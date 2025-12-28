@@ -10,18 +10,13 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => (
   <html lang='en'>
     <Head>
       <title>Ben Edgar-Prosen</title>
-      <link rel="icon" href="/favicon.ico" sizes="any" />
+      <link href='/favicon.ico' rel='icon' sizes='any' />
+      <link href='/icon.png' rel='icon' sizes='any' type='image/png' />
       <link
-        rel="icon"
-        href="/icon.png"
-        type="image/png"
-        sizes="any"
-      />
-      <link
-        rel="apple-touch-icon"
-        href="/apple-icon.png"
-        type="image/png"
-        sizes="any"
+        href='/apple-icon.png'
+        rel='apple-touch-icon'
+        sizes='any'
+        type='image/png'
       />
     </Head>
     <body>

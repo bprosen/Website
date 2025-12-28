@@ -30,9 +30,6 @@ coverage/
 # Optional npm cache directory
 .npm
 
-# Optional eslint cache
-.eslintcache
-
 # Output of 'npm pack'
 *.tgz
 

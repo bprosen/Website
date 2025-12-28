@@ -1,3 +1,5 @@
 import { Button } from '~/ui';
 
-export const Page: React.FC = () => <Button>Hello Next!</Button>;
+const Page: React.FC = () => <Button>Hello Next!</Button>;
+
+export default Page;

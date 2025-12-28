@@ -5,7 +5,7 @@ type RootLayoutProps = {
   children: React.ReactNode;
 };
 
-export const RootLayout: React.FC<RootLayoutProps> = ({ children }) => (
+const RootLayout: React.FC<RootLayoutProps> = ({ children }) => (
   <html lang='en'>
     <body>
       {children}
@@ -14,3 +14,5 @@ export const RootLayout: React.FC<RootLayoutProps> = ({ children }) => (
     </body>
   </html>
 );
+
+export default RootLayout;

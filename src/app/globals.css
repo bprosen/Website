@@ -10,16 +10,17 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  --primary: oklch(0.8121 0.0663 148.28);
+  --primary-foreground: oklch(0.8383 0.084 173.59);
+  --secondary: oklch(0.8976 0.0357 220.59);
+  --secondary-foreground: oklch(0.9273 0.006 220.59);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
+  --caution: oklch(0.9095 0.1125 107.36);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -91,6 +92,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-caution: var(--caution);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -117,7 +119,10 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply bg-primary;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-primary text-foreground;
   }
 }

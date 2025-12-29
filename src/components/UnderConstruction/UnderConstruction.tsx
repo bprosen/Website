@@ -5,12 +5,14 @@ export const UnderConstruction: React.FC = () => {
   return (
     <Card className='shadow-xl'>
       <CardHeader>
-        <CardTitle className='text-center text-xl'>Hold on a second!</CardTitle>
+        <CardTitle className='text-center text-3xl'>
+          Hold on a second!
+        </CardTitle>
       </CardHeader>
-      <CardContent className='flex flex-col items-center gap-6'>
-        <Construction className='w-75 h-75 stroke-caution' />
+      <CardContent className='flex flex-col items-center gap-4'>
+        <Construction color='#e4ec75' size={350} strokeWidth={1.2} />
         <p className='text-lg'>
-          This page is under construction, please come back soon
+          This page is under construction, check back soon
         </p>
       </CardContent>
     </Card>

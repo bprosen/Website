@@ -8,9 +8,7 @@ describe('UnderConstruction', () => {
 
     expect(screen.getByText('Hold on a second!')).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'This page is under construction, please come back soon',
-      ),
+      screen.getByText('This page is under construction, check back soon'),
     ).toBeInTheDocument();
   });
 });

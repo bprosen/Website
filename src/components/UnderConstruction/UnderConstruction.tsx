@@ -11,9 +11,9 @@ export const UnderConstruction: React.FC = () => {
       </CardHeader>
       <CardContent className='flex flex-col items-center gap-4'>
         <Construction
+          className='w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[350px] md:h-[350px]'
           color='#e4ec75'
           strokeWidth={1.2}
-          className='w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[350px] md:h-[350px]'
         />
         <p className='text-base sm:text-lg text-center'>
           This page is under construction, check back soon

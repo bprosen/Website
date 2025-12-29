@@ -1,5 +1,5 @@
-import { Button } from '~/ui';
+import { Home } from '~/routes';
 
-const Page: React.FC = () => <Button>Hello Next!</Button>;
+const Page: React.FC = () => <Home />;
 
 export default Page;

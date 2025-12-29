@@ -12,7 +12,10 @@
     "format": "biome format src",
     "format:fix": "biome format --write src",
     "biome:fix": "npm run lint:fix && npm run format:fix",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:ui": "vitest --coverage --ui"
   },
   "repository": {
     "type": "git",
@@ -42,9 +45,17 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.10",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "24.5.2",
     "@types/react": "^19.1.13",
+    "@vitejs/plugin-react": "^5.1.2",
+    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/ui": "^4.0.16",
     "husky": "^9.1.7",
-    "typescript": "5.9.2"
+    "jsdom": "^27.4.0",
+    "typescript": "5.9.2",
+    "vitest": "^4.0.16"
   }
 }

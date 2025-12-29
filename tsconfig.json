@@ -28,7 +28,6 @@
     }
   },
   "include": [
-    "src/types/next-env.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",

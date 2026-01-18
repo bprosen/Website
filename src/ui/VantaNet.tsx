@@ -27,7 +27,7 @@ export const VantaNet = ({
   className,
   containerClassName,
   backgroundColor = 'var(--primary)',
-  color = '#FFFFFFF',
+  color = '#FFFFFF',
   mouseControls = true,
   touchControls = true,
   gyroControls = false,

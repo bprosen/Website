@@ -1,6 +1,6 @@
 import { UnderConstruction } from '~/components';
-import { isMobile } from '~/lib/utils';
 import { VantaNet } from '~/ui';
+import { isMobile } from '~/utils/utils';
 
 export const Home = async () => {
   const mobile = await isMobile();

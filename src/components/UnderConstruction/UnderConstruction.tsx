@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/ui';
 
 export const UnderConstruction: React.FC = () => {
   return (
-    <Card className='shadow-xl md:max-w-xl my-4 mx-12 sm:mx-4 md:mx-auto'>
+    <Card className='shadow-xl md:max-w-xl my-4 mx-12 sm:mx-2 md:mx-auto'>
       <CardHeader>
         <CardTitle className='text-center text-2xl sm:text-3xl'>
           Hold on a second!
@@ -15,7 +15,7 @@ export const UnderConstruction: React.FC = () => {
           color='#e4ec75'
           strokeWidth={1.2}
         />
-        <p className='text-base sm:text-lg text-center'>
+        <p className='text-base text-center'>
           This page is under construction, check back soon
         </p>
       </CardContent>

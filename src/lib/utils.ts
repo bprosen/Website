@@ -8,7 +8,7 @@ export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 export const isMobile = async (): Promise<boolean> => {
   const headersList = await headers();
   const userAgent = headersList.get('user-agent') || '';
-  const { device } = userAgentFromString(userAgent);
+  const agent = userAgentFromString(userAgent);
 
-  return device.type === 'mobile';
+  return agent?.device?.type === 'mobile';
 };

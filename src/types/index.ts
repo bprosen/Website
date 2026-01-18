@@ -1,1 +1,1 @@
-export * from './vanta';
+export * from './Vanta';

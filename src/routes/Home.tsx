@@ -9,11 +9,11 @@ export const Home = async () => {
     <VantaNet
       backgroundColor='var(--primary)'
       className='flex flex-col items-center justify-center h-screen'
-      gyroControls={!mobile}
+      gyroControls={mobile}
       maxDistance={mobile ? 20.0 : 18}
       mouseControls={!mobile}
       spacing={mobile ? 18.0 : 15.0}
-      touchControls={!mobile}
+      touchControls={mobile}
     >
       <UnderConstruction />
     </VantaNet>

@@ -101,7 +101,13 @@ export const VantaNet = ({
         }
       }, 50);
 
-      return () => clearInterval(checkInterval);
+      return () => {
+        clearInterval(checkInterval);
+        if (vantaInstance.current) {
+          vantaInstance.current.destroy?.();
+          vantaInstance.current = null;
+        }
+      };
     }
 
     return () => {
@@ -126,9 +132,9 @@ export const VantaNet = ({
   ]);
 
   return (
-    <div className={`relative h-full w-full ${containerClassName}`}>
+    <div className={`relative h-full w-full ${containerClassName ?? ''}`}>
       <div className='absolute inset-0 z-0 h-full w-full' ref={vantaRef} />
-      <div className={`relative z-10 ${className}`}>{children}</div>
+      <div className={`relative z-10 ${className ?? ''}`}>{children}</div>
     </div>
   );
 };

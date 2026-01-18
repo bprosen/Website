@@ -28,10 +28,12 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => (
       <Script
         id='three-js'
         src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js'
+        strategy='beforeInteractive'
       />
       <Script
         id='vanta-net'
         src='https://cdn.jsdelivr.net/npm/vanta/dist/vanta.net.min.js'
+        strategy='beforeInteractive'
       />
     </body>
   </html>

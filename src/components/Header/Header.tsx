@@ -4,12 +4,10 @@ import {
   IconMail,
 } from '@tabler/icons-react';
 import { EMAIL, GITHUB, LINKED_IN } from '~/constants';
-import { AnimatedSignature } from '../AnimatedSignature/AnimatedSignature';
 
 export const Header = () => {
   return (
     <div className='flex justify-between w-full px-6 py-4'>
-      <AnimatedSignature />
       <div className='flex gap-4'>
         <a href={GITHUB} target='_blank'>
           <IconBrandGithub color='#FFFFFF' size={40} stroke={1.2} />

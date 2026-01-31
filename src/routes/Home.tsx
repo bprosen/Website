@@ -1,21 +1,12 @@
-import { UnderConstruction } from '~/components';
-import { VantaNet } from '~/ui';
-import { isMobile } from '~/utils/utils';
+import { Intro, ScrollDownIndicator } from '~/components';
 
-export const Home = async () => {
-  const mobile = await isMobile();
-
+export const Home = () => {
   return (
-    <VantaNet
-      backgroundColor='var(--primary)'
-      className='flex flex-col items-center justify-center h-screen'
-      gyroControls={mobile}
-      maxDistance={mobile ? 20.0 : 18}
-      mouseControls={!mobile}
-      spacing={mobile ? 18.0 : 15.0}
-      touchControls={mobile}
-    >
-      <UnderConstruction />
-    </VantaNet>
+    <div className='min-h-screen flex flex-col'>
+      <div className='flex-1 flex items-center justify-center'>
+        <Intro />
+      </div>
+      <ScrollDownIndicator />
+    </div>
   );
 };

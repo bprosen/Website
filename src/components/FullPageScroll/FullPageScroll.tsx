@@ -48,7 +48,6 @@ export const FullPageBlurScroll = ({
   blur,
 }: FullPageBlurScrollProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const pages = Children.toArray(children);
 
   return (
     <div
@@ -58,12 +57,8 @@ export const FullPageBlurScroll = ({
       )}
       ref={scrollRef}
     >
-      {pages.map((page, index) => (
-        <BlurPage
-          blur={blur}
-          key={`scroll-page-${index + 1}`}
-          scrollRef={scrollRef}
-        >
+      {Children.map(children, (page) => (
+        <BlurPage blur={blur} scrollRef={scrollRef}>
           {page}
         </BlurPage>
       ))}

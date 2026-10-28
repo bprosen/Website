@@ -25,11 +25,13 @@ Act like a senior developer: make decisions with confidence, own the result, and
 Code goes in folders grouped by purpose under `src/`. Each folder has an `index.ts` barrel that re-exports its contents, and you import through the `~/` alias (e.g. `import { Card } from '~/ui'`).
 
 - `app/`: Next.js routes, layouts and global CSS
+- `api/`: every network request. Endpoint functions (e.g. `recordVisit`) are built on the shared `requestJson` helper; nothing else calls `fetch` directly.
 - `components/`: app-specific components
 - `ui/`: reusable UI primitives (shadcn/react-bits)
 - `routes/`: page-level compositions
 - `constants/`: constant values (URLs, config)
 - `types/`: shared types
+- `hooks/`: shared React hooks
 - `utils/` and `lib/`: helpers and setup
 
 Every component gets its own folder, so its test can sit next to it:
@@ -76,6 +78,12 @@ export const Header = ({ title, subtitle }: HeaderProps) => {
 - All code must pass `pnpm lint` and `pnpm format` with no errors or warnings, and no `biome-ignore` unless you can justify it in a comment.
 - Code style: single quotes (JS and JSX), 2-space indentation, sorted imports, sorted JSX attributes and object keys.
 - After making changes, run `pnpm biome:fix` and then `pnpm lint` to verify.
+
+## Comments
+
+- Don't write comments. Names and small, focused functions should explain the code. If something is complex enough to need a comment, refactor it until it doesn't.
+- The only exceptions are tool directives that have to be comments, such as a justified `biome-ignore` or a Vitest `// @vitest-environment` pragma.
+- Never refer to people by name in code or copy-adjacent identifiers (no "Ben's clock"); describe what the thing is.
 
 ## Quality and Performance
 

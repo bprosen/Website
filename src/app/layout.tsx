@@ -1,40 +1,62 @@
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import type { Metadata } from 'next';
-import Script from 'next/script';
+import type { Metadata, Viewport } from 'next';
+import { DM_Sans, Fraunces } from 'next/font/google';
+import type { ReactNode } from 'react';
+import {
+  COLORS,
+  OG_DESCRIPTION,
+  SITE_DESCRIPTION,
+  SITE_TITLE,
+  SITE_URL,
+} from '~/constants';
 import './globals.css';
 
-type RootLayoutProps = {
-  children: React.ReactNode;
-};
+const fraunces = Fraunces({
+  axes: ['opsz'],
+  display: 'swap',
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+});
+
+const dmSans = DM_Sans({
+  axes: ['opsz'],
+  display: 'swap',
+  subsets: ['latin'],
+  variable: '--font-dm-sans',
+});
 
 export const metadata: Metadata = {
-  icons: {
-    apple: '/apple-icon.png',
-    icon: [
-      { sizes: 'any', url: '/favicon.ico' },
-      { type: 'image/png', url: '/icon.png' },
-    ],
+  description: SITE_DESCRIPTION,
+  metadataBase: new URL(SITE_URL),
+  openGraph: {
+    description: OG_DESCRIPTION,
+    title: SITE_TITLE,
+    type: 'website',
+    url: SITE_URL,
   },
-  title: 'Ben Edgar-Prosen',
+  title: SITE_TITLE,
+  twitter: {
+    card: 'summary_large_image',
+    description: OG_DESCRIPTION,
+    title: SITE_TITLE,
+  },
 };
 
-const RootLayout: React.FC<RootLayoutProps> = ({ children }) => (
-  <html lang='en'>
+export const viewport: Viewport = {
+  themeColor: COLORS.paper,
+};
+
+type RootLayoutProps = {
+  children: ReactNode;
+};
+
+const RootLayout = ({ children }: RootLayoutProps) => (
+  <html className={`${fraunces.variable} ${dmSans.variable}`} lang='en'>
     <body>
       {children}
       <SpeedInsights />
       <Analytics />
-      <Script
-        id='three-js'
-        src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js'
-        strategy='beforeInteractive'
-      />
-      <Script
-        id='vanta-net'
-        src='https://cdn.jsdelivr.net/npm/vanta/dist/vanta.net.min.js'
-        strategy='beforeInteractive'
-      />
     </body>
   </html>
 );

@@ -1,0 +1,36 @@
+import type { BrandName } from '~/constants/brands';
+
+export type Brand = {
+  color: string;
+  label?: string;
+  path: string;
+};
+
+export type Stat = {
+  label: string;
+  value: string;
+};
+
+export type MediaSlot = {
+  alt?: string;
+  label: string;
+  src?: string;
+  tint?: string;
+};
+
+export type WorkEntry = {
+  collage?: readonly MediaSlot[];
+  company: string;
+  id: string;
+  period: string;
+  role: string;
+  roleNote: string;
+  stats?: readonly Stat[];
+  summary: string;
+  tech: readonly BrandName[];
+};
+
+export type Section = {
+  label: string;
+  slug: string;
+};

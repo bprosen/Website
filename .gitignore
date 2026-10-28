@@ -42,7 +42,6 @@ dist
 
 # Gatsby files
 .cache/
-public
 
 # Storybook build outputs
 .out
@@ -63,3 +62,4 @@ public
 .Trashes
 ehthumbs.db
 Thumbs.db
+!.env.example

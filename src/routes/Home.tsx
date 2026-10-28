@@ -1,12 +1,26 @@
-import { Intro, ScrollDownIndicator } from '~/components';
+import {
+  AboutSection,
+  Hero,
+  SectionScroller,
+  SiteFooter,
+  SiteHeader,
+  WorkSection,
+} from '~/components';
+import type { SectionSlug } from '~/utils';
 
-export const Home = () => {
-  return (
-    <div className='min-h-screen flex flex-col'>
-      <div className='flex-1 flex items-center justify-center'>
-        <Intro />
-      </div>
-      <ScrollDownIndicator />
-    </div>
-  );
+type HomeProps = {
+  section?: SectionSlug | null;
 };
+
+export const Home = ({ section = null }: HomeProps) => (
+  <div className='tl-root min-h-screen'>
+    <SiteHeader />
+    <main>
+      <Hero />
+      <WorkSection />
+      <AboutSection />
+    </main>
+    <SiteFooter />
+    <SectionScroller section={section} />
+  </div>
+);

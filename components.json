@@ -10,10 +10,10 @@
     "cssVariables": true,
     "prefix": ""
   },
-  "iconLibrary": "lucide",
+  "iconLibrary": "tabler",
   "aliases": {
     "components": "~/components",
-    "utils": "~/lib/utils",
+    "utils": "~/lib/ui",
     "ui": "~/ui",
     "lib": "~/lib",
     "hooks": "~/hooks"

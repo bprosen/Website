@@ -1,5 +1,6 @@
 import { ABOUT_BIO, JAPAN_NOTE } from '~/constants';
 import { PhotoStrip } from '../PhotoStrip';
+import { Portrait } from '../Portrait';
 import { StackCard } from '../StackCard';
 
 type AboutSectionProps = {
@@ -17,11 +18,14 @@ export const AboutSection = ({
     tabIndex={-1}
   >
     <p className='m-0 mb-8 font-serif text-xl font-semibold'>About</p>
-    <h2 className='m-0 mb-12 font-serif text-[clamp(44px,6vw,80px)] leading-none font-semibold tracking-[-0.035em]'>
-      <span className='box-decoration-clone rounded-[14px] bg-accent px-3.5'>
-        Get to know me
-      </span>
-    </h2>
+    <div className='mb-12 flex items-center gap-4 sm:gap-6'>
+      <h2 className='m-0 font-serif text-[clamp(44px,6vw,80px)] leading-none font-semibold tracking-[-0.035em]'>
+        <span className='box-decoration-clone rounded-[14px] bg-accent px-3.5'>
+          Get to know me
+        </span>
+      </h2>
+      <Portrait className='size-16 shrink-0 sm:size-22' />
+    </div>
     <div className='flex flex-wrap items-start justify-between gap-x-20 gap-y-12'>
       <div className='min-w-0 max-w-[560px] flex-[1_1_360px]'>
         <div className='flex flex-col gap-4 text-pretty'>
@@ -34,7 +38,7 @@ export const AboutSection = ({
         </div>
         <PhotoStrip className='mt-10' />
       </div>
-      <StackCard className='min-w-0 flex-[0_1_340px]' />
+      <StackCard className='min-w-0 flex-[0_1_340px] max-[880px]:mx-auto' />
     </div>
   </section>
 );

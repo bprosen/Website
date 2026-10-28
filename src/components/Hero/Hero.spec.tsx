@@ -7,9 +7,9 @@ describe('Hero', () => {
   it('introduces the site with contact links and the globe', () => {
     render(<Hero />);
 
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      'BenEdgar-Prosen',
-    );
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Ben Edgar-Prosen' }),
+    ).toHaveTextContent('BenEdgar-Prosen');
     expect(screen.getByText(HERO_TAGLINE)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Email me' })).toBeInTheDocument();
     expect(screen.getByRole('application')).toBeInTheDocument();

@@ -121,8 +121,9 @@ export const toGlobeUnits = (
 export const clampTooltipCenter = (
   center: number,
   width: number,
-  containerSize: number,
+  min: number,
+  max: number,
 ) =>
-  width >= containerSize
-    ? containerSize / 2
-    : clamp(center, width / 2, containerSize - width / 2);
+  width >= max - min
+    ? (min + max) / 2
+    : clamp(center, min + width / 2, max - width / 2);

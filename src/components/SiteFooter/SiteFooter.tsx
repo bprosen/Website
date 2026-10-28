@@ -1,5 +1,11 @@
-import { IconHeartFilled } from '@tabler/icons-react';
-import { CONTACT_COPY, CONTACT_HEADING, NAME } from '~/constants';
+import { IconBrandGithub, IconHeartFilled } from '@tabler/icons-react';
+import {
+  CONTACT_COPY,
+  CONTACT_HEADING,
+  ICON_STROKE,
+  NAME,
+  SITE_REPO,
+} from '~/constants';
 import { Separator } from '~/ui';
 import { ContactLinks } from '../ContactLinks';
 
@@ -7,7 +13,7 @@ const YEAR = new Date().getFullYear();
 
 export const SiteFooter = () => (
   <footer
-    className='mt-[clamp(32px,4vw,64px)] scroll-mt-[72px] outline-none rounded-t-[48px] bg-ink text-paper'
+    className='mt-[clamp(32px,4vw,64px)] scroll-mt-[72px] outline-none rounded-t-[48px] bg-inverse text-inverse-foreground'
     id='contact'
     tabIndex={-1}
   >
@@ -19,7 +25,7 @@ export const SiteFooter = () => (
         {CONTACT_COPY}
       </p>
       <ContactLinks className='mt-9' tone='dark' />
-      <Separator className='mt-[clamp(64px,8vw,104px)] bg-paper/18' />
+      <Separator className='mt-[clamp(64px,8vw,104px)] bg-inverse-foreground/18' />
       <div className='flex flex-wrap justify-between gap-x-6 gap-y-2 pt-6 text-sm text-mist'>
         <span className='inline-flex flex-wrap items-center gap-1.5'>
           © {YEAR} {NAME} · Made with
@@ -29,6 +35,19 @@ export const SiteFooter = () => (
             role='img'
           />
         </span>
+        <a
+          className='inline-flex items-center gap-1.5 rounded-sm text-inherit underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-inverse-foreground/60'
+          href={SITE_REPO}
+          rel='noopener'
+          target='_blank'
+        >
+          <IconBrandGithub
+            aria-hidden
+            className='size-4'
+            stroke={ICON_STROKE}
+          />
+          View source
+        </a>
       </div>
     </div>
   </footer>

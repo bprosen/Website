@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { OG_DESCRIPTION, OG_IMAGE } from '~/constants';
 import Page, {
   dynamicParams,
   generateMetadata,
@@ -28,18 +29,32 @@ describe('section page', () => {
     expect(dynamicParams).toBe(false);
   });
 
-  it('titles and canonicalises each section', async () => {
+  it('titles, canonicalises and previews each section', async () => {
     await expect(generateMetadata(params(['work']))).resolves.toEqual({
       alternates: { canonical: '/work' },
+      openGraph: {
+        description: OG_DESCRIPTION,
+        images: [OG_IMAGE],
+        title: 'Work · Ben Edgar-Prosen',
+        type: 'website',
+        url: '/work',
+      },
       title: 'Work · Ben Edgar-Prosen',
+      twitter: {
+        card: 'summary_large_image',
+        description: OG_DESCRIPTION,
+        images: [OG_IMAGE],
+        title: 'Work · Ben Edgar-Prosen',
+      },
     });
   });
 
-  it('uses the site title for home', async () => {
-    await expect(generateMetadata(params())).resolves.toEqual({
-      alternates: { canonical: '/' },
-      title: 'Ben Edgar-Prosen · Software Developer',
-    });
+  it('uses the site title and root URL for home', async () => {
+    const metadata = await generateMetadata(params());
+
+    expect(metadata.title).toBe('Ben Edgar-Prosen · Software Developer');
+    expect(metadata.alternates).toEqual({ canonical: '/' });
+    expect(metadata.openGraph).toMatchObject({ url: '/' });
   });
 
   it('renders the page for the section', async () => {

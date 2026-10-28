@@ -1,5 +1,8 @@
+import { IconArrowUpRight, IconBrandGithub } from '@tabler/icons-react';
+import { ICON_STROKE } from '~/constants';
 import { cn } from '~/lib/ui';
 import type { WorkEntry as WorkEntryData } from '~/types';
+import { Button } from '~/ui';
 import { Collage } from '../Collage';
 import { StatRow } from '../StatRow';
 import { TechList } from '../TechList';
@@ -11,8 +14,18 @@ type WorkEntryProps = {
 };
 
 export const WorkEntry = ({ entry, first, last }: WorkEntryProps) => {
-  const { collage, company, id, period, role, roleNote, stats, summary, tech } =
-    entry;
+  const {
+    collage,
+    company,
+    id,
+    link,
+    period,
+    role,
+    roleNote,
+    stats,
+    summary,
+    tech,
+  } = entry;
   const scrollSpyTimeline = id;
 
   return (
@@ -34,6 +47,28 @@ export const WorkEntry = ({ entry, first, last }: WorkEntryProps) => {
         {stats && <StatRow stats={stats} />}
         <p className='mt-3 mb-0 max-w-[620px] text-pretty'>{summary}</p>
         <TechList className='mt-5' items={tech} />
+        {link && (
+          <Button
+            asChild
+            className='mt-5 hover:bg-paper'
+            size='nav'
+            variant='outline'
+          >
+            <a href={link.href} rel='noopener' target='_blank'>
+              <IconBrandGithub
+                aria-hidden
+                className='size-5'
+                stroke={ICON_STROKE}
+              />
+              {link.label}
+              <IconArrowUpRight
+                aria-hidden
+                className='size-4'
+                stroke={ICON_STROKE}
+              />
+            </a>
+          </Button>
+        )}
         {collage && (
           <Collage
             className='mt-7'

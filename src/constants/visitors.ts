@@ -11,3 +11,5 @@ export const DNT_HEADER = 'dnt';
 
 export const VISITORS_IDLE_FALLBACK_MS = 1500;
 export const VISITORS_IDLE_TIMEOUT_MS = 4000;
+export const REDIS_URL_ENV = 'UPSTASH_KV_REST_API_URL';
+export const REDIS_TOKEN_ENV = 'UPSTASH_KV_REST_API_TOKEN';

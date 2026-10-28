@@ -1,9 +1,11 @@
 import {
+  GLOBE_AUTO_SPIN_DEG_PER_SECOND,
   GLOBE_DRAG_LAT_PER_PX,
   GLOBE_DRAG_LON_PER_PX,
   GLOBE_DRAG_THRESHOLD_PX,
   GLOBE_FLING_NEWEST_WEIGHT,
   GLOBE_FLING_WINDOW_MS,
+  GLOBE_INTRO_SPIN_DEG_PER_SECOND,
   GLOBE_KEY_STEP_LAT,
   GLOBE_KEY_STEP_LON,
   GLOBE_LAT_DAMPING,
@@ -13,6 +15,7 @@ import {
   GLOBE_MAX_STEP_SECONDS,
   GLOBE_MIN_DRAG_STEP_SECONDS,
   GLOBE_REST_SPEED,
+  GLOBE_START,
 } from '~/constants';
 import { clamp } from './globe';
 
@@ -150,4 +153,21 @@ export const hitTestMarker = <Id extends string>(
   }
 
   return best;
+};
+
+export const introMotion = (reducedMotion: boolean): Motion => {
+  if (reducedMotion) {
+    return { ...GLOBE_START, vLat: 0, vLon: 0 };
+  }
+
+  const settleDistance =
+    (GLOBE_INTRO_SPIN_DEG_PER_SECOND - GLOBE_AUTO_SPIN_DEG_PER_SECOND) /
+    GLOBE_LON_DAMPING;
+
+  return {
+    lat: GLOBE_START.lat,
+    lon: GLOBE_START.lon - settleDistance,
+    vLat: 0,
+    vLon: GLOBE_INTRO_SPIN_DEG_PER_SECOND,
+  };
 };

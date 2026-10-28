@@ -99,15 +99,19 @@ describe('toGlobeUnits', () => {
 
 describe('clampTooltipCenter', () => {
   it('follows the marker when the tooltip fits', () => {
-    expect(clampTooltipCenter(150, 100, 300)).toBe(150);
+    expect(clampTooltipCenter(150, 100, 0, 300)).toBe(150);
   });
 
-  it('keeps the tooltip inside the globe at either edge', () => {
-    expect(clampTooltipCenter(10, 100, 300)).toBe(50);
-    expect(clampTooltipCenter(290, 100, 300)).toBe(250);
+  it('keeps the tooltip inside the bounds at either edge', () => {
+    expect(clampTooltipCenter(10, 100, 0, 300)).toBe(50);
+    expect(clampTooltipCenter(290, 100, 0, 300)).toBe(250);
   });
 
-  it('centres a tooltip wider than the globe', () => {
-    expect(clampTooltipCenter(10, 400, 300)).toBe(150);
+  it('allows bounds wider than the globe', () => {
+    expect(clampTooltipCenter(100, 280, -200, 110)).toBe(-30);
+  });
+
+  it('centres a tooltip wider than the bounds', () => {
+    expect(clampTooltipCenter(10, 400, 0, 300)).toBe(150);
   });
 });

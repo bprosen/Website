@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --paper: #f4f1e8;
   --ink: #17201a;
@@ -19,6 +21,29 @@
   --border: rgb(23 32 26 / 0.12);
   --ring: var(--ink);
   --radius: 1rem;
+
+  --muted-deep: #33423a;
+  --forest: #2e5638;
+  --selection: #f6c7b8;
+  --inverse: #17201a;
+  --inverse-foreground: #f4f1e8;
+}
+
+.dark {
+  --paper: #121914;
+  --ink: #d8d3c4;
+  --sage: #233328;
+
+  --card: #19221b;
+  --muted-foreground: #a7b0a3;
+  --border: rgb(216 211 196 / 0.12);
+
+  --muted-deep: #a9b8ab;
+  --forest: #9ccaa5;
+  --selection: #7a3b2a;
+  --inverse: #0b100c;
+  --inverse-foreground: #d8d3c4;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -42,11 +67,13 @@
   --color-ink: var(--ink);
   --color-coral: var(--coral);
   --color-coral-deep: #c9553a;
-  --color-muted-deep: #33423a;
-  --color-forest: #2e5638;
+  --color-muted-deep: var(--muted-deep);
+  --color-forest: var(--forest);
   --color-mist: #c9cfc4;
   --color-love: #c62828;
-  --color-selection: #f6c7b8;
+  --color-selection: var(--selection);
+  --color-inverse: var(--inverse);
+  --color-inverse-foreground: var(--inverse-foreground);
   --color-tint-stone: #e3e0d3;
   --color-tint-leaf: #d6e8cf;
   --color-tint-sand: #f1e6cf;
@@ -56,6 +83,64 @@
 
   --animate-ring: ring 2.4s ease-out infinite;
   --animate-drift: drift 45s linear infinite;
+  --animate-intro-letter: intro-letter 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-intro-pin: intro-pin 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-intro-rise: intro-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-intro-drop: intro-drop 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-intro-globe: intro-globe 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes intro-letter {
+    from {
+      transform: translateY(110%) rotate(12deg);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes intro-pin {
+    from {
+      transform: scale(0);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes intro-rise {
+    from {
+      opacity: 0;
+      filter: blur(6px);
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
+  }
+
+  @keyframes intro-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes intro-globe {
+    from {
+      opacity: 0;
+      transform: scale(0.8) rotate(-30deg);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 
   @keyframes ring {
     from {
@@ -290,4 +375,10 @@
       animation-timeline: view();
     }
   }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: none;
 }

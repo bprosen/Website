@@ -35,4 +35,29 @@ describe('LegendButton', () => {
 
     expect(screen.getByRole('button', { pressed: true })).toBeInTheDocument();
   });
+
+  it('keeps the label for screen readers when it is visually hidden on mobile', () => {
+    render(
+      <LegendButton onClick={() => {}} pressed={false} swatchClassName='bg-ink'>
+        You, near Toronto
+      </LegendButton>,
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'You, near Toronto' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('You, near Toronto')).toHaveClass('max-sm:sr-only');
+  });
+
+  it('shows a visible focus ring for keyboard users', () => {
+    render(
+      <LegendButton onClick={() => {}} pressed={false} swatchClassName='bg-ink'>
+        Me
+      </LegendButton>,
+    );
+
+    expect(screen.getByRole('button')).toHaveClass(
+      'focus-visible:outline-solid',
+    );
+  });
 });

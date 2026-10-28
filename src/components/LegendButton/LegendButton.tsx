@@ -18,11 +18,11 @@ export const LegendButton = ({
   <button
     aria-describedby={describedBy}
     aria-pressed={pressed}
-    className='inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-lg border-0 bg-transparent px-2 font-[inherit] text-inherit underline-offset-4 outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+    className='inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-1.5 text-left leading-snug rounded-lg border-0 bg-transparent px-2 font-[inherit] text-inherit underline-offset-4 outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-ink'
     onClick={onClick}
     type='button'
   >
     <span aria-hidden className={`size-2.5 rounded-full ${swatchClassName}`} />
-    {children}
+    <span className='max-sm:sr-only'>{children}</span>
   </button>
 );

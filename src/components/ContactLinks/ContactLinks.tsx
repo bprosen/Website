@@ -5,7 +5,6 @@ import {
   IconMail,
 } from '@tabler/icons-react';
 import {
-  EMAIL,
   GITHUB,
   ICON_STROKE,
   LINKED_IN,
@@ -14,6 +13,7 @@ import {
 } from '~/constants';
 import { cn } from '~/lib/ui';
 import { Button } from '~/ui';
+import { EmailPill } from '../EmailPill';
 
 type ContactLinksProps = {
   className?: string;
@@ -31,12 +31,16 @@ export const ContactLinks = ({
 
   return (
     <div className={cn('flex flex-wrap items-center gap-3', className)}>
-      <Button asChild size={size} variant={dark ? 'accent' : 'default'}>
-        <a href={MAILTO}>
-          <IconMail aria-hidden stroke={ICON_STROKE} />
-          {dark ? EMAIL : 'Email me'}
-        </a>
-      </Button>
+      {dark ? (
+        <EmailPill />
+      ) : (
+        <Button asChild size={size}>
+          <a href={MAILTO}>
+            <IconMail aria-hidden stroke={ICON_STROKE} />
+            Email me
+          </a>
+        </Button>
+      )}
       <Button asChild size={size} variant={outline}>
         <a href={RESUME_PATH} rel='noopener' target='_blank'>
           <IconFileText aria-hidden className='size-5' stroke={ICON_STROKE} />

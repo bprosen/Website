@@ -1,4 +1,4 @@
-import { SECTIONS } from '~/constants';
+import { NAME, PAGE_END_TOLERANCE_PX, SECTIONS, SITE_TITLE } from '~/constants';
 
 export type SectionSlug = (typeof SECTIONS)[number]['slug'];
 
@@ -61,3 +61,39 @@ export const scrollToSection = (
   target.focus({ preventScroll: true });
   return true;
 };
+
+export type SectionTop = {
+  slug: SectionSlug;
+  top: number;
+};
+
+export const activeSection = (
+  tops: readonly SectionTop[],
+  line: number,
+  atPageEnd = false,
+): SectionSlug | null => {
+  if (atPageEnd && tops.length > 0) {
+    return tops[tops.length - 1].slug;
+  }
+
+  let active: SectionSlug | null = null;
+
+  for (const { slug, top } of tops) {
+    if (top <= line) {
+      active = slug;
+    }
+  }
+
+  return active;
+};
+
+export const sectionTitle = (section: SectionSlug | null) => {
+  const match = SECTIONS.find(({ slug }) => slug === section);
+  return match ? `${match.label} · ${NAME}` : SITE_TITLE;
+};
+
+export const isAtPageEnd = (
+  scrollY: number,
+  viewportHeight: number,
+  pageHeight: number,
+) => scrollY + viewportHeight >= pageHeight - PAGE_END_TOLERANCE_PX;

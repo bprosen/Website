@@ -205,57 +205,47 @@ describe('parsePipelineResponse', () => {
 });
 
 describe('readRedisConfig', () => {
-  const upstash = {
-    UPSTASH_REDIS_REST_TOKEN: 'upstash-token',
-    UPSTASH_REDIS_REST_URL: 'https://upstash.example',
+  const env = {
+    UPSTASH_KV_REST_API_TOKEN: 'token',
+    UPSTASH_KV_REST_API_URL: 'https://redis.example',
   };
-  const kv = {
-    KV_REST_API_TOKEN: 'kv-token',
-    KV_REST_API_URL: 'https://kv.example',
-  };
+
+  it('reads the Upstash REST URL and read-write token', () => {
+    expect(readRedisConfig(env)).toEqual({
+      token: 'token',
+      url: 'https://redis.example',
+    });
+  });
+
+  it('never uses the read-only token', () => {
+    expect(
+      readRedisConfig({
+        UPSTASH_KV_REST_API_READ_ONLY_TOKEN: 'read-only',
+        UPSTASH_KV_REST_API_URL: 'https://redis.example',
+      }),
+    ).toBeNull();
+  });
 
   it('returns null when nothing is set', () => {
     expect(readRedisConfig({})).toBeNull();
   });
 
-  it('prefers the UPSTASH_* names', () => {
-    expect(readRedisConfig({ ...kv, ...upstash })).toEqual({
-      token: 'upstash-token',
-      url: 'https://upstash.example',
-    });
-  });
-
-  it('falls back to the KV_* names', () => {
-    expect(readRedisConfig(kv)).toEqual({
-      token: 'kv-token',
-      url: 'https://kv.example',
-    });
-  });
-
-  it('falls back per variable and treats empty strings as unset', () => {
+  it('returns null when either value is missing or empty', () => {
     expect(
-      readRedisConfig({
-        ...kv,
-        UPSTASH_REDIS_REST_TOKEN: '',
-        UPSTASH_REDIS_REST_URL: 'https://upstash.example',
-      }),
-    ).toEqual({ token: 'kv-token', url: 'https://upstash.example' });
-  });
-
-  it('returns null when only a URL or only a token is set', () => {
-    expect(
-      readRedisConfig({ UPSTASH_REDIS_REST_URL: 'https://x.example' }),
+      readRedisConfig({ UPSTASH_KV_REST_API_URL: 'https://redis.example' }),
     ).toBeNull();
-    expect(readRedisConfig({ KV_REST_API_TOKEN: 'token' })).toBeNull();
+    expect(
+      readRedisConfig({ ...env, UPSTASH_KV_REST_API_TOKEN: '' }),
+    ).toBeNull();
   });
 
   it('strips trailing slashes from the URL', () => {
     expect(
       readRedisConfig({
-        UPSTASH_REDIS_REST_TOKEN: 't',
-        UPSTASH_REDIS_REST_URL: 'https://x.example//',
+        ...env,
+        UPSTASH_KV_REST_API_URL: 'https://x.example//',
       }),
-    ).toEqual({ token: 't', url: 'https://x.example' });
+    ).toEqual({ token: 'token', url: 'https://x.example' });
   });
 });
 
@@ -277,7 +267,7 @@ describe('resolveVisitor', () => {
   it('recognises visitors in Winnipeg and draws no second marker', () => {
     expect(resolveVisitor('America/Winnipeg', zones)).toEqual({
       coords: null,
-      label: "You're in Winnipeg too",
+      label: 'You (Winnipeg)',
       sameCity: true,
     });
   });

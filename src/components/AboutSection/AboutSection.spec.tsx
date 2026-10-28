@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { ABOUT_BIO } from '~/constants';
+import { ABOUT_BIO, PORTRAIT } from '~/constants';
 import { AboutSection } from './AboutSection';
 
 describe('AboutSection', () => {
@@ -15,6 +15,7 @@ describe('AboutSection', () => {
     expect(
       screen.getByRole('heading', { name: 'What I work with most' }),
     ).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: PORTRAIT.alt })).toBeInTheDocument();
   });
 
   it('hides the Japan note until it has text', () => {

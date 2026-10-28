@@ -4,6 +4,7 @@ import type { CSSProperties } from 'react';
 import { PLACEHOLDER_ICON_STROKE } from '~/constants';
 import { cn } from '~/lib/ui';
 import type { MediaSlot } from '~/types';
+import { LazyVideo } from '../LazyVideo';
 
 type MediaTileProps = {
   className?: string;
@@ -22,6 +23,23 @@ export const MediaTile = ({
     ? { backgroundColor: slot.tint }
     : undefined;
 
+  if (slot.video && slot.src) {
+    return (
+      <figure
+        className={cn('relative m-0 overflow-hidden', className)}
+        style={style}
+      >
+        <LazyVideo
+          className='size-full object-cover'
+          label={slot.alt ?? slot.label}
+          poster={slot.src}
+          sizes={sizes}
+          src={slot.video}
+        />
+      </figure>
+    );
+  }
+
   if (slot.src) {
     return (
       <figure
@@ -30,7 +48,7 @@ export const MediaTile = ({
       >
         <Image
           alt={slot.alt ?? slot.label}
-          className='object-cover'
+          className={cn('object-cover', slot.focus === 'top' && 'object-top')}
           fill
           sizes={sizes}
           src={slot.src}

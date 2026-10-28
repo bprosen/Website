@@ -2,6 +2,7 @@
 
 import { type ReactNode, useRef } from 'react';
 import { GLOBE_LABEL } from '~/constants';
+import { cn } from '~/lib/ui';
 import type { LatLon } from '~/types';
 import type { MarkerId } from '~/utils';
 import { useGlobeMotion } from './useGlobeMotion';
@@ -18,11 +19,13 @@ type GlobeProps = {
   onSelect: (marker: MarkerId | null) => void;
   tip: MarkerId | null;
   tooltip: ReactNode;
+  className?: string;
   tooltipId: string;
   visitorCoords: LatLon | null;
 };
 
 export const Globe = ({
+  className,
   dots,
   onSelect,
   tip,
@@ -52,7 +55,10 @@ export const Globe = ({
     <div
       aria-describedby={tip ? tooltipId : undefined}
       aria-label={GLOBE_LABEL}
-      className='@container relative aspect-square w-full max-w-[min(320px,34svh)] cursor-grab touch-pan-y touch-pinch-zoom select-none rounded-full outline-none [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink active:cursor-grabbing'
+      className={cn(
+        '@container relative aspect-square w-full max-w-[min(320px,34svh)] cursor-grab touch-pan-y touch-pinch-zoom select-none rounded-full outline-none [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-solid focus-visible:outline-ink active:cursor-grabbing',
+        className,
+      )}
       ref={containerRef}
       role='application'
       // biome-ignore lint/a11y/noNoninteractiveTabindex: `application` is ARIA's role for a custom keyboard widget (arrow keys spin the globe), so it must be focusable; Biome counts it as non-interactive.
@@ -63,9 +69,11 @@ export const Globe = ({
         <canvas className='absolute inset-0 size-full' ref={canvasRef} />
       </div>
       <span aria-hidden='true' className={MARKER_CLASS} data-hidden ref={meRef}>
-        <span className={`${RING_CLASS} border-ink`} />
-        <span className={`${RING_CLASS} border-ink [animation-delay:1.2s]`} />
-        <span className={`${DOT_CLASS} bg-ink`} />
+        <span className='absolute top-0 left-0 motion-safe:animate-intro-pin motion-safe:[animation-delay:1100ms]'>
+          <span className={`${RING_CLASS} border-ink`} />
+          <span className={`${RING_CLASS} border-ink [animation-delay:1.2s]`} />
+          <span className={`${DOT_CLASS} bg-ink`} />
+        </span>
       </span>
       <span
         aria-hidden='true'
@@ -83,7 +91,7 @@ export const Globe = ({
       >
         {tip && (
           <div
-            className='-translate-x-1/2 translate-y-[calc(-100%-16px)] rounded-xl bg-ink px-3.5 py-2 text-sm leading-[1.35] whitespace-nowrap text-paper shadow-[0_8px_20px_rgb(23_32_26/0.25)]'
+            className='translate-y-[calc(-100%-16px)] rounded-xl bg-inverse px-3.5 py-2 text-sm leading-[1.35] whitespace-nowrap text-inverse-foreground shadow-[0_8px_20px_rgb(23_32_26/0.25)]'
             id={tooltipId}
             role='tooltip'
           >

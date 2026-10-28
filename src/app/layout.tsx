@@ -5,11 +5,17 @@ import { DM_Sans, Fraunces } from 'next/font/google';
 import type { ReactNode } from 'react';
 import {
   COLORS,
+  DARK_PAPER,
   OG_DESCRIPTION,
   SITE_DESCRIPTION,
   SITE_TITLE,
   SITE_URL,
 } from '~/constants';
+import {
+  personStructuredData,
+  serializeStructuredData,
+  themeInitScript,
+} from '~/utils';
 import './globals.css';
 
 const fraunces = Fraunces({
@@ -44,7 +50,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: COLORS.paper,
+  themeColor: [
+    { color: COLORS.paper, media: '(prefers-color-scheme: light)' },
+    { color: DARK_PAPER, media: '(prefers-color-scheme: dark)' },
+  ],
 };
 
 type RootLayoutProps = {
@@ -52,7 +61,25 @@ type RootLayoutProps = {
 };
 
 const RootLayout = ({ children }: RootLayoutProps) => (
-  <html className={`${fraunces.variable} ${dmSans.variable}`} lang='en'>
+  <html
+    className={`${fraunces.variable} ${dmSans.variable}`}
+    data-scroll-behavior='smooth'
+    lang='en'
+    suppressHydrationWarning
+  >
+    <head>
+      <script
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: a fixed script built from constants (no user input) that must run before first paint to avoid a light-theme flash.
+        dangerouslySetInnerHTML={{ __html: themeInitScript() }}
+      />
+      <script
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD built from constants and escaped by serializeStructuredData, so no user input reaches the page.
+        dangerouslySetInnerHTML={{
+          __html: serializeStructuredData(personStructuredData()),
+        }}
+        type='application/ld+json'
+      />
+    </head>
     <body>
       {children}
       <SpeedInsights />

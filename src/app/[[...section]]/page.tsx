@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { NAME, SECTIONS, SITE_TITLE } from '~/constants';
+import { OG_DESCRIPTION, OG_IMAGE, SECTIONS } from '~/constants';
 import { Home } from '~/routes';
-import { sectionFromParams, sectionPath } from '~/utils';
+import { sectionFromParams, sectionPath, sectionTitle } from '~/utils';
 
 type PageProps = {
   params: Promise<{ section?: string[] }>;
@@ -19,11 +19,25 @@ export const generateMetadata = async ({
   params,
 }: PageProps): Promise<Metadata> => {
   const section = sectionFromParams((await params).section);
-  const match = SECTIONS.find(({ slug }) => slug === section);
+  const path = sectionPath(section ?? null);
+  const title = sectionTitle(section ?? null);
 
   return {
-    alternates: { canonical: sectionPath(section ?? null) },
-    title: match ? `${match.label} · ${NAME}` : SITE_TITLE,
+    alternates: { canonical: path },
+    openGraph: {
+      description: OG_DESCRIPTION,
+      images: [OG_IMAGE],
+      title,
+      type: 'website',
+      url: path,
+    },
+    title,
+    twitter: {
+      card: 'summary_large_image',
+      description: OG_DESCRIPTION,
+      images: [OG_IMAGE],
+      title,
+    },
   };
 };
 

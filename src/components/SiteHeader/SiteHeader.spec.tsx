@@ -23,4 +23,12 @@ describe('SiteHeader', () => {
       ['Contact', '/contact'],
     ]);
   });
+
+  it('has a dark theme switch', () => {
+    render(<SiteHeader />);
+
+    expect(
+      screen.getByRole('switch', { name: 'Dark theme' }),
+    ).toBeInTheDocument();
+  });
 });

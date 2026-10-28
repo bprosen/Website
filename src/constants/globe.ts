@@ -29,3 +29,5 @@ export const GLOBE_REST_SPEED = 0.01;
 export const EARTH_DIAMETER_KM = 12742;
 export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 export const GLOBE_LABEL = `A globe with a marker on ${HOME_CITY_SHORT}. Drag it, or use the arrow keys, to spin it.`;
+export const GLOBE_TOOLTIP_VIEWPORT_MARGIN = 12;
+export const GLOBE_INTRO_SPIN_DEG_PER_SECOND = 300;

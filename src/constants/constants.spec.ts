@@ -29,10 +29,14 @@ describe('constants', () => {
     expect(WORK.map(({ id }) => id)).toEqual(['w1', 'w2', 'w3', 'w4']);
   });
 
-  it('keeps collages to the four-tile layout', () => {
+  it('keeps collages to the three-tile layout', () => {
     for (const { collage } of WORK) {
-      expect(collage?.length ?? 4).toBeLessThanOrEqual(4);
+      expect(collage?.length ?? 3).toBeLessThanOrEqual(3);
     }
+  });
+
+  it('has enough photos for the strip to loop without a gap', () => {
+    expect(PHOTOS.length).toBeGreaterThanOrEqual(4);
   });
 
   it('has unique photo labels for stable keys', () => {

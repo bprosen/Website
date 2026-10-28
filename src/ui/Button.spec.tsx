@@ -36,7 +36,7 @@ describe('Button', () => {
   it.each([
     ['accent', 'bg-accent'],
     ['ghost', 'hover:bg-accent'],
-    ['outlineDark', 'border-paper/50'],
+    ['outlineDark', 'border-inverse-foreground/50'],
   ] as const)('applies the %s variant', (variant, className) => {
     render(<Button variant={variant}>X</Button>);
 
@@ -52,5 +52,13 @@ describe('Button', () => {
     render(<Button size={size}>X</Button>);
 
     expect(screen.getByRole('button')).toHaveClass(className);
+  });
+
+  it('animates the hover lift instead of jumping', () => {
+    render(<Button>Lift</Button>);
+    const button = screen.getByRole('button');
+
+    expect(button).toHaveClass('hover:-translate-y-0.5');
+    expect(button.className).toMatch(/transition-\[[^\]]*translate[^\]]*\]/);
   });
 });

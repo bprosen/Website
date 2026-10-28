@@ -3,7 +3,8 @@ import { cn } from '~/lib/ui';
 import type { MediaSlot } from '~/types';
 import { MediaTile } from '../MediaTile';
 
-const TILE_CLASS = 'relative size-full gap-1.5 rounded-2xl text-[13px]';
+const TILE_CLASS =
+  'relative size-full gap-1.5 rounded-2xl text-[13px] transition-transform duration-250 hover:scale-[1.03]';
 
 type PhotoStripProps = {
   className?: string;
@@ -16,7 +17,7 @@ export const PhotoStrip = ({ className, photos = PHOTOS }: PhotoStripProps) => {
       <li
         aria-hidden={copy || undefined}
         className={cn(
-          'aspect-[4/5] w-[136px] flex-[0_0_auto]',
+          'aspect-[4/5] w-44 flex-[0_0_auto]',
           copy && 'motion-reduce:hidden',
         )}
         key={`${copy ? 'copy' : 'photo'}-${slot.label}`}
@@ -24,7 +25,7 @@ export const PhotoStrip = ({ className, photos = PHOTOS }: PhotoStripProps) => {
         <MediaTile
           className={TILE_CLASS}
           iconClassName='size-6'
-          sizes='136px'
+          sizes='176px'
           slot={slot}
         />
       </li>
@@ -33,7 +34,7 @@ export const PhotoStrip = ({ className, photos = PHOTOS }: PhotoStripProps) => {
   return (
     <div
       className={cn(
-        'group overflow-hidden rounded-2xl [contain-intrinsic-size:auto_170px] [content-visibility:auto] motion-reduce:overflow-x-auto',
+        'group -my-2 overflow-hidden rounded-2xl py-2 [contain-intrinsic-size:auto_236px] [content-visibility:auto] motion-reduce:overflow-x-auto',
         className,
       )}
     >

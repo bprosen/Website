@@ -4,16 +4,19 @@ import {
   GLOBE_DRAG_LAT_PER_PX,
   GLOBE_DRAG_LON_PER_PX,
   GLOBE_FLING_WINDOW_MS,
+  GLOBE_INTRO_SPIN_DEG_PER_SECOND,
   GLOBE_KEY_STEP_LAT,
   GLOBE_KEY_STEP_LON,
   GLOBE_LAT_LIMIT,
   GLOBE_MAX_FLING_SPEED,
   GLOBE_MAX_STEP_SECONDS,
+  GLOBE_START,
 } from '~/constants';
 import {
   applyDrag,
   exceedsDragThreshold,
   hitTestMarker,
+  introMotion,
   isAtRest,
   type Motion,
   nudge,
@@ -198,5 +201,26 @@ describe('hitTestMarker', () => {
     expect(
       hitTestMarker({ x: 0, y: 0 }, [{ ...markers[0], visible: false }], 13),
     ).toBeNull();
+  });
+});
+
+describe('introMotion', () => {
+  it('starts still at the resting view under reduced motion', () => {
+    expect(introMotion(true)).toEqual({ ...GLOBE_START, vLat: 0, vLon: 0 });
+  });
+
+  it('spins up fast and settles facing the resting view', () => {
+    let motion = introMotion(false);
+
+    expect(motion.vLon).toBe(GLOBE_INTRO_SPIN_DEG_PER_SECOND);
+
+    const seconds = 12;
+    for (let i = 0; i < seconds * 60; i++) {
+      motion = stepIdle(motion, 1 / 60, GLOBE_AUTO_SPIN_DEG_PER_SECOND);
+    }
+
+    const drift = GLOBE_AUTO_SPIN_DEG_PER_SECOND * seconds;
+    expect(Math.abs(motion.lon - drift - GLOBE_START.lon)).toBeLessThan(5);
+    expect(motion.vLon).toBeCloseTo(GLOBE_AUTO_SPIN_DEG_PER_SECOND, 1);
   });
 });

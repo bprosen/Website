@@ -38,4 +38,45 @@ describe('MediaTile', () => {
 
     expect(screen.getByRole('img', { name: 'Hub' })).toBeInTheDocument();
   });
+
+  it('crops from the top when the slot asks for it', () => {
+    render(
+      <MediaTile
+        sizes='100px'
+        slot={{ alt: 'Pagoda', focus: 'top', label: 'Pagoda', src: '/p.jpg' }}
+      />,
+    );
+
+    expect(screen.getByRole('img', { name: 'Pagoda' })).toHaveClass(
+      'object-top',
+    );
+  });
+
+  it('crops from the centre by default', () => {
+    render(
+      <MediaTile sizes='100px' slot={{ label: 'Hub', src: '/hub.jpg' }} />,
+    );
+
+    expect(screen.getByRole('img', { name: 'Hub' })).not.toHaveClass(
+      'object-top',
+    );
+  });
+
+  it('plays a lazy video with the image as its poster', () => {
+    render(
+      <MediaTile
+        sizes='100px'
+        slot={{
+          alt: 'Parkour clip',
+          label: 'Clip',
+          src: '/poster.jpg',
+          video: '/clip.mp4',
+        }}
+      />,
+    );
+    const video = screen.getByLabelText('Parkour clip');
+
+    expect(video.tagName).toBe('VIDEO');
+    expect(video).toHaveAttribute('src', '/clip.mp4');
+  });
 });

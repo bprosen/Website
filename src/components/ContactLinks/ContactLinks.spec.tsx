@@ -33,9 +33,29 @@ describe('ContactLinks', () => {
   it('spells out the address and uses dark styles in the dark tone', () => {
     render(<ContactLinks tone='dark' />);
 
-    expect(screen.getByRole('link', { name: EMAIL })).toHaveClass('bg-accent');
+    expect(screen.getByRole('link', { name: EMAIL })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Resume' })).toHaveClass(
-      'border-paper/50',
+      'border-inverse-foreground/50',
+    );
+  });
+
+  it('offers to copy the email only in the footer tone', () => {
+    const { unmount } = render(<ContactLinks tone='dark' />);
+    expect(
+      screen.getByRole('button', { name: 'Copy email address' }),
+    ).toBeInTheDocument();
+    unmount();
+
+    render(<ContactLinks />);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('links to the named resume file', () => {
+    render(<ContactLinks />);
+
+    expect(screen.getByRole('link', { name: 'Resume' })).toHaveAttribute(
+      'href',
+      '/Ben-Edgar-Prosen-Resume.pdf',
     );
   });
 });

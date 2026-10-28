@@ -33,4 +33,19 @@ describe('WorkEntry', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('article')).toHaveClass('pt-16');
   });
+
+  it('links out to the project code when the entry has a link', () => {
+    render(<WorkEntry entry={renatus} last />);
+    const link = screen.getByRole('link', { name: 'View Momentum on GitHub' });
+
+    expect(link).toHaveAttribute('href', 'https://github.com/bprosen/Momentum');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener');
+  });
+
+  it('has no project link otherwise', () => {
+    render(<WorkEntry entry={taiv} first />);
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
 });

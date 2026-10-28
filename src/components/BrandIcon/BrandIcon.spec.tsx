@@ -23,4 +23,18 @@ describe('BrandIcon', () => {
     expect(icon).not.toHaveAttribute('aria-hidden');
     expect(icon.querySelector('path')).not.toHaveAttribute('fill');
   });
+
+  it('lets dark logos use the text colour in dark mode', () => {
+    const { container } = render(<BrandIcon name='GitHub' />);
+
+    expect(container.querySelector('path')).toHaveClass('dark:fill-current');
+  });
+
+  it('keeps light logos in their brand colour', () => {
+    const { container } = render(<BrandIcon name='React' />);
+
+    expect(container.querySelector('path')).not.toHaveClass(
+      'dark:fill-current',
+    );
+  });
 });

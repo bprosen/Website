@@ -22,4 +22,13 @@ describe('SiteFooter', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'love' })).toBeInTheDocument();
   });
+
+  it('links to the site source', () => {
+    render(<SiteFooter />);
+    const link = screen.getByRole('link', { name: 'View source' });
+
+    expect(link).toHaveAttribute('href', 'https://github.com/bprosen/Website');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener');
+  });
 });

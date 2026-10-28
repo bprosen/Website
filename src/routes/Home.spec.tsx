@@ -21,4 +21,12 @@ describe('Home', () => {
 
     expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(1);
   });
+
+  it('lets keyboard users skip straight to the content', () => {
+    render(<Home />);
+    const skip = screen.getByRole('link', { name: 'Skip to content' });
+
+    expect(skip).toHaveAttribute('href', '#main');
+    expect(screen.getByRole('main')).toHaveAttribute('id', 'main');
+  });
 });

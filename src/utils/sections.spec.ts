@@ -1,11 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  activeSection,
+  isAtPageEnd,
   isPlainLeftClick,
   isSectionSlug,
   scrollToSection,
   sectionFromParams,
   sectionFromPath,
   sectionPath,
+  sectionTitle,
 } from './sections';
 
 const click = {
@@ -105,5 +108,59 @@ describe('scrollToSection', () => {
 
   it('reports a missing section', () => {
     expect(scrollToSection('about')).toBe(false);
+  });
+});
+
+describe('activeSection', () => {
+  const tops = (work: number, about: number, contact: number) => [
+    { slug: 'work' as const, top: work },
+    { slug: 'about' as const, top: about },
+    { slug: 'contact' as const, top: contact },
+  ];
+
+  it('is home while every section is below the line', () => {
+    expect(activeSection(tops(500, 2000, 4000), 300)).toBeNull();
+  });
+
+  it('picks the last section whose top has passed the line', () => {
+    expect(activeSection(tops(-100, 900, 3000), 300)).toBe('work');
+    expect(activeSection(tops(-2000, 300, 2000), 300)).toBe('about');
+    expect(activeSection(tops(-5000, -2000, 100), 300)).toBe('contact');
+  });
+
+  it('handles missing sections', () => {
+    expect(activeSection([], 300)).toBeNull();
+  });
+});
+
+describe('activeSection at the end of the page', () => {
+  it('picks the last section once the page is scrolled to the bottom', () => {
+    const tops = [
+      { slug: 'work' as const, top: -3000 },
+      { slug: 'about' as const, top: -900 },
+      { slug: 'contact' as const, top: 500 },
+    ];
+
+    expect(activeSection(tops, 300)).toBe('about');
+    expect(activeSection(tops, 300, true)).toBe('contact');
+  });
+
+  it('is home when there are no sections', () => {
+    expect(activeSection([], 300, true)).toBeNull();
+  });
+});
+
+describe('isAtPageEnd', () => {
+  it('detects the bottom of the page with a little tolerance', () => {
+    expect(isAtPageEnd(1000, 800, 1800)).toBe(true);
+    expect(isAtPageEnd(999, 800, 1800)).toBe(true);
+    expect(isAtPageEnd(900, 800, 1800)).toBe(false);
+  });
+});
+
+describe('sectionTitle', () => {
+  it('titles each section and falls back to the site title', () => {
+    expect(sectionTitle('contact')).toBe('Contact · Ben Edgar-Prosen');
+    expect(sectionTitle(null)).toBe('Ben Edgar-Prosen · Software Developer');
   });
 });

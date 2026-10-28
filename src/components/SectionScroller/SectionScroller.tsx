@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useSectionUrlSync } from '~/hooks';
 import { type SectionSlug, scrollToSection, sectionFromPath } from '~/utils';
 
 type SectionScrollerProps = {
@@ -11,6 +12,8 @@ const browserHandlesScroll = () =>
   window.location.hash !== '' || window.scrollY !== 0;
 
 export const SectionScroller = ({ section }: SectionScrollerProps) => {
+  useSectionUrlSync();
+
   useEffect(() => {
     if (section && !browserHandlesScroll()) {
       scrollToSection(section, 'instant');

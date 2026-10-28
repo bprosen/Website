@@ -10,7 +10,7 @@ describe('opengraph image', () => {
     expect(size).toEqual({ height: 630, width: 1200 });
   });
 
-  it('renders an image response', () => {
-    expect(Image()).toBeInstanceOf(ImageResponse);
+  it('renders an image response', async () => {
+    await expect(Image()).resolves.toBeInstanceOf(ImageResponse);
   });
 });

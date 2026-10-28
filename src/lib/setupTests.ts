@@ -29,6 +29,8 @@ const installStubs = () => {
         removeEventListener: vi.fn(),
       })),
     );
+    HTMLMediaElement.prototype.play = vi.fn(() => Promise.resolve());
+    HTMLMediaElement.prototype.pause = vi.fn();
     HTMLCanvasElement.prototype.getContext = vi.fn(
       () => null,
     ) as unknown as HTMLCanvasElement['getContext'];

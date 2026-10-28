@@ -1,4 +1,5 @@
 import { BRANDS, type BrandName } from '~/constants';
+import { isDarkBrand } from '~/utils';
 
 type BrandIconProps = {
   className?: string;
@@ -23,7 +24,13 @@ export const BrandIcon = ({
       role={label ? 'img' : undefined}
       viewBox='0 0 24 24'
     >
-      <path d={brand.path} fill={tinted ? brand.color : undefined} />
+      <path
+        className={
+          tinted && isDarkBrand(brand.color) ? 'dark:fill-current' : undefined
+        }
+        d={brand.path}
+        fill={tinted ? brand.color : undefined}
+      />
     </svg>
   );
 };

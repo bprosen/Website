@@ -1,9 +1,9 @@
 import { act, render, screen } from '@testing-library/react';
 import { useRef } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { GLOBE_START, HOME_COORDS } from '~/constants';
+import { HOME_COORDS } from '~/constants';
 import type { LatLon } from '~/types';
-import { createView, type MarkerId, projectPoint } from '~/utils';
+import { createView, introMotion, type MarkerId, projectPoint } from '~/utils';
 import { useGlobeMotion } from './useGlobeMotion';
 
 const SIZE = 200;
@@ -163,10 +163,8 @@ const mount = (props: HarnessProps = {}) => {
 };
 
 const homeOnScreen = () => {
-  const point = projectPoint(
-    HOME_COORDS,
-    createView(GLOBE_START.lat, GLOBE_START.lon),
-  );
+  const start = introMotion(false);
+  const point = projectPoint(HOME_COORDS, createView(start.lat, start.lon));
   const round = (value: number) => Math.round((value + SIZE / 2) * 10) / 10;
   return { x: round(point.x), y: round(point.y) };
 };
@@ -412,13 +410,35 @@ describe('useGlobeMotion', () => {
     expect(frames).toHaveLength(1);
   });
 
-  it('keeps a wide tooltip inside the globe', () => {
+  it('keeps a wide tooltip inside the viewport', () => {
+    const viewport = vi
+      .spyOn(document.documentElement, 'clientWidth', 'get')
+      .mockReturnValue(SIZE);
     mount({ tip: 'me' });
     act(() => resizeTooltip(SIZE + 20));
 
     expect(screen.getByTestId('tooltip').style.transform).toBe(
-      `translate3d(${SIZE / 2}px, ${homeOnScreen().y}px, 0)`,
+      `translate3d(${SIZE / 2 - (SIZE + 20) / 2}px, ${homeOnScreen().y}px, 0)`,
     );
+    viewport.mockRestore();
+  });
+
+  it('lets a tooltip extend past the globe when the viewport has room', () => {
+    const viewport = vi
+      .spyOn(document.documentElement, 'clientWidth', 'get')
+      .mockReturnValue(1000);
+    const { globe } = mount({ tip: 'me' });
+    globe.getBoundingClientRect = () =>
+      ({ height: SIZE, left: 400, top: 0, width: SIZE }) as DOMRect;
+    act(() => {
+      resize();
+      resizeTooltip(SIZE + 20);
+    });
+
+    expect(screen.getByTestId('tooltip').style.transform).toBe(
+      `translate3d(${homeOnScreen().x - (SIZE + 20) / 2}px, ${homeOnScreen().y}px, 0)`,
+    );
+    viewport.mockRestore();
   });
 
   it('ends a drag when pointer capture is lost', () => {
@@ -439,5 +459,17 @@ describe('useGlobeMotion', () => {
 
     expect(frames).toHaveLength(0);
     expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it('redraws when the theme changes', async () => {
+    const ctx = mockContext();
+    mount();
+    const fills = ctx.fill.mock.calls.length;
+
+    document.documentElement.classList.add('dark');
+    await act(async () => {});
+
+    expect(ctx.fill.mock.calls.length).toBeGreaterThan(fills);
+    document.documentElement.classList.remove('dark');
   });
 });

@@ -14,7 +14,7 @@ const toronto: Visitor = {
 };
 const local: Visitor = {
   coords: null,
-  label: "You're in Winnipeg too",
+  label: 'You (Winnipeg)',
   sameCity: true,
 };
 

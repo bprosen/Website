@@ -6,6 +6,8 @@ import {
   GPC_HEADER,
   HOME_CITY_SHORT,
   HOME_COORDS,
+  REDIS_TOKEN_ENV,
+  REDIS_URL_ENV,
   VISITORS_KEY,
   VISITORS_MAX,
   VISITORS_TTL_MS,
@@ -84,8 +86,8 @@ export const parsePipelineResponse = (body: unknown): LatLon[] => {
 export const readRedisConfig = (
   env: Record<string, string | undefined>,
 ): RedisConfig | null => {
-  const url = env.UPSTASH_REDIS_REST_URL || env.KV_REST_API_URL;
-  const token = env.UPSTASH_REDIS_REST_TOKEN || env.KV_REST_API_TOKEN;
+  const url = env[REDIS_URL_ENV];
+  const token = env[REDIS_TOKEN_ENV];
   return url && token ? { token, url: url.replace(/\/+$/, '') } : null;
 };
 
@@ -121,7 +123,7 @@ export const resolveVisitor = (
   if (isNearHome(coords)) {
     return {
       coords: null,
-      label: `You're in ${HOME_CITY_SHORT} too`,
+      label: `You (${HOME_CITY_SHORT})`,
       sameCity: true,
     };
   }

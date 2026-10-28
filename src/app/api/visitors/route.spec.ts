@@ -30,10 +30,8 @@ const sentCommands = (): unknown[][] => JSON.parse(sentBody());
 
 beforeEach(() => {
   vi.stubGlobal('fetch', fetchMock);
-  vi.stubEnv('UPSTASH_REDIS_REST_URL', REDIS_URL);
-  vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', TOKEN);
-  vi.stubEnv('KV_REST_API_URL', '');
-  vi.stubEnv('KV_REST_API_TOKEN', '');
+  vi.stubEnv('UPSTASH_KV_REST_API_URL', REDIS_URL);
+  vi.stubEnv('UPSTASH_KV_REST_API_TOKEN', TOKEN);
   fetchMock.mockResolvedValue(okResponse(['50,-97', '-34,151']));
 });
 
@@ -142,22 +140,9 @@ describe('POST /api/visitors', () => {
     expect((await response.json()).visitors).toHaveLength(2);
   });
 
-  it('uses the KV_* fallback env names', async () => {
-    vi.stubEnv('UPSTASH_REDIS_REST_URL', '');
-    vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', '');
-    vi.stubEnv('KV_REST_API_URL', 'https://kv.example');
-    vi.stubEnv('KV_REST_API_TOKEN', 'kv-token');
-
-    await POST(request());
-
-    const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe('https://kv.example/pipeline');
-    expect(init?.headers).toMatchObject({ Authorization: 'Bearer kv-token' });
-  });
-
   it('returns [] without calling fetch when env is missing', async () => {
-    vi.stubEnv('UPSTASH_REDIS_REST_URL', '');
-    vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', '');
+    vi.stubEnv('UPSTASH_KV_REST_API_URL', '');
+    vi.stubEnv('UPSTASH_KV_REST_API_TOKEN', '');
 
     const response = await POST(request(geoHeaders));
 

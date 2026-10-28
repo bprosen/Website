@@ -8,7 +8,7 @@ import {
   GLOBE_HIT_RADIUS,
   GLOBE_LAND_DOT_RADIUS,
   GLOBE_MAX_DPR,
-  GLOBE_START,
+  GLOBE_TOOLTIP_VIEWPORT_MARGIN,
   GLOBE_VISITOR_DOT_ALPHA,
   GLOBE_VISITOR_DOT_RADIUS,
   HOME_COORDS,
@@ -23,6 +23,7 @@ import {
   type DragVelocity,
   exceedsDragThreshold,
   hitTestMarker,
+  introMotion,
   isAtRest,
   type MarkerHit,
   type MarkerId,
@@ -74,6 +75,7 @@ type DragState = {
 
 type Controls = {
   draw: () => void;
+  measureTooltipBounds: () => void;
   wake: () => void;
 };
 
@@ -125,11 +127,17 @@ const setHidden = (el: HTMLElement, hidden: boolean) => {
   }
 };
 
+type TooltipBounds = {
+  max: number;
+  min: number;
+  width: number;
+};
+
 const place = (
   el: HTMLElement | null,
   hit: MarkerHit<MarkerId> | undefined,
   size: number,
-  clampWidth?: number,
+  tooltip?: TooltipBounds,
 ) => {
   if (!el) {
     return;
@@ -141,8 +149,10 @@ const place = (
   }
 
   const x = toPixels(hit.x, size);
-  const px =
-    clampWidth === undefined ? x : clampTooltipCenter(x, clampWidth, size);
+  const px = tooltip
+    ? clampTooltipCenter(x, tooltip.width, tooltip.min, tooltip.max) -
+      tooltip.width / 2
+    : x;
   const transform = `translate3d(${px}px, ${toPixels(hit.y, size)}px, 0)`;
 
   if (el.style.transform !== transform) {
@@ -183,23 +193,22 @@ export const useGlobeMotion = ({
 
     const ctx = canvas.getContext('2d');
     const land = getLandLayer();
-    const styles = getComputedStyle(document.documentElement);
-    const ink = styles.getPropertyValue('--ink').trim() || COLORS.ink;
-    const coral = styles.getPropertyValue('--coral').trim() || COLORS.coral;
+    const readColor = (name: string, fallback: string) =>
+      getComputedStyle(document.documentElement)
+        .getPropertyValue(name)
+        .trim() || fallback;
+    let ink = readColor('--ink', COLORS.ink);
+    let coral = readColor('--coral', COLORS.coral);
     const reducedQuery = window.matchMedia(REDUCED_MOTION_QUERY);
 
     let reduced = reducedQuery.matches;
-    let motion: Motion = {
-      ...GLOBE_START,
-      vLat: 0,
-      vLon: reduced ? 0 : GLOBE_AUTO_SPIN_DEG_PER_SECOND,
-    };
+    let motion: Motion = introMotion(reduced);
     let visible = false;
     let running = false;
     let frame = 0;
     let last = 0;
     let size = 0;
-    let tooltipWidth = 0;
+    const tooltipBounds: TooltipBounds = { max: 0, min: 0, width: 0 };
     let drag: DragState | null = null;
     const markers: MarkerHit<MarkerId>[] = [
       { id: 'me', visible: false, x: 0, y: 0 },
@@ -261,8 +270,15 @@ export const useGlobeMotion = ({
         tooltipRef.current,
         markers.find(({ id }) => id === tipRef.current),
         size,
-        tooltipWidth,
+        tooltipBounds,
       );
+    };
+
+    const measureTooltipBounds = () => {
+      const { left } = container.getBoundingClientRect();
+      const viewport = document.documentElement.clientWidth;
+      tooltipBounds.min = GLOBE_TOOLTIP_VIEWPORT_MARGIN - left;
+      tooltipBounds.max = viewport - GLOBE_TOOLTIP_VIEWPORT_MARGIN - left;
     };
 
     const draw = () => {
@@ -410,11 +426,17 @@ export const useGlobeMotion = ({
       const dpr = Math.min(window.devicePixelRatio || 1, GLOBE_MAX_DPR);
       canvas.width = Math.round(size * dpr);
       canvas.height = Math.round(size * dpr);
+      measureTooltipBounds();
       draw();
     });
 
+    const onWindowResize = () => {
+      measureTooltipBounds();
+      drawMarkers(createView(motion.lat, motion.lon));
+    };
+
     const tooltipObserver = new ResizeObserver(([entry]) => {
-      tooltipWidth = entry.contentRect.width;
+      tooltipBounds.width = entry.contentRect.width;
       drawMarkers(createView(motion.lat, motion.lon));
     });
 
@@ -442,7 +464,17 @@ export const useGlobeMotion = ({
       tooltipObserver.observe(tooltipRef.current);
     }
     intersectionObserver.observe(container);
-    controls.current = { draw, wake };
+    const themeObserver = new MutationObserver(() => {
+      ink = readColor('--ink', COLORS.ink);
+      coral = readColor('--coral', COLORS.coral);
+      draw();
+    });
+    themeObserver.observe(document.documentElement, {
+      attributeFilter: ['class'],
+      attributes: true,
+    });
+    window.addEventListener('resize', onWindowResize);
+    controls.current = { draw, measureTooltipBounds, wake };
 
     return () => {
       sleep();
@@ -454,6 +486,8 @@ export const useGlobeMotion = ({
       container.removeEventListener('lostpointercapture', onPointerCancel);
       container.removeEventListener('keydown', onKeyDown);
       reducedQuery.removeEventListener('change', onReducedChange);
+      window.removeEventListener('resize', onWindowResize);
+      themeObserver.disconnect();
       resizeObserver.disconnect();
       tooltipObserver.disconnect();
       intersectionObserver.disconnect();
@@ -462,6 +496,11 @@ export const useGlobeMotion = ({
 
   useEffect(() => {
     tipRef.current = tip;
+
+    if (tip) {
+      controls.current?.measureTooltipBounds();
+    }
+
     controls.current?.draw();
     controls.current?.wake();
   }, [tip]);

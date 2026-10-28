@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { Collage } from './Collage';
 
 describe('Collage', () => {
-  it('lists tiles with the first one large', () => {
+  it('shows a wide banner with two tiles underneath', () => {
     render(
       <Collage
         label='Renatus collage'
@@ -15,8 +15,8 @@ describe('Collage', () => {
     ).getAllByRole('listitem');
 
     expect(items).toHaveLength(3);
-    expect(items[0]).toHaveClass('col-span-2', 'row-span-2');
-    expect(items[1]).toHaveClass('col-span-2');
-    expect(items[2]).not.toHaveClass('col-span-2');
+    expect(items[0]).toHaveClass('col-span-2', 'aspect-[2/1]');
+    expect(items[1]).toHaveClass('aspect-video');
+    expect(items[2]).toHaveClass('aspect-video');
   });
 });

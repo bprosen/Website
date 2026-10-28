@@ -1,6 +1,7 @@
 import {
   AboutSection,
   Hero,
+  ScrollReveal,
   SectionScroller,
   SiteFooter,
   SiteHeader,
@@ -14,7 +15,7 @@ type HomeProps = {
 };
 
 export const Home = ({ section = null }: HomeProps) => (
-  <div className='tl-root min-h-screen'>
+  <div className='min-h-screen'>
     <a
       className='sr-only rounded-full bg-primary px-5 py-3 font-medium text-primary-foreground no-underline focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-60'
       href={`#${MAIN_CONTENT_ID}`}
@@ -29,5 +30,6 @@ export const Home = ({ section = null }: HomeProps) => (
     </main>
     <SiteFooter />
     <SectionScroller section={section} />
+    <ScrollReveal />
   </div>
 );

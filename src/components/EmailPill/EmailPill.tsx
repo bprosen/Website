@@ -17,9 +17,9 @@ export const EmailPill = () => {
   const { copied, copy } = useCopyToClipboard();
 
   return (
-    <div className='inline-flex h-13 max-w-full items-center rounded-full bg-accent pr-1.5 pl-[22px] font-semibold text-accent-foreground transition-[translate] duration-200 ease-out hover:-translate-y-0.5'>
+    <div className='inline-flex h-13 max-w-full max-sm:h-11 items-center rounded-full bg-accent pr-3 pl-[22px] max-sm:pr-1.5 max-sm:pl-4 max-sm:text-[15px] font-semibold text-accent-foreground transition-[translate] duration-200 ease-out hover:-translate-y-0.5'>
       <a
-        className={`inline-flex min-w-0 items-center gap-2.5 rounded-full text-inherit no-underline ${FOCUS_RING}`}
+        className={`inline-flex min-w-0 items-center gap-2.5 rounded-full max-[379px]:gap-2 text-inherit no-underline ${FOCUS_RING}`}
         href={MAILTO}
       >
         <IconMail
@@ -27,11 +27,11 @@ export const EmailPill = () => {
           className='size-[22px] shrink-0'
           stroke={ICON_STROKE}
         />
-        <span className='truncate'>{EMAIL}</span>
+        <span className='truncate max-sm:sr-only'>{EMAIL}</span>
       </a>
       <span
         aria-hidden
-        className='mx-2.5 h-6 w-px shrink-0 bg-accent-foreground/20'
+        className='mr-1 ml-2.5 h-6 w-px shrink-0 bg-accent-foreground/20'
       />
       <button
         aria-label={COPY_EMAIL_LABEL}

@@ -38,6 +38,8 @@ describe('WorkEntry', () => {
     render(<WorkEntry entry={renatus} last />);
     const link = screen.getByRole('link', { name: 'View Momentum on GitHub' });
 
+    expect(link).toHaveTextContent(/^View Momentum$/);
+
     expect(link).toHaveAttribute('href', 'https://github.com/bprosen/Momentum');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener');
@@ -46,6 +48,8 @@ describe('WorkEntry', () => {
   it('has no project link otherwise', () => {
     render(<WorkEntry entry={taiv} first />);
 
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: /on GitHub/ }),
+    ).not.toBeInTheDocument();
   });
 });

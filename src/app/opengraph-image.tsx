@@ -5,18 +5,31 @@ import {
   DISPLAY_FONT,
   FIRST_NAME,
   LAST_NAME,
+  NAME,
   OG_DESCRIPTION,
   SITE_DOMAIN,
   SITE_TITLE,
 } from '~/constants';
-import { loadBodyFont, loadDisplayFont } from '~/lib/displayFont';
+import {
+  loadBodyFont,
+  loadDisplayFont,
+  loadPortraitDataUrl,
+} from '~/lib/ogAssets';
 
 export const alt = SITE_TITLE;
 export const contentType = 'image/png';
 export const size = { height: 630, width: 1200 };
 
-const Image = async () =>
-  new ImageResponse(
+const PORTRAIT_PX = 340;
+
+const Image = async () => {
+  const [portrait, bodyFont, displayFont] = await Promise.all([
+    loadPortraitDataUrl(),
+    loadBodyFont(),
+    loadDisplayFont(),
+  ]);
+
+  return new ImageResponse(
     <div
       style={{
         alignItems: 'center',
@@ -52,33 +65,21 @@ const Image = async () =>
           {SITE_DOMAIN}
         </div>
       </div>
-      <div
+      {/* biome-ignore lint/performance/noImgElement: ImageResponse renders with Satori, which only understands plain img elements. */}
+      <img
+        alt={NAME}
+        height={PORTRAIT_PX}
+        src={portrait}
         style={{
-          alignItems: 'center',
-          background: COLORS.sage,
-          border: `5px solid ${COLORS.ink}`,
+          border: `6px solid ${COLORS.ink}`,
           borderRadius: '50%',
-          display: 'flex',
-          height: 340,
-          justifyContent: 'center',
-          width: 340,
+          objectFit: 'cover',
         }}
-      >
-        <div
-          style={{
-            background: COLORS.ink,
-            border: `6px solid ${COLORS.paper}`,
-            borderRadius: '50%',
-            display: 'flex',
-            height: 44,
-            marginLeft: -70,
-            marginTop: -90,
-            width: 44,
-          }}
-        />
-      </div>
+        width={PORTRAIT_PX}
+      />
     </div>,
-    { ...size, fonts: [await loadBodyFont(), await loadDisplayFont()] },
+    { ...size, fonts: [bodyFont, displayFont] },
   );
+};
 
 export default Image;

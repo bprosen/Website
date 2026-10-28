@@ -46,4 +46,26 @@ describe('Globe', () => {
 
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
+
+  it('only tints the home marker coral when it is shared with the visitor', () => {
+    const { container, rerender } = renderGlobe();
+
+    expect(container.querySelector('[data-shared]')).toBeNull();
+
+    rerender(
+      <Globe
+        dots={[]}
+        onSelect={vi.fn()}
+        sharedHome
+        tip={null}
+        tooltip={null}
+        tooltipId='globe-tooltip'
+        visitorCoords={null}
+      />,
+    );
+
+    expect(container.querySelector('[data-shared]')).toHaveClass(
+      'border-coral-deep',
+    );
+  });
 });

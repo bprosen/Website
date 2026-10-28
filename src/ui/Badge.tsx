@@ -12,7 +12,7 @@ export const badgeVariants = cva(
     variants: {
       variant: {
         default: 'bg-primary text-primary-foreground',
-        tech: 'gap-2 bg-background py-1.5 pr-3.5 pl-2.5 text-sm font-normal text-foreground [&>svg]:size-[18px]',
+        tech: 'gap-2 bg-background py-1.5 pr-3.5 pl-2.5 text-sm font-normal text-foreground no-underline outline-none transition-[translate,box-shadow] duration-200 hover:-translate-y-0.5 focus-visible:ring-[3px] focus-visible:ring-ring/50 [&>svg]:size-[18px]',
       },
     },
   },

@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { STACK_GRID } from '~/constants';
+import { BRANDS, STACK_GRID } from '~/constants';
 import { StackCard } from './StackCard';
 
 describe('StackCard', () => {
@@ -24,5 +24,13 @@ describe('StackCard', () => {
     expect(container.querySelectorAll('svg[aria-hidden="true"]')).toHaveLength(
       STACK_GRID.length,
     );
+  });
+
+  it('links every logo to its site', () => {
+    render(<StackCard />);
+
+    expect(
+      screen.getAllByRole('link').map((link) => link.getAttribute('href')),
+    ).toEqual(STACK_GRID.map((name) => BRANDS[name].url));
   });
 });

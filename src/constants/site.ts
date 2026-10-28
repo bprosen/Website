@@ -25,6 +25,7 @@ export const LINKED_IN = 'https://www.linkedin.com/in/ben-edgar-prosen/';
 export const RESUME_PATH = '/Ben-Edgar-Prosen-Resume.pdf';
 export const MOMENTUM_REPO = 'https://github.com/bprosen/Momentum';
 export const SITE_REPO = 'https://github.com/bprosen/Website';
+export const GITHUB_LINK_CONTEXT = 'on GitHub';
 
 export const HOME_CITY_SHORT = 'Winnipeg';
 export const HOME_CITY = `${HOME_CITY_SHORT}, Canada`;
@@ -63,3 +64,18 @@ export const HOME_COUNTRY = 'CA';
 export const COPY_EMAIL_LABEL = 'Copy email address';
 export const COPIED_EMAIL_LABEL = 'Email address copied';
 export const COPY_RESET_MS = 2000;
+
+export const HERO_NAME_ID = 'hero-name';
+export const SITE_HEADER_ID = 'site-header';
+export const PHOTO_STRIP_SPEED_PX_PER_S = 17;
+export const AUTO_SCROLL_RESUME_MS = 1500;
+export const SCROLL_SYNC_TOLERANCE_PX = 1;
+export const ENLARGE_MEDIA_LABEL = 'Enlarge';
+export const CLOSE_DIALOG_LABEL = 'Close';
+export const LIGHTBOX_MAX_VW = 92;
+export const LIGHTBOX_MAX_SVH = 85;
+export const REVEAL_SELECTOR = '[data-reveal], [data-reveal-group] > *';
+export const REVEALED_ATTRIBUTE = 'data-revealed';
+export const REVEAL_READY_CLASS = 'reveal-ready';
+export const REVEAL_ROOT_MARGIN = '0px 0px -4% 0px';
+export const WORK_SECTION_ID = 'work';

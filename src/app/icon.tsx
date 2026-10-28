@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { Monogram } from '~/components';
-import { loadDisplayFont } from '~/lib/displayFont';
+import { loadDisplayFont } from '~/lib/ogAssets';
 
 export const contentType = 'image/png';
 export const size = { height: 64, width: 64 };

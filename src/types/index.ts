@@ -1,1 +1,2 @@
-export * from './Vanta';
+export * from './content';
+export * from './geo';

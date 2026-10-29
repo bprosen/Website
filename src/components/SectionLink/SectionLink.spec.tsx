@@ -11,6 +11,18 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+const clickWouldNavigate = (link: HTMLElement, init?: MouseEventInit) => {
+  let navigates = false;
+  const record = (event: Event) => {
+    navigates = !event.defaultPrevented;
+    event.preventDefault();
+  };
+  document.addEventListener('click', record);
+  fireEvent.click(link, init);
+  document.removeEventListener('click', record);
+  return navigates;
+};
+
 const renderWithSection = () =>
   render(
     <>
@@ -33,9 +45,7 @@ describe('SectionLink', () => {
     renderWithSection();
     const link = screen.getByRole('link', { name: 'Work' });
 
-    const allowed = fireEvent.click(link);
-
-    expect(allowed).toBe(false);
+    expect(clickWouldNavigate(link)).toBe(false);
     expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
     expect(window.location.pathname).toBe('/work');
   });
@@ -54,7 +64,7 @@ describe('SectionLink', () => {
     renderWithSection();
 
     expect(
-      fireEvent.click(screen.getByRole('link', { name: 'Work' }), {
+      clickWouldNavigate(screen.getByRole('link', { name: 'Work' }), {
         metaKey: true,
       }),
     ).toBe(true);
@@ -64,9 +74,9 @@ describe('SectionLink', () => {
   it('navigates normally when the section is not on the page', () => {
     render(<SectionLink section='about'>About</SectionLink>);
 
-    expect(fireEvent.click(screen.getByRole('link', { name: 'About' }))).toBe(
-      true,
-    );
+    expect(
+      clickWouldNavigate(screen.getByRole('link', { name: 'About' })),
+    ).toBe(true);
   });
 
   it('respects a caller that prevents the click', () => {

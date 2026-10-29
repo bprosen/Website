@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { CLOSE_DIALOG_LABEL, ENLARGE_MEDIA_LABEL } from '~/constants';
 import { MediaLightbox } from './MediaLightbox';
 
@@ -59,6 +59,25 @@ describe('MediaLightbox', () => {
     expect(video).toHaveAttribute('disablepictureinpicture');
     expect(video.muted).toBe(true);
     expect(video).not.toHaveAttribute('controls');
+  });
+
+  it('leaves videos paused with controls when reduced motion is preferred', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => ({
+        addEventListener: vi.fn(),
+        matches: true,
+        removeEventListener: vi.fn(),
+      })),
+    );
+    const user = userEvent.setup();
+    renderLightbox({ video: '/clip.mp4' });
+
+    await user.click(screen.getByRole('button', { name: TRIGGER }));
+    const video = within(screen.getByRole('dialog')).getByLabelText(ALT);
+
+    expect(video).not.toHaveAttribute('autoplay');
+    expect(video).toHaveAttribute('controls');
   });
 
   it('closes from the X button and returns focus to the thumbnail', async () => {

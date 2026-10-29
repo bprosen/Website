@@ -1,6 +1,9 @@
+'use client';
+
 import Image from 'next/image';
 import type { CSSProperties, ReactNode } from 'react';
 import { ENLARGE_MEDIA_LABEL, LIGHTBOX_MAX_VW } from '~/constants';
+import { usePrefersReducedMotion } from '~/hooks';
 import { cn } from '~/lib/ui';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '~/ui';
 import { fitToScreen } from '~/utils';
@@ -30,47 +33,52 @@ export const MediaLightbox = ({
   style,
   video,
   width,
-}: MediaLightboxProps) => (
-  <Dialog>
-    <DialogTrigger
-      aria-label={`${ENLARGE_MEDIA_LABEL}: ${alt}`}
-      className={cn(
-        'block cursor-zoom-in border-0 p-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
-        className,
-      )}
-      style={style}
-      tabIndex={focusable ? undefined : -1}
-    >
-      {children}
-    </DialogTrigger>
-    <DialogContent>
-      <DialogTitle className='sr-only'>{alt}</DialogTitle>
-      {video ? (
-        <video
-          aria-label={alt}
-          autoPlay
-          className={ENLARGED_MEDIA}
-          disablePictureInPicture
-          disableRemotePlayback
-          loop
-          muted
-          playsInline
-          poster={src}
-          src={video}
-          style={fitToScreen(width, height)}
-        />
-      ) : (
-        <Image
-          alt={alt}
-          className={ENLARGED_MEDIA}
-          height={height}
-          loading='eager'
-          sizes={`min(${LIGHTBOX_MAX_VW}vw, ${width}px)`}
-          src={src}
-          style={fitToScreen(width, height)}
-          width={width}
-        />
-      )}
-    </DialogContent>
-  </Dialog>
-);
+}: MediaLightboxProps) => {
+  const reducedMotion = usePrefersReducedMotion();
+
+  return (
+    <Dialog>
+      <DialogTrigger
+        aria-label={`${ENLARGE_MEDIA_LABEL}: ${alt}`}
+        className={cn(
+          'block cursor-zoom-in border-0 p-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+          className,
+        )}
+        style={style}
+        tabIndex={focusable ? undefined : -1}
+      >
+        {children}
+      </DialogTrigger>
+      <DialogContent>
+        <DialogTitle className='sr-only'>{alt}</DialogTitle>
+        {video ? (
+          <video
+            aria-label={alt}
+            autoPlay={!reducedMotion}
+            className={ENLARGED_MEDIA}
+            controls={reducedMotion}
+            disablePictureInPicture
+            disableRemotePlayback
+            loop
+            muted
+            playsInline
+            poster={src}
+            src={video}
+            style={fitToScreen(width, height)}
+          />
+        ) : (
+          <Image
+            alt={alt}
+            className={ENLARGED_MEDIA}
+            height={height}
+            loading='eager'
+            sizes={`min(${LIGHTBOX_MAX_VW}vw, ${width}px)`}
+            src={src}
+            style={fitToScreen(width, height)}
+            width={width}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};

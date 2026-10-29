@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AUTO_SCROLL_RESUME_MS } from '~/constants';
 import { useAutoScroll } from './useAutoScroll';
 
@@ -58,6 +58,10 @@ describe('useAutoScroll', () => {
         observe = vi.fn();
       },
     );
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('drifts while visible and loops back after one set of tiles', () => {

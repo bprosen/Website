@@ -5,7 +5,7 @@ import { BODY_FONT, DISPLAY_FONT, PORTRAIT } from '~/constants';
 type FontSpec = typeof BODY_FONT | typeof DISPLAY_FONT;
 
 const loadFont = async ({ file, name, weight }: FontSpec) => ({
-  data: await readFile(join(process.cwd(), file)),
+  data: await readFile(join(process.cwd(), 'src', 'assets', 'fonts', file)),
   name,
   style: 'normal' as const,
   weight,

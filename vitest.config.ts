@@ -13,6 +13,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     css: true,
+    pool: 'threads',
     setupFiles: "./src/lib/setupTests.ts",
     include: ["src/**/*.spec.ts", "src/**/*.spec.tsx"],
     coverage: {

@@ -8,6 +8,8 @@ let prefersDark = false;
 let reducedMotion = false;
 
 beforeEach(() => {
+  document.documentElement.classList.remove('dark');
+  localStorage.clear();
   prefersDark = false;
   reducedMotion = false;
   vi.stubGlobal(
@@ -27,8 +29,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  document.documentElement.classList.remove('dark');
-  localStorage.clear();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
   Reflect.deleteProperty(document, 'startViewTransition');

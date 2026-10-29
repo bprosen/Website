@@ -16,12 +16,21 @@ describe('Portrait', () => {
     );
   });
 
-  it('requests the image at the size it is shown', () => {
-    render(<Portrait size={104} />);
+  it('requests one shared image size so the photo downloads once', () => {
+    render(<Portrait />);
 
     expect(
       screen.getByRole('img', { name: PORTRAIT.alt }).getAttribute('sizes'),
-    ).toBe('104px');
+    ).toBe(PORTRAIT.sizes);
+  });
+
+  it('loads the image eagerly because it is visible wherever it appears', () => {
+    render(<Portrait />);
+
+    expect(screen.getByRole('img', { name: PORTRAIT.alt })).toHaveAttribute(
+      'loading',
+      'eager',
+    );
   });
 
   it('opens the enlarged portrait when clicked', async () => {

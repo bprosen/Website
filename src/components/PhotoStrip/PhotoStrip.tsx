@@ -1,5 +1,6 @@
 'use client';
 
+import type { ImageProps } from 'next/image';
 import { useRef } from 'react';
 import { PHOTO_STRIP_SPEED_PX_PER_S, PHOTOS } from '~/constants';
 import { useAutoScroll } from '~/hooks';
@@ -12,10 +13,15 @@ const TILE_CLASS =
 
 type PhotoStripProps = {
   className?: string;
+  loading?: ImageProps['loading'];
   photos?: readonly MediaSlot[];
 };
 
-export const PhotoStrip = ({ className, photos = PHOTOS }: PhotoStripProps) => {
+export const PhotoStrip = ({
+  className,
+  loading,
+  photos = PHOTOS,
+}: PhotoStripProps) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   useAutoScroll(scrollerRef, PHOTO_STRIP_SPEED_PX_PER_S);
 
@@ -33,6 +39,7 @@ export const PhotoStrip = ({ className, photos = PHOTOS }: PhotoStripProps) => {
           className={TILE_CLASS}
           focusable={!copy}
           iconClassName='size-6'
+          loading={loading}
           sizes='176px'
           slot={slot}
         />
@@ -42,7 +49,7 @@ export const PhotoStrip = ({ className, photos = PHOTOS }: PhotoStripProps) => {
   return (
     <div
       className={cn(
-        '-my-2 overflow-x-auto overscroll-x-contain rounded-2xl py-2 [contain-intrinsic-size:auto_236px] [content-visibility:auto] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+        '-my-2 overflow-x-auto overscroll-x-contain rounded-2xl py-2 [mask-image:linear-gradient(to_right,transparent,black_12px,black_calc(100%-12px),transparent)] [contain-intrinsic-size:auto_236px] [content-visibility:auto] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
         className,
       )}
       ref={scrollerRef}

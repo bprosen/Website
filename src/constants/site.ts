@@ -39,7 +39,7 @@ export const SECTIONS = [
 ] as const satisfies readonly Section[];
 
 export const HERO_TAGLINE =
-  "Software Developer at Taiv. I take products from first idea to launch, and I've been shipping to millions of users since 2019.";
+  'Software Developer at Taiv. I take products from first idea to launch, and before that I built and ran a game server for 2M+ players.';
 
 export const CONTACT_HEADING = "Let's talk";
 export const CONTACT_COPY =

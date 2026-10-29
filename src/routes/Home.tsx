@@ -26,7 +26,7 @@ export const Home = ({ section = null }: HomeProps) => (
     <main className='outline-none' id={MAIN_CONTENT_ID} tabIndex={-1}>
       <Hero />
       <WorkSection />
-      <AboutSection />
+      <AboutSection eagerPhotos={section === 'about'} />
     </main>
     <SiteFooter />
     <SectionScroller section={section} />

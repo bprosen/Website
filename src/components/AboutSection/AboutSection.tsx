@@ -5,11 +5,13 @@ import { StackCard } from '../StackCard';
 
 type AboutSectionProps = {
   bio?: readonly string[];
+  eagerPhotos?: boolean;
   japanNote?: string;
 };
 
 export const AboutSection = ({
   bio = ABOUT_BIO,
+  eagerPhotos = false,
   japanNote = JAPAN_NOTE,
 }: AboutSectionProps) => (
   <section
@@ -39,7 +41,7 @@ export const AboutSection = ({
           {japanNote && <p className='m-0'>{japanNote}</p>}
         </div>
         <div className='mt-10' data-reveal>
-          <PhotoStrip />
+          <PhotoStrip loading={eagerPhotos ? 'eager' : 'lazy'} />
         </div>
       </div>
       <div

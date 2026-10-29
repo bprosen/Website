@@ -5,13 +5,9 @@ import { MediaLightbox } from '../MediaLightbox';
 
 type PortraitProps = {
   className?: string;
-  size?: number;
 };
 
-export const Portrait = ({
-  className,
-  size = PORTRAIT.size,
-}: PortraitProps) => (
+export const Portrait = ({ className }: PortraitProps) => (
   <MediaLightbox
     alt={PORTRAIT.alt}
     className={cn(
@@ -26,7 +22,8 @@ export const Portrait = ({
       alt={PORTRAIT.alt}
       className='object-cover'
       fill
-      sizes={`${size}px`}
+      loading='eager'
+      sizes={PORTRAIT.sizes}
       src={PORTRAIT.src}
     />
   </MediaLightbox>

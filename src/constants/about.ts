@@ -4,13 +4,10 @@ import { NAME } from './site';
 export const PORTRAIT = {
   alt: NAME,
   height: 480,
-  size: 88,
+  sizes: '144px',
   src: '/photos/portrait.jpg',
   width: 480,
 } as const;
-
-export const HERO_PORTRAIT_SIZE = 144;
-export const HEADER_AVATAR_SIZE = 36;
 
 export const ABOUT_BIO: readonly string[] = [
   "I'm a software developer in Winnipeg, and I graduated with distinction in Computer Science from the University of Manitoba. I like building interfaces that feel clean and quick, and I care about testing and tooling as much as the pixels.",

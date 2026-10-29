@@ -26,6 +26,7 @@ export const GlobeCard = ({ className }: GlobeCardProps) => {
   );
 
   const youMarker = markerFor('you', visitor);
+  const placed = visitor.coords !== null || visitor.sameCity;
   const describes = (marker: MarkerId) =>
     tip === marker ? tooltipId : undefined;
 
@@ -40,6 +41,7 @@ export const GlobeCard = ({ className }: GlobeCardProps) => {
         className='motion-safe:animate-intro-globe motion-safe:[animation-delay:120ms]'
         dots={dots}
         onSelect={select}
+        sharedHome={visitor.sameCity}
         tip={tip}
         tooltip={tip && <MarkerTooltip marker={tip} visitor={visitor} />}
         tooltipId={tooltipId}
@@ -60,14 +62,16 @@ export const GlobeCard = ({ className }: GlobeCardProps) => {
         >
           Me
         </LegendButton>
-        <LegendButton
-          describedBy={describes(youMarker)}
-          onClick={() => select(youMarker)}
-          pressed={tip === youMarker}
-          swatchClassName='bg-coral ring-1 ring-coral-deep'
-        >
-          {visitor.label}
-        </LegendButton>
+        {placed && (
+          <LegendButton
+            describedBy={describes(youMarker)}
+            onClick={() => select(youMarker)}
+            pressed={tip === youMarker}
+            swatchClassName='bg-coral ring-1 ring-coral-deep'
+          >
+            {visitor.label}
+          </LegendButton>
+        )}
       </p>
     </div>
   );

@@ -8,6 +8,8 @@ let prefersDark = false;
 let reducedMotion = false;
 
 beforeEach(() => {
+  document.documentElement.classList.remove('dark');
+  localStorage.clear();
   prefersDark = false;
   reducedMotion = false;
   vi.stubGlobal(
@@ -27,9 +29,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  document.documentElement.classList.remove('dark');
-  localStorage.clear();
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
   Reflect.deleteProperty(document, 'startViewTransition');
 });
 
@@ -83,38 +84,38 @@ describe('useTheme', () => {
     );
   });
 
-  it('switches instantly under reduced motion', () => {
+  it('switches instantly under reduced motion', async () => {
     reducedMotion = true;
     const startViewTransition = vi.fn();
     Object.assign(document, { startViewTransition });
     const { result } = renderHook(() => useTheme());
 
-    act(() => result.current.toggle({ x: 0, y: 0 }));
+    await act(async () => result.current.toggle({ x: 0, y: 0 }));
 
     expect(startViewTransition).not.toHaveBeenCalled();
     expect(document.documentElement).toHaveClass('dark');
   });
 
-  it('follows system changes until the visitor picks a theme', () => {
+  it('follows system changes until the visitor picks a theme', async () => {
     renderHook(() => useTheme());
 
     prefersDark = true;
-    act(() => systemListener());
+    await act(async () => systemListener());
     expect(document.documentElement).toHaveClass('dark');
 
     localStorage.setItem(THEME_STORAGE_KEY, 'dark');
     prefersDark = false;
-    act(() => systemListener());
+    await act(async () => systemListener());
     expect(document.documentElement).toHaveClass('dark');
   });
 
-  it('still switches when storage is unavailable', () => {
+  it('still switches when storage is unavailable', async () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('blocked');
     });
     const { result } = renderHook(() => useTheme());
 
-    act(() => result.current.toggle());
+    await act(async () => result.current.toggle());
 
     expect(document.documentElement).toHaveClass('dark');
   });

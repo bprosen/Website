@@ -77,13 +77,15 @@ describe('LazyVideo', () => {
     expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
   });
 
-  it('shows controls instead of autoplaying under reduced motion', () => {
+  it('does not autoplay or show controls under reduced motion', () => {
     setReducedMotion(true);
     renderVideo();
 
     act(() => intersect(true));
 
-    expect(screen.getByLabelText('Parkour clip')).toHaveAttribute('controls');
+    expect(screen.getByLabelText('Parkour clip')).not.toHaveAttribute(
+      'controls',
+    );
     expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
   });
 
@@ -112,7 +114,7 @@ describe('LazyVideo', () => {
     expect(video).toHaveClass('opacity-100');
   });
 
-  it('keeps the video visible with controls under reduced motion', () => {
+  it('shows the poster frame under reduced motion', () => {
     setReducedMotion(true);
     renderVideo();
 

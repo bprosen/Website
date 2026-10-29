@@ -58,7 +58,6 @@ export const LazyVideo = ({
           'absolute inset-0 size-full object-cover transition-opacity duration-300',
           playing || reducedMotion ? 'opacity-100' : 'opacity-0',
         )}
-        controls={reducedMotion}
         loop
         muted
         onPlaying={() => setPlaying(true)}

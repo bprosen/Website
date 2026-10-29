@@ -17,12 +17,14 @@ export const TechList = ({ className, items }: TechListProps) => (
       const brand = BRANDS[name];
 
       return (
-        <Badge asChild key={name} variant='tech'>
-          <li>
-            <BrandIcon name={name} />
-            {'label' in brand ? brand.label : name}
-          </li>
-        </Badge>
+        <li key={name}>
+          <Badge asChild variant='tech'>
+            <a href={brand.url} rel='noopener' target='_blank'>
+              <BrandIcon name={name} />
+              {'label' in brand ? brand.label : name}
+            </a>
+          </Badge>
+        </li>
       );
     })}
   </ul>

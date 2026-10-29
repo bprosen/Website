@@ -4,6 +4,7 @@ export type Brand = {
   color: string;
   label?: string;
   path: string;
+  url: string;
 };
 
 export type Stat = {
@@ -11,14 +12,26 @@ export type Stat = {
   value: string;
 };
 
+export type MediaFile = {
+  height: number;
+  src: string;
+  video?: string;
+  width: number;
+};
+
+type NoMediaFile = {
+  height?: never;
+  src?: never;
+  video?: never;
+  width?: never;
+};
+
 export type MediaSlot = {
   alt?: string;
   focus?: 'center' | 'top';
   label: string;
-  src?: string;
   tint?: string;
-  video?: string;
-};
+} & (MediaFile | NoMediaFile);
 
 export type WorkEntry = {
   collage?: readonly MediaSlot[];

@@ -1,5 +1,5 @@
 import { IconArrowUpRight, IconBrandGithub } from '@tabler/icons-react';
-import { ICON_STROKE } from '~/constants';
+import { GITHUB_LINK_CONTEXT, ICON_STROKE } from '~/constants';
 import { cn } from '~/lib/ui';
 import type { WorkEntry as WorkEntryData } from '~/types';
 import { Button } from '~/ui';
@@ -35,7 +35,11 @@ export const WorkEntry = ({ entry, first, last }: WorkEntryProps) => {
         className='invisible relative -top-[120px] block h-0'
         id={id}
       />
-      <div className={cn(scrollSpyTimeline, !last && 'pb-16')}>
+      <div
+        className={cn(scrollSpyTimeline, !last && 'pb-16')}
+        data-reveal-group
+        data-work-entry={id}
+      >
         <p className='m-0 text-base text-muted-deep'>{period}</p>
         <h3 className='mt-1.5 mb-0 font-serif text-[clamp(40px,5vw,64px)] leading-none font-semibold tracking-[-0.035em]'>
           {company}
@@ -54,7 +58,12 @@ export const WorkEntry = ({ entry, first, last }: WorkEntryProps) => {
             size='nav'
             variant='outline'
           >
-            <a href={link.href} rel='noopener' target='_blank'>
+            <a
+              aria-label={`${link.label} ${GITHUB_LINK_CONTEXT}`}
+              href={link.href}
+              rel='noopener'
+              target='_blank'
+            >
               <IconBrandGithub
                 aria-hidden
                 className='size-5'

@@ -18,6 +18,12 @@ const toronto: Visitor = {
   sameCity: false,
 };
 
+const winnipeg: Visitor = {
+  coords: null,
+  label: 'You (Winnipeg)',
+  sameCity: true,
+};
+
 beforeEach(() => {
   useVisitor.mockReturnValue(toronto);
 });
@@ -63,17 +69,28 @@ describe('GlobeCard', () => {
     );
   });
 
-  it('opens the home marker when the visitor cannot be placed', async () => {
+  it('leaves the visitor out of the legend when they cannot be placed', () => {
     useVisitor.mockReturnValue(UNKNOWN_VISITOR);
     render(<GlobeCard />);
 
-    const you = screen.getByRole('button', { name: 'You' });
+    expect(screen.getByRole('button', { name: 'Me' })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'You' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shares the home marker with visitors from the same city', async () => {
+    useVisitor.mockReturnValue(winnipeg);
+    const { container } = render(<GlobeCard />);
+    const you = screen.getByRole('button', { name: 'You (Winnipeg)' });
+
+    expect(container.querySelector('[data-shared]')).toHaveClass(
+      'border-coral-deep',
+    );
 
     await userEvent.click(you);
 
-    expect(screen.getByRole('tooltip')).toHaveTextContent(
-      /Ben · Winnipeg, Canada/,
-    );
+    expect(screen.getByRole('tooltip')).toHaveTextContent(/you're here too/);
     expect(you).toHaveAttribute('aria-pressed', 'true');
   });
 

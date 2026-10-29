@@ -2,6 +2,8 @@ export * from './geo';
 export * from './globe';
 export * from './globeMotion';
 export * from './markers';
+export * from './media';
+export * from './progress';
 export * from './sections';
 export * from './structuredData';
 export * from './theme';

@@ -18,16 +18,21 @@ export const SiteFooter = () => (
     tabIndex={-1}
   >
     <div className='mx-auto max-w-[1240px] px-[clamp(20px,5vw,56px)] pt-[clamp(64px,8vw,120px)] pb-10'>
-      <h2 className='rise m-0 max-w-[900px] font-serif text-[clamp(48px,9vw,128px)] leading-[0.95] font-semibold tracking-[-0.04em] text-balance'>
+      <h2
+        className='m-0 max-w-[900px] font-serif text-[clamp(48px,9vw,128px)] leading-[0.95] font-semibold tracking-[-0.04em] text-balance'
+        data-reveal
+      >
         {CONTACT_HEADING}
       </h2>
-      <p className='mt-7 mb-0 max-w-[520px] text-[19px] text-mist'>
+      <p className='mt-7 mb-0 max-w-[520px] text-[19px] text-mist' data-reveal>
         {CONTACT_COPY}
       </p>
-      <ContactLinks className='mt-9' tone='dark' />
+      <div className='mt-9' data-reveal>
+        <ContactLinks tone='dark' />
+      </div>
       <Separator className='mt-[clamp(64px,8vw,104px)] bg-inverse-foreground/18' />
-      <div className='flex flex-wrap justify-between gap-x-6 gap-y-2 pt-6 text-sm text-mist'>
-        <span className='inline-flex flex-wrap items-center gap-1.5'>
+      <div className='flex flex-wrap justify-between gap-x-3 gap-y-2 pt-6 text-xs whitespace-nowrap text-mist sm:gap-x-6 sm:text-sm'>
+        <span className='inline-flex items-center gap-1 sm:gap-1.5'>
           © {YEAR} {NAME} · Made with
           <IconHeartFilled
             aria-label='love'
@@ -36,14 +41,14 @@ export const SiteFooter = () => (
           />
         </span>
         <a
-          className='inline-flex items-center gap-1.5 rounded-sm text-inherit underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-inverse-foreground/60'
+          className='inline-flex items-center gap-1 rounded-sm text-inherit sm:gap-1.5 underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-inverse-foreground/60'
           href={SITE_REPO}
           rel='noopener'
           target='_blank'
         >
           <IconBrandGithub
             aria-hidden
-            className='size-4'
+            className='size-4 max-[379px]:hidden'
             stroke={ICON_STROKE}
           />
           View source

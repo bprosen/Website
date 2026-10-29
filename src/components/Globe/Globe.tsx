@@ -17,6 +17,7 @@ const DOT_CLASS =
 type GlobeProps = {
   dots: readonly LatLon[];
   onSelect: (marker: MarkerId | null) => void;
+  sharedHome?: boolean;
   tip: MarkerId | null;
   tooltip: ReactNode;
   className?: string;
@@ -28,6 +29,7 @@ export const Globe = ({
   className,
   dots,
   onSelect,
+  sharedHome = false,
   tip,
   tooltip,
   tooltipId,
@@ -71,7 +73,14 @@ export const Globe = ({
       <span aria-hidden='true' className={MARKER_CLASS} data-hidden ref={meRef}>
         <span className='absolute top-0 left-0 motion-safe:animate-intro-pin motion-safe:[animation-delay:1100ms]'>
           <span className={`${RING_CLASS} border-ink`} />
-          <span className={`${RING_CLASS} border-ink [animation-delay:1.2s]`} />
+          <span
+            className={cn(
+              RING_CLASS,
+              '[animation-delay:1.2s]',
+              sharedHome ? 'border-coral-deep' : 'border-ink',
+            )}
+            data-shared={sharedHome || undefined}
+          />
           <span className={`${DOT_CLASS} bg-ink`} />
         </span>
       </span>
@@ -82,6 +91,9 @@ export const Globe = ({
         ref={youRef}
       >
         <span className={`${RING_CLASS} border-coral-deep`} />
+        <span
+          className={`${RING_CLASS} border-coral-deep [animation-delay:1.2s]`}
+        />
         <span className={`${DOT_CLASS} bg-coral`} />
       </span>
       <div

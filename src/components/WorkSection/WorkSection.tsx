@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { WORK } from '~/constants';
+import { WORK, WORK_SECTION_ID } from '~/constants';
 import { Separator } from '~/ui';
 import { WorkEntry } from '../WorkEntry';
 import { WorkNav } from '../WorkNav';
@@ -7,7 +7,7 @@ import { WorkNav } from '../WorkNav';
 export const WorkSection = () => (
   <section
     className='tl-spy mx-[clamp(12px,2vw,24px)] scroll-mt-[72px] outline-none rounded-[40px] bg-accent pt-[clamp(64px,6vw,88px)] pb-[clamp(40px,6vw,88px)]'
-    id='work'
+    id={WORK_SECTION_ID}
     tabIndex={-1}
   >
     <div className='mx-auto flex max-w-[1240px] flex-wrap gap-x-20 gap-y-10 px-[clamp(20px,5vw,56px)]'>

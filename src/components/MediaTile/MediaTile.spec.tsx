@@ -22,7 +22,13 @@ describe('MediaTile', () => {
     render(
       <MediaTile
         sizes='100px'
-        slot={{ alt: 'Spawn at sunset', label: 'Hub', src: '/hub.jpg' }}
+        slot={{
+          alt: 'Spawn at sunset',
+          height: 300,
+          label: 'Hub',
+          src: '/hub.jpg',
+          width: 400,
+        }}
       />,
     );
 
@@ -33,7 +39,10 @@ describe('MediaTile', () => {
 
   it('falls back to the label for alt text', () => {
     render(
-      <MediaTile sizes='100px' slot={{ label: 'Hub', src: '/hub.jpg' }} />,
+      <MediaTile
+        sizes='100px'
+        slot={{ height: 300, label: 'Hub', src: '/hub.jpg', width: 400 }}
+      />,
     );
 
     expect(screen.getByRole('img', { name: 'Hub' })).toBeInTheDocument();
@@ -43,7 +52,14 @@ describe('MediaTile', () => {
     render(
       <MediaTile
         sizes='100px'
-        slot={{ alt: 'Pagoda', focus: 'top', label: 'Pagoda', src: '/p.jpg' }}
+        slot={{
+          alt: 'Pagoda',
+          focus: 'top',
+          height: 300,
+          label: 'Pagoda',
+          src: '/p.jpg',
+          width: 400,
+        }}
       />,
     );
 
@@ -54,7 +70,10 @@ describe('MediaTile', () => {
 
   it('crops from the centre by default', () => {
     render(
-      <MediaTile sizes='100px' slot={{ label: 'Hub', src: '/hub.jpg' }} />,
+      <MediaTile
+        sizes='100px'
+        slot={{ height: 300, label: 'Hub', src: '/hub.jpg', width: 400 }}
+      />,
     );
 
     expect(screen.getByRole('img', { name: 'Hub' })).not.toHaveClass(
@@ -68,9 +87,11 @@ describe('MediaTile', () => {
         sizes='100px'
         slot={{
           alt: 'Parkour clip',
+          height: 450,
           label: 'Clip',
           src: '/poster.jpg',
           video: '/clip.mp4',
+          width: 800,
         }}
       />,
     );

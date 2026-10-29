@@ -21,13 +21,13 @@ export const THEME_REVEAL_EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
 export const DARK_BRAND_LUMINANCE = 0.05;
 
 export const DISPLAY_FONT = {
-  file: 'src/assets/fonts/Fraunces-Bold.ttf',
+  file: 'Fraunces-Bold.ttf',
   name: 'Fraunces',
   weight: 700,
 } as const;
 
 export const BODY_FONT = {
-  file: 'src/assets/fonts/DMSans-Regular.ttf',
+  file: 'DMSans-Regular.ttf',
   name: 'DM Sans',
   weight: 400,
 } as const;

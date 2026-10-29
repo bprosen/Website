@@ -5,9 +5,11 @@ import { PLACEHOLDER_ICON_STROKE } from '~/constants';
 import { cn } from '~/lib/ui';
 import type { MediaSlot } from '~/types';
 import { LazyVideo } from '../LazyVideo';
+import { MediaLightbox } from '../MediaLightbox';
 
 type MediaTileProps = {
   className?: string;
+  focusable?: boolean;
   iconClassName?: string;
   sizes: string;
   slot: MediaSlot;
@@ -15,6 +17,7 @@ type MediaTileProps = {
 
 export const MediaTile = ({
   className,
+  focusable,
   iconClassName = 'size-7',
   sizes,
   slot,
@@ -22,38 +25,38 @@ export const MediaTile = ({
   const style: CSSProperties | undefined = slot.tint
     ? { backgroundColor: slot.tint }
     : undefined;
-
-  if (slot.video && slot.src) {
-    return (
-      <figure
-        className={cn('relative m-0 overflow-hidden', className)}
-        style={style}
-      >
-        <LazyVideo
-          className='size-full object-cover'
-          label={slot.alt ?? slot.label}
-          poster={slot.src}
-          sizes={sizes}
-          src={slot.video}
-        />
-      </figure>
-    );
-  }
+  const alt = slot.alt ?? slot.label;
 
   if (slot.src) {
     return (
-      <figure
+      <MediaLightbox
+        alt={alt}
         className={cn('relative m-0 overflow-hidden', className)}
+        focusable={focusable}
+        height={slot.height}
+        src={slot.src}
         style={style}
+        video={slot.video}
+        width={slot.width}
       >
-        <Image
-          alt={slot.alt ?? slot.label}
-          className={cn('object-cover', slot.focus === 'top' && 'object-top')}
-          fill
-          sizes={sizes}
-          src={slot.src}
-        />
-      </figure>
+        {slot.video ? (
+          <LazyVideo
+            className='size-full object-cover'
+            label={alt}
+            poster={slot.src}
+            sizes={sizes}
+            src={slot.video}
+          />
+        ) : (
+          <Image
+            alt={alt}
+            className={cn('object-cover', slot.focus === 'top' && 'object-top')}
+            fill
+            sizes={sizes}
+            src={slot.src}
+          />
+        )}
+      </MediaLightbox>
     );
   }
 

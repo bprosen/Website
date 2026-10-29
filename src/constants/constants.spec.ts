@@ -20,6 +20,12 @@ describe('constants', () => {
     }
   });
 
+  it('links every brand to its https site', () => {
+    for (const brand of Object.values(BRANDS)) {
+      expect(new URL(brand.url).protocol).toBe('https:');
+    }
+  });
+
   it('fills the four-column stack grid evenly', () => {
     expect(STACK_GRID.length % 4).toBe(0);
     expect(new Set(STACK_GRID).size).toBe(STACK_GRID.length);

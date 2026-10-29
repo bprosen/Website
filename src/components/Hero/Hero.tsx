@@ -1,7 +1,6 @@
 import {
   FIRST_NAME,
   HERO_NAME_ID,
-  HERO_PORTRAIT_SIZE,
   HERO_TAGLINE,
   LAST_NAME,
   NAME,
@@ -39,10 +38,7 @@ export const Hero = () => (
         className={`col-span-2 row-start-3 motion-safe:animate-intro-rise motion-safe:[animation-delay:360ms] sm:mt-7 ${LINKS_GAP}`}
       />
     </div>
-    <Portrait
-      className='col-start-2 row-start-1 size-[clamp(96px,32vw,144px)] motion-safe:animate-intro-rise motion-safe:[animation-delay:120ms] sm:hidden'
-      size={HERO_PORTRAIT_SIZE}
-    />
+    <Portrait className='col-start-2 row-start-1 size-[clamp(96px,32vw,144px)] motion-safe:animate-intro-rise motion-safe:[animation-delay:120ms] sm:hidden' />
     <GlobeCard className='max-sm:hidden' />
   </section>
 );

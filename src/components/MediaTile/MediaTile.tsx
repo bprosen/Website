@@ -1,5 +1,5 @@
 import { IconPhoto } from '@tabler/icons-react';
-import Image from 'next/image';
+import Image, { type ImageProps } from 'next/image';
 import type { CSSProperties } from 'react';
 import { PLACEHOLDER_ICON_STROKE } from '~/constants';
 import { cn } from '~/lib/ui';
@@ -11,6 +11,7 @@ type MediaTileProps = {
   className?: string;
   focusable?: boolean;
   iconClassName?: string;
+  loading?: ImageProps['loading'];
   sizes: string;
   slot: MediaSlot;
 };
@@ -19,6 +20,7 @@ export const MediaTile = ({
   className,
   focusable,
   iconClassName = 'size-7',
+  loading,
   sizes,
   slot,
 }: MediaTileProps) => {
@@ -52,6 +54,7 @@ export const MediaTile = ({
             alt={alt}
             className={cn('object-cover', slot.focus === 'top' && 'object-top')}
             fill
+            loading={loading}
             sizes={sizes}
             src={slot.src}
           />

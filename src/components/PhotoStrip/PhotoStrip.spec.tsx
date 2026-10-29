@@ -10,4 +10,18 @@ describe('PhotoStrip', () => {
     expect(list.querySelectorAll('li')).toHaveLength(4);
     expect(within(list).getAllByRole('listitem')).toHaveLength(2);
   });
+
+  it('loads the photos the way it is asked to', () => {
+    render(
+      <PhotoStrip
+        loading='eager'
+        photos={[{ height: 400, label: 'One', src: '/one.jpg', width: 300 }]}
+      />,
+    );
+
+    expect(screen.getByRole('img', { name: 'One' })).toHaveAttribute(
+      'loading',
+      'eager',
+    );
+  });
 });

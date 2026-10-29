@@ -1,13 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import {
-  HEADER_AVATAR_SIZE,
-  HERO_NAME_ID,
-  NAME,
-  PORTRAIT,
-  SITE_HEADER_ID,
-} from '~/constants';
+import { HERO_NAME_ID, NAME, PORTRAIT, SITE_HEADER_ID } from '~/constants';
 import { useScrolledPast } from '~/hooks';
 import { cn } from '~/lib/ui';
 import { SectionLink } from '../SectionLink';
@@ -34,7 +28,8 @@ export const HeaderHome = ({ className }: HeaderHomeProps) => {
           alt=''
           className='object-cover'
           fill
-          sizes={`${HEADER_AVATAR_SIZE}px`}
+          loading='eager'
+          sizes={PORTRAIT.sizes}
           src={PORTRAIT.src}
         />
       </span>

@@ -35,6 +35,21 @@ describe('useCopyToClipboard', () => {
     expect(result.current.copied).toBe(false);
   });
 
+  it('restarts the confirmation when copied again', async () => {
+    const { result } = renderHook(() => useCopyToClipboard());
+
+    await act(async () => {
+      await result.current.copy('first');
+    });
+    act(() => vi.advanceTimersByTime(COPY_RESET_MS - 500));
+    await act(async () => {
+      await result.current.copy('second');
+    });
+    act(() => vi.advanceTimersByTime(COPY_RESET_MS - 500));
+
+    expect(result.current.copied).toBe(true);
+  });
+
   it('reports failure when the clipboard is unavailable', async () => {
     writeText.mockRejectedValueOnce(new Error('denied'));
     const { result } = renderHook(() => useCopyToClipboard());

@@ -1,14 +1,10 @@
 import {
-  GLOBE_EXTENT,
   GLOBE_MIN_VISIBLE_COSINE,
   GLOBE_RADIUS,
+  GLOBE_VIEWBOX_SIZE,
 } from '~/constants';
 import type { LatLon } from '~/types';
-
-const RAD = Math.PI / 180;
-
-export const clamp = (value: number, min: number, max: number) =>
-  Math.min(max, Math.max(min, value));
+import { clamp, RADIANS_PER_DEGREE } from './math';
 
 export type PointTable = {
   cosLat: Float32Array;
@@ -29,8 +25,8 @@ export const preparePoints = (flat: readonly number[]): PointTable => {
   };
 
   for (let i = 0; i < count; i++) {
-    const lat = flat[i * 2] * RAD;
-    const lon = flat[i * 2 + 1] * RAD;
+    const lat = flat[i * 2] * RADIANS_PER_DEGREE;
+    const lon = flat[i * 2 + 1] * RADIANS_PER_DEGREE;
     table.cosLat[i] = Math.cos(lat);
     table.sinLat[i] = Math.sin(lat);
     table.cosLon[i] = Math.cos(lon);
@@ -48,10 +44,10 @@ export type View = {
 };
 
 export const createView = (lat: number, lon: number): View => ({
-  cosLat0: Math.cos(lat * RAD),
-  cosLon0: Math.cos(lon * RAD),
-  sinLat0: Math.sin(lat * RAD),
-  sinLon0: Math.sin(lon * RAD),
+  cosLat0: Math.cos(lat * RADIANS_PER_DEGREE),
+  cosLon0: Math.cos(lon * RADIANS_PER_DEGREE),
+  sinLat0: Math.sin(lat * RADIANS_PER_DEGREE),
+  sinLon0: Math.sin(lon * RADIANS_PER_DEGREE),
 });
 
 export type ProjectedPoint = {
@@ -65,8 +61,8 @@ export const projectPoint = (
   view: View,
   radius = GLOBE_RADIUS,
 ): ProjectedPoint => {
-  const f = lat * RAD;
-  const dl = lon * RAD;
+  const f = lat * RADIANS_PER_DEGREE;
+  const dl = lon * RADIANS_PER_DEGREE;
   const cosF = Math.cos(f);
   const sinF = Math.sin(f);
   const cosL = Math.cos(dl);
@@ -114,8 +110,12 @@ export const toGlobeUnits = (
   clientY: number,
   rect: Pick<DOMRect, 'height' | 'left' | 'top' | 'width'>,
 ) => ({
-  x: ((clientX - rect.left) / rect.width) * GLOBE_EXTENT - GLOBE_EXTENT / 2,
-  y: ((clientY - rect.top) / rect.height) * GLOBE_EXTENT - GLOBE_EXTENT / 2,
+  x:
+    ((clientX - rect.left) / rect.width) * GLOBE_VIEWBOX_SIZE -
+    GLOBE_VIEWBOX_SIZE / 2,
+  y:
+    ((clientY - rect.top) / rect.height) * GLOBE_VIEWBOX_SIZE -
+    GLOBE_VIEWBOX_SIZE / 2,
 });
 
 export const clampTooltipCenter = (

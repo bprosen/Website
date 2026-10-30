@@ -1,9 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { FULL_NAME, SITE_TITLE, TITLE_SEPARATOR } from '~/constants';
 import {
   activeSection,
+  hasSectionTarget,
   isAtPageEnd,
   isPlainLeftClick,
   isSectionSlug,
+  pageTitle,
   scrollToSection,
   sectionFromParams,
   sectionFromPath,
@@ -84,6 +87,16 @@ describe('isPlainLeftClick', () => {
   });
 });
 
+describe('hasSectionTarget', () => {
+  it('finds sections on the page and always allows home', () => {
+    document.body.innerHTML = '<section id="work"></section>';
+
+    expect(hasSectionTarget('work')).toBe(true);
+    expect(hasSectionTarget('about')).toBe(false);
+    expect(hasSectionTarget(null)).toBe(true);
+  });
+});
+
 describe('scrollToSection', () => {
   it('scrolls to and focuses the section', () => {
     document.body.innerHTML = '<section id="work" tabindex="-1"></section>';
@@ -154,13 +167,23 @@ describe('isAtPageEnd', () => {
   it('detects the bottom of the page with a little tolerance', () => {
     expect(isAtPageEnd(1000, 800, 1800)).toBe(true);
     expect(isAtPageEnd(999, 800, 1800)).toBe(true);
+    expect(isAtPageEnd(998, 800, 1800)).toBe(true);
+    expect(isAtPageEnd(997, 800, 1800)).toBe(false);
     expect(isAtPageEnd(900, 800, 1800)).toBe(false);
+  });
+});
+
+describe('pageTitle', () => {
+  it('pairs a page label with the site owner', () => {
+    expect(pageTitle('Work')).toBe(`Work${TITLE_SEPARATOR}${FULL_NAME}`);
   });
 });
 
 describe('sectionTitle', () => {
   it('titles each section and falls back to the site title', () => {
-    expect(sectionTitle('contact')).toBe('Contact · Ben Edgar-Prosen');
-    expect(sectionTitle(null)).toBe('Ben Edgar-Prosen · Software Developer');
+    expect(sectionTitle('contact')).toBe(
+      `Contact${TITLE_SEPARATOR}${FULL_NAME}`,
+    );
+    expect(sectionTitle(null)).toBe(SITE_TITLE);
   });
 });

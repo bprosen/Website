@@ -11,10 +11,10 @@ const letterDelay = (delayMs: number, index: number): CSSProperties => ({
 });
 
 export const SplitText = ({ delayMs, text }: SplitTextProps) => (
-  <span aria-hidden='true'>
+  <span aria-hidden>
     {[...text].map((letter, index) => (
       <span
-        className='inline-block origin-bottom-left motion-safe:animate-intro-letter'
+        className='motion-safe:animate-intro-letter inline-block origin-bottom-left'
         // biome-ignore lint/suspicious/noArrayIndexKey: letters repeat, so their position in the fixed string is their identity.
         key={index}
         style={letterDelay(delayMs, index)}

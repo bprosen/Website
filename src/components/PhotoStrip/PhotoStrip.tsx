@@ -2,7 +2,11 @@
 
 import type { ImageProps } from 'next/image';
 import { useRef } from 'react';
-import { PHOTO_STRIP_SPEED_PX_PER_S, PHOTOS } from '~/constants';
+import {
+  ABOUT_PHOTOS,
+  PHOTO_STRIP_LABEL,
+  PHOTO_STRIP_SPEED_PX_PER_SECOND,
+} from '~/constants';
 import { useAutoScroll } from '~/hooks';
 import { cn } from '~/lib/ui';
 import type { MediaSlot } from '~/types';
@@ -20,24 +24,24 @@ type PhotoStripProps = {
 export const PhotoStrip = ({
   className,
   loading,
-  photos = PHOTOS,
+  photos = ABOUT_PHOTOS,
 }: PhotoStripProps) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  useAutoScroll(scrollerRef, PHOTO_STRIP_SPEED_PX_PER_S);
+  useAutoScroll(scrollerRef, PHOTO_STRIP_SPEED_PX_PER_SECOND);
 
-  const tiles = (copy: boolean) =>
+  const renderTiles = ({ decorative }: { decorative: boolean }) =>
     photos.map((slot) => (
       <li
-        aria-hidden={copy || undefined}
+        aria-hidden={decorative ? true : undefined}
         className={cn(
           'aspect-[4/5] w-44 flex-[0_0_auto]',
-          copy && 'motion-reduce:hidden',
+          decorative && 'motion-reduce:hidden',
         )}
-        key={`${copy ? 'copy' : 'photo'}-${slot.label}`}
+        key={`${decorative ? 'copy' : 'photo'}-${slot.label}`}
       >
         <MediaTile
           className={TILE_CLASS}
-          focusable={!copy}
+          focusable={!decorative}
           iconClassName='size-6'
           loading={loading}
           sizes='176px'
@@ -49,14 +53,14 @@ export const PhotoStrip = ({
   return (
     <div
       className={cn(
-        '-my-2 overflow-x-auto overscroll-x-contain rounded-2xl py-2 [mask-image:linear-gradient(to_right,transparent,black_12px,black_calc(100%-12px),transparent)] [contain-intrinsic-size:auto_236px] [content-visibility:auto] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+        '-my-2 [scrollbar-width:none] overflow-x-auto overscroll-x-contain rounded-2xl [mask-image:linear-gradient(to_right,transparent,black_12px,black_calc(100%-12px),transparent)] py-2 [contain-intrinsic-size:auto_236px] [content-visibility:auto] [&::-webkit-scrollbar]:hidden',
         className,
       )}
       ref={scrollerRef}
     >
-      <ul aria-label='Photos' className='m-0 flex w-max list-none gap-3 p-0'>
-        {tiles(false)}
-        {tiles(true)}
+      <ul aria-label={PHOTO_STRIP_LABEL} className='flex w-max gap-3'>
+        {renderTiles({ decorative: false })}
+        {renderTiles({ decorative: true })}
       </ul>
     </div>
   );

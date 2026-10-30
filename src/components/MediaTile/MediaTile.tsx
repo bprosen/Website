@@ -1,7 +1,7 @@
 import { IconPhoto } from '@tabler/icons-react';
 import Image, { type ImageProps } from 'next/image';
 import type { CSSProperties } from 'react';
-import { PLACEHOLDER_ICON_STROKE } from '~/constants';
+import { PLACEHOLDER_ICON_STROKE_WIDTH } from '~/constants';
 import { cn } from '~/lib/ui';
 import type { MediaSlot } from '~/types';
 import { LazyVideo } from '../LazyVideo';
@@ -24,7 +24,7 @@ export const MediaTile = ({
   sizes,
   slot,
 }: MediaTileProps) => {
-  const style: CSSProperties | undefined = slot.tint
+  const tintStyle: CSSProperties | undefined = slot.tint
     ? { backgroundColor: slot.tint }
     : undefined;
   const alt = slot.alt ?? slot.label;
@@ -33,11 +33,11 @@ export const MediaTile = ({
     return (
       <MediaLightbox
         alt={alt}
-        className={cn('relative m-0 overflow-hidden', className)}
+        className={cn('relative overflow-hidden', className)}
         focusable={focusable}
         height={slot.height}
         src={slot.src}
-        style={style}
+        style={tintStyle}
         video={slot.video}
         width={slot.width}
       >
@@ -66,15 +66,15 @@ export const MediaTile = ({
   return (
     <figure
       className={cn(
-        'm-0 box-border flex flex-col items-center justify-center gap-2 p-3 text-center',
+        'flex flex-col items-center justify-center gap-2 p-3 text-center',
         className,
       )}
-      style={style}
+      style={tintStyle}
     >
       <IconPhoto
         aria-hidden
         className={iconClassName}
-        stroke={PLACEHOLDER_ICON_STROKE}
+        stroke={PLACEHOLDER_ICON_STROKE_WIDTH}
       />
       <figcaption className='leading-[1.3]'>{slot.label}</figcaption>
     </figure>

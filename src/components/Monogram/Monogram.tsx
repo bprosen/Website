@@ -1,4 +1,11 @@
-import { COLORS, DISPLAY_FONT, FIRST_NAME } from '~/constants';
+import {
+  COLORS,
+  DISPLAY_FONT,
+  FIRST_NAME,
+  MONOGRAM_BASELINE_NUDGE_RATIO,
+  MONOGRAM_CORNER_RATIO,
+  MONOGRAM_LETTER_RATIO,
+} from '~/constants';
 
 type MonogramProps = {
   rounded?: boolean;
@@ -10,16 +17,16 @@ export const Monogram = ({ rounded = true, size }: MonogramProps) => (
     style={{
       alignItems: 'center',
       background: COLORS.ink,
-      borderRadius: rounded ? size * 0.22 : 0,
+      borderRadius: rounded ? size * MONOGRAM_CORNER_RATIO : 0,
       color: COLORS.paper,
       display: 'flex',
       fontFamily: DISPLAY_FONT.name,
-      fontSize: size * 0.78,
+      fontSize: size * MONOGRAM_LETTER_RATIO,
       fontWeight: DISPLAY_FONT.weight,
       height: size,
       justifyContent: 'center',
       lineHeight: 1,
-      paddingBottom: size * 0.06,
+      paddingBottom: size * MONOGRAM_BASELINE_NUDGE_RATIO,
       width: size,
     }}
   >

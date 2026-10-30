@@ -1,20 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { stubFetchJson } from '~/lib/testing';
 import { requestJson } from './request';
 
-const fetchMock = vi.fn<typeof fetch>();
+let fetchMock: ReturnType<typeof stubFetchJson>;
 const parse = vi.fn((body: unknown) => body as string);
 
-const respond = (body: unknown, status = 200) =>
-  fetchMock.mockResolvedValue(new Response(JSON.stringify(body), { status }));
+const respond = (body: unknown, status = 200) => {
+  fetchMock = stubFetchJson(body, status);
+};
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', fetchMock);
   respond('parsed');
-});
-
-afterEach(() => {
-  fetchMock.mockReset();
-  vi.unstubAllGlobals();
 });
 
 describe('requestJson', () => {
@@ -80,6 +76,14 @@ describe('requestJson', () => {
     expect(combined?.aborted).toBe(true);
   });
 
+  it('times out after the requested number of milliseconds', async () => {
+    const timeout = vi.spyOn(AbortSignal, 'timeout');
+
+    await requestJson('/api/x', { fallback: 'none', parse, timeoutMs: 50 });
+
+    expect(timeout).toHaveBeenCalledWith(50);
+  });
+
   it('returns the fallback for an error status', async () => {
     respond('parsed', 500);
 
@@ -87,6 +91,15 @@ describe('requestJson', () => {
       requestJson('/api/x', { fallback: 'none', parse }),
     ).resolves.toBe('none');
     expect(parse).not.toHaveBeenCalled();
+  });
+
+  it('releases the unread body of an error response', async () => {
+    const response = new Response('{}', { status: 500 });
+    fetchMock.mockResolvedValue(response);
+
+    await requestJson('/api/x', { fallback: 'none', parse });
+
+    expect(response.bodyUsed || response.body?.locked).toBe(true);
   });
 
   it('returns the fallback when the body is not JSON', async () => {

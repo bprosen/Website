@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { describe, expect, it } from 'vitest';
 import { SITE_TITLE } from '~/constants';
-import Image, { alt, contentType, size } from './opengraph-image';
+import OpengraphImage, { alt, contentType, size } from './opengraph-image';
 
 describe('opengraph image', () => {
   it('describes a 1200x630 PNG card', () => {
@@ -11,6 +11,6 @@ describe('opengraph image', () => {
   });
 
   it('renders an image response', async () => {
-    await expect(Image()).resolves.toBeInstanceOf(ImageResponse);
+    await expect(OpengraphImage()).resolves.toBeInstanceOf(ImageResponse);
   });
 });

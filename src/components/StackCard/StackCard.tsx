@@ -1,9 +1,15 @@
 import type { CSSProperties } from 'react';
-import { BRANDS, STACK_GRID } from '~/constants';
+import {
+  BRANDS,
+  EXTERNAL_LINK_PROPS,
+  STACK_BRANDS,
+  STACK_HEADING,
+} from '~/constants';
 import { cn } from '~/lib/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '~/ui';
 import { isDarkBrand } from '~/utils';
 import { BrandIcon } from '../BrandIcon';
+import { NewTabHint } from '../NewTabHint';
 
 type StackCardProps = {
   className?: string;
@@ -12,36 +18,40 @@ type StackCardProps = {
 export const StackCard = ({ className }: StackCardProps) => (
   <Card className={className}>
     <CardHeader>
-      <CardTitle className='text-forest'>What I work with most</CardTitle>
+      <CardTitle className='text-forest'>{STACK_HEADING}</CardTitle>
     </CardHeader>
     <CardContent>
-      <ul className='m-0 grid list-none grid-cols-4 gap-x-3 gap-y-5 p-0'>
-        {STACK_GRID.map((name) => (
-          <li
-            className={cn(
-              '[--c:var(--brand)]',
-              isDarkBrand(BRANDS[name].color) && 'dark:[--c:var(--ink)]',
-            )}
-            key={name}
-            style={{ '--brand': BRANDS[name].color } as CSSProperties}
-          >
-            <a
-              className='group flex flex-col items-center gap-2 rounded-lg text-center no-underline outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
-              href={BRANDS[name].url}
-              rel='noopener'
-              target='_blank'
+      <ul className='grid grid-cols-4 gap-x-3 gap-y-5'>
+        {STACK_BRANDS.map((name) => {
+          const brand = BRANDS[name];
+
+          return (
+            <li
+              className={cn(
+                '[--logo-fill:var(--brand-color)]',
+                isDarkBrand(brand.color) && 'dark:[--logo-fill:var(--ink)]',
+              )}
+              key={name}
+              style={{ '--brand-color': brand.color } as CSSProperties}
             >
-              <BrandIcon
-                className='size-10 fill-(--c) transition-[translate,scale] duration-200 group-hover:-translate-y-[3px] group-hover:scale-110 group-focus-visible:-translate-y-[3px] group-focus-visible:scale-110'
-                name={name}
-                tinted={false}
-              />
-              <span className='text-xs leading-tight text-muted-foreground'>
-                {name}
-              </span>
-            </a>
-          </li>
-        ))}
+              <a
+                className='group flex flex-col items-center gap-2 rounded-lg text-center'
+                href={brand.url}
+                {...EXTERNAL_LINK_PROPS}
+              >
+                <BrandIcon
+                  className='size-10 fill-(--logo-fill) transition-[translate,scale] duration-200 group-hover:-translate-y-[3px] group-hover:scale-110 group-focus-visible:-translate-y-[3px] group-focus-visible:scale-110'
+                  name={name}
+                  tinted={false}
+                />
+                <span className='text-muted-foreground text-xs leading-tight'>
+                  {name}
+                </span>
+                <NewTabHint />
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </CardContent>
   </Card>

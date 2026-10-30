@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -25,8 +25,20 @@
   --muted-deep: #33423a;
   --forest: #2e5638;
   --selection: #f6c7b8;
-  --inverse: #17201a;
-  --inverse-foreground: #f4f1e8;
+  --inverse: var(--ink);
+  --inverse-foreground: var(--paper);
+  --coral-deep: #c9553a;
+  --mist: #c9cfc4;
+  --heart: #e53935;
+  --tint-stone: #e3e0d3;
+  --tint-leaf: #d6e8cf;
+  --tint-sand: #f1e6cf;
+
+  --header-clearance: 72px;
+  --page-max-width: 1240px;
+  --page-gutter: clamp(20px, 5vw, 56px);
+  --timeline-line: 124px;
+  --timeline-step: 64px;
 }
 
 .dark {
@@ -42,8 +54,17 @@
   --forest: #9ccaa5;
   --selection: #7a3b2a;
   --inverse: #0b100c;
-  --inverse-foreground: #d8d3c4;
+  --inverse-foreground: var(--ink);
   color-scheme: dark;
+}
+
+@theme {
+  --breakpoint-narrow: 22.5rem;
+  --breakpoint-compact: 23.75rem;
+  --breakpoint-roomy: 45rem;
+  --breakpoint-split: 55rem;
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @theme inline {
@@ -66,27 +87,27 @@
   --color-paper: var(--paper);
   --color-ink: var(--ink);
   --color-coral: var(--coral);
-  --color-coral-deep: #c9553a;
+  --color-coral-deep: var(--coral-deep);
   --color-muted-deep: var(--muted-deep);
   --color-forest: var(--forest);
-  --color-mist: #c9cfc4;
-  --color-love: #c62828;
+  --color-mist: var(--mist);
+  --color-heart: var(--heart);
   --color-selection: var(--selection);
   --color-inverse: var(--inverse);
   --color-inverse-foreground: var(--inverse-foreground);
-  --color-tint-stone: #e3e0d3;
-  --color-tint-leaf: #d6e8cf;
-  --color-tint-sand: #f1e6cf;
+  --color-tint-stone: var(--tint-stone);
+  --color-tint-leaf: var(--tint-leaf);
+  --color-tint-sand: var(--tint-sand);
 
   --font-sans: var(--font-dm-sans), system-ui, sans-serif;
   --font-serif: var(--font-fraunces), Georgia, serif;
 
   --animate-ring: ring 2.4s ease-out infinite;
-  --animate-intro-letter: intro-letter 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-intro-pin: intro-pin 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  --animate-intro-rise: intro-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-intro-drop: intro-drop 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-intro-globe: intro-globe 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-intro-letter: intro-letter 0.9s var(--ease-out-expo) both;
+  --animate-intro-pin: intro-pin 0.6s var(--ease-out-back) both;
+  --animate-intro-rise: intro-rise 0.9s var(--ease-out-expo) both;
+  --animate-intro-drop: intro-drop 0.8s var(--ease-out-expo) both;
+  --animate-intro-globe: intro-globe 1.4s var(--ease-out-expo) both;
 
   @keyframes intro-letter {
     from {
@@ -155,28 +176,29 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 
   html {
+    scroll-padding-top: var(--header-clearance);
     @apply bg-background;
-    scroll-behavior: smooth;
   }
 
-  @media (prefers-reduced-motion: reduce) {
+  @media (prefers-reduced-motion: no-preference) {
     html {
-      scroll-behavior: auto;
+      scroll-behavior: smooth;
     }
   }
 
   body {
     font-size: 18px;
     line-height: 1.55;
-    @apply m-0 bg-background font-sans text-foreground antialiased;
-  }
-
-  a {
-    color: inherit;
+    @apply font-sans text-foreground antialiased;
   }
 
   ::selection {
@@ -184,39 +206,45 @@
   }
 }
 
+@utility page-container {
+  max-width: var(--page-max-width);
+  padding-inline: var(--page-gutter);
+  margin-inline: auto;
+}
+
 @layer components {
-  .spy-dot {
+  .timeline-dot {
     @apply absolute top-1/2 -left-6 z-1 -mt-[3px] size-1.5 rounded-full bg-ink opacity-35;
   }
 
-  .spy-head {
+  .timeline-head {
     box-shadow: 0 0 0 4px rgb(228 112 79 / 0.28);
     @apply absolute top-0 left-1/2 z-2 -mt-[7px] -ml-[7px] box-border size-3.5 rounded-full border-2 border-card bg-coral opacity-0;
   }
 }
 
-@property --p1 {
-  syntax: "<number>";
+@property --timeline-progress-1 {
+  syntax: '<number>';
   inherits: false;
   initial-value: 0;
 }
 
-@property --p2 {
-  syntax: "<number>";
+@property --timeline-progress-2 {
+  syntax: '<number>';
   inherits: false;
   initial-value: 0;
 }
 
-@property --p3 {
-  syntax: "<number>";
+@property --timeline-progress-3 {
+  syntax: '<number>';
   inherits: false;
   initial-value: 0;
 }
 
-@keyframes spy {
+@keyframes timeline-link-highlight {
   0%,
   100% {
-    opacity: 0.45;
+    opacity: 0.75;
   }
   4%,
   96% {
@@ -224,103 +252,120 @@
   }
 }
 
-@keyframes pk1 {
+@keyframes timeline-progress-1 {
   from {
-    --p1: 0;
+    --timeline-progress-1: 0;
   }
   to {
-    --p1: 1;
+    --timeline-progress-1: 1;
   }
 }
 
-@keyframes pk2 {
+@keyframes timeline-progress-2 {
   from {
-    --p2: 0;
+    --timeline-progress-2: 0;
   }
   to {
-    --p2: 1;
+    --timeline-progress-2: 1;
   }
 }
 
-@keyframes pk3 {
+@keyframes timeline-progress-3 {
   from {
-    --p3: 0;
+    --timeline-progress-3: 0;
   }
   to {
-    --p3: 1;
+    --timeline-progress-3: 1;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    .tl-spy {
-      timeline-scope: --w1, --w2, --w3, --w4;
+    .work-timeline {
+      timeline-scope:
+        --timeline-w1, --timeline-w2, --timeline-w3, --timeline-w4;
     }
 
-    .w1,
-    .w2,
-    .w3,
-    .w4 {
-      view-timeline-inset: 124px calc(100% - 125px);
+    .timeline-w1,
+    .timeline-w2,
+    .timeline-w3,
+    .timeline-w4 {
+      view-timeline-inset: var(--timeline-line)
+        calc(100% - var(--timeline-line) - 1px);
     }
 
-    .w1 {
-      view-timeline-name: --w1;
+    .timeline-w1 {
+      view-timeline-name: --timeline-w1;
     }
 
-    .w2 {
-      view-timeline-name: --w2;
+    .timeline-w2 {
+      view-timeline-name: --timeline-w2;
     }
 
-    .w3 {
-      view-timeline-name: --w3;
+    .timeline-w3 {
+      view-timeline-name: --timeline-w3;
     }
 
-    .w4 {
-      view-timeline-name: --w4;
+    .timeline-w4 {
+      view-timeline-name: --timeline-w4;
     }
 
-    .spy-w1,
-    .spy-w2,
-    .spy-w3,
-    .spy-w4 {
-      animation: spy linear both;
+    .timeline-link-w1,
+    .timeline-link-w2,
+    .timeline-link-w3,
+    .timeline-link-w4 {
+      animation: timeline-link-highlight linear both;
       animation-range: cover 0% cover 100%;
     }
 
-    .spy-w1 {
-      animation-timeline: --w1;
+    .timeline-link-w1 {
+      animation-timeline: --timeline-w1;
     }
 
-    .spy-w2 {
-      animation-timeline: --w2;
+    .timeline-link-w2 {
+      animation-timeline: --timeline-w2;
     }
 
-    .spy-w3 {
-      animation-timeline: --w3;
+    .timeline-link-w3 {
+      animation-timeline: --timeline-w3;
     }
 
-    .spy-w4 {
-      animation-timeline: --w4;
+    .timeline-link-w4 {
+      animation-timeline: --timeline-w4;
     }
 
-    .spy-fill,
-    .spy-head {
+    .timeline-fill,
+    .timeline-head {
       animation:
-        pk1 linear both,
-        pk2 linear both,
-        pk3 linear both;
+        timeline-progress-1 linear both,
+        timeline-progress-2 linear both,
+        timeline-progress-3 linear both;
       animation-range: cover 0% cover 100%;
-      animation-timeline: --w1, --w2, --w3;
+      animation-timeline: --timeline-w1, --timeline-w2, --timeline-w3;
     }
 
-    .spy-fill {
-      height: calc(64px * (var(--p1) + var(--p2) + var(--p3)));
+    .timeline-fill {
+      height: calc(
+        var(--timeline-step) *
+        (
+          var(--timeline-progress-1) +
+          var(--timeline-progress-2) +
+          var(--timeline-progress-3)
+        )
+      );
     }
 
-    .spy-head {
-      top: calc(64px * (var(--p1) + var(--p2) + var(--p3)));
+    .timeline-head {
+      top: calc(
+        var(--timeline-step) *
+        (
+          var(--timeline-progress-1) +
+          var(--timeline-progress-2) +
+          var(--timeline-progress-3)
+        )
+      );
       opacity: 1;
+      animation-timing-function: steps(1, jump-end);
     }
   }
 }
@@ -331,7 +376,7 @@
   animation: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
+@media screen and (prefers-reduced-motion: no-preference) {
   .reveal-ready
     :is([data-reveal], [data-reveal-group] > *):not([data-revealed]) {
     opacity: 0;
@@ -340,7 +385,7 @@
 
   :where(.reveal-ready) :where([data-reveal], [data-reveal-group] > *) {
     transition:
-      opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-      translate 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      opacity 0.6s var(--ease-out-expo),
+      translate 0.6s var(--ease-out-expo);
   }
 }

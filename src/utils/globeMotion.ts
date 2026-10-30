@@ -5,6 +5,7 @@ import {
   GLOBE_DRAG_THRESHOLD_PX,
   GLOBE_FLING_NEWEST_WEIGHT,
   GLOBE_FLING_WINDOW_MS,
+  GLOBE_INITIAL_VIEW,
   GLOBE_INTRO_SPIN_DEG_PER_SECOND,
   GLOBE_KEY_STEP_LAT,
   GLOBE_KEY_STEP_LON,
@@ -15,9 +16,10 @@ import {
   GLOBE_MAX_STEP_SECONDS,
   GLOBE_MIN_DRAG_STEP_SECONDS,
   GLOBE_REST_SPEED,
-  GLOBE_START,
+  GLOBE_SEEK_RATE_PER_SECOND,
+  MS_PER_SECOND,
 } from '~/constants';
-import { clamp } from './globe';
+import { clamp } from './math';
 
 export type Motion = {
   lat: number;
@@ -50,6 +52,29 @@ export const stepIdle = (
     vLon,
   };
 };
+
+export const shortestLonDelta = (from: number, to: number) =>
+  ((((to - from) % 360) + 540) % 360) - 180;
+
+export const turnToward = (
+  motion: Motion,
+  targetLon: number,
+  elapsedSeconds: number,
+): Motion => {
+  const step = clamp(elapsedSeconds, 0, GLOBE_MAX_STEP_SECONDS);
+  const turned =
+    shortestLonDelta(motion.lon, targetLon) *
+    (1 - Math.exp(-step * GLOBE_SEEK_RATE_PER_SECOND));
+
+  return { ...motion, lon: motion.lon + turned, vLat: 0, vLon: 0 };
+};
+
+export const centerOn = (motion: Motion, targetLon: number): Motion => ({
+  ...motion,
+  lon: motion.lon + shortestLonDelta(motion.lon, targetLon),
+  vLat: 0,
+  vLon: 0,
+});
 
 export const isAtRest = (motion: Motion, autoSpeed: number) =>
   autoSpeed === 0 &&
@@ -157,7 +182,7 @@ export const hitTestMarker = <Id extends string>(
 
 export const introMotion = (reducedMotion: boolean): Motion => {
   if (reducedMotion) {
-    return { ...GLOBE_START, vLat: 0, vLon: 0 };
+    return { ...GLOBE_INITIAL_VIEW, vLat: 0, vLon: 0 };
   }
 
   const settleDistance =
@@ -165,9 +190,73 @@ export const introMotion = (reducedMotion: boolean): Motion => {
     GLOBE_LON_DAMPING;
 
   return {
-    lat: GLOBE_START.lat,
-    lon: GLOBE_START.lon - settleDistance,
+    lat: GLOBE_INITIAL_VIEW.lat,
+    lon: GLOBE_INITIAL_VIEW.lon - settleDistance,
     vLat: 0,
     vLon: GLOBE_INTRO_SPIN_DEG_PER_SECOND,
   };
 };
+
+export type DragState = {
+  dragging: boolean;
+  lastMoveMs: number;
+  lastX: number;
+  lastY: number;
+  pointerId: number;
+  startX: number;
+  startY: number;
+  velocity: DragVelocity;
+};
+
+export const startDrag = (
+  pointerId: number,
+  x: number,
+  y: number,
+  nowMs: number,
+): DragState => ({
+  dragging: false,
+  lastMoveMs: nowMs,
+  lastX: x,
+  lastY: y,
+  pointerId,
+  startX: x,
+  startY: y,
+  velocity: { lat: 0, lon: 0 },
+});
+
+export const moveDrag = (
+  drag: DragState,
+  motion: Motion,
+  x: number,
+  y: number,
+  nowMs: number,
+): { drag: DragState; motion: Motion } => {
+  const next = applyDrag(
+    motion,
+    drag.velocity,
+    x - drag.lastX,
+    y - drag.lastY,
+    (nowMs - drag.lastMoveMs) / MS_PER_SECOND,
+  );
+
+  return {
+    drag: {
+      ...drag,
+      dragging: true,
+      lastMoveMs: nowMs,
+      lastX: x,
+      lastY: y,
+      velocity: next.velocity,
+    },
+    motion: next.motion,
+  };
+};
+
+export const releaseDrag = (
+  drag: DragState,
+  motion: Motion,
+  nowMs: number,
+): Motion => ({
+  ...motion,
+  ...releaseVelocity(drag.velocity, nowMs - drag.lastMoveMs),
+});

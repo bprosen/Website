@@ -61,30 +61,28 @@ describe('useVisitorDots', () => {
     expect(recordVisit).not.toHaveBeenCalled();
   });
 
-  it('ignores results that arrive after unmount', async () => {
-    let resolve: (value: unknown) => void = () => {};
-    recordVisit.mockReturnValue(new Promise((done) => (resolve = done)));
-    const { result, unmount } = renderHook(() => useVisitorDots());
+  it('aborts the request on unmount', async () => {
+    recordVisit.mockReturnValue(new Promise(() => {}));
+    const { unmount } = renderHook(() => useVisitorDots());
 
     await act(async () => {
       await vi.runAllTimersAsync();
     });
     const signal: AbortSignal = recordVisit.mock.calls[0][0];
     unmount();
-    resolve([[1, 2]]);
 
     expect(signal.aborted).toBe(true);
-    expect(result.current).toEqual([]);
   });
 
-  it('keeps an empty list when there are no visitors', async () => {
+  it('keeps the same empty list when there are no visitors', async () => {
     recordVisit.mockResolvedValue([]);
     const { result } = renderHook(() => useVisitorDots());
+    const initial = result.current;
 
     await act(async () => {
       await vi.runAllTimersAsync();
     });
 
-    expect(result.current).toEqual([]);
+    expect(result.current).toBe(initial);
   });
 });

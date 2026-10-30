@@ -1,5 +1,6 @@
 import { act, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { sectionTitle } from '~/utils';
 import { SectionScroller } from './SectionScroller';
 
 const scrollIntoView = vi.fn<Element['scrollIntoView']>();
@@ -44,6 +45,17 @@ describe('SectionScroller', () => {
       behavior: 'auto',
       block: 'start',
     });
+  });
+
+  it('updates the tab title on back and forward', () => {
+    render(<SectionScroller section={null} />);
+    window.history.replaceState(null, '', '/about');
+
+    act(() => {
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+
+    expect(document.title).toBe(sectionTitle('about'));
   });
 
   it('stops listening when unmounted', () => {

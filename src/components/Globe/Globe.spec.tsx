@@ -2,20 +2,20 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { Globe } from './Globe';
 
-const renderGlobe = (tip: 'me' | null = null) =>
+const renderGlobe = (selectedMarker: 'home' | null = null) =>
   render(
     <Globe
-      dots={[]}
       onSelect={vi.fn()}
-      tip={tip}
-      tooltip={tip && 'Tooltip text'}
+      selectedMarker={selectedMarker}
+      tooltip={selectedMarker && 'Tooltip text'}
       tooltipId='globe-tooltip'
       visitorCoords={null}
+      visitorDots={[]}
     />,
   );
 
 describe('Globe', () => {
-  it('is a focusable, labelled widget', () => {
+  it('is a focusable, labeled widget', () => {
     renderGlobe();
     const globe = screen.getByRole('application');
 
@@ -32,7 +32,7 @@ describe('Globe', () => {
   });
 
   it('shows and describes the open tooltip', () => {
-    renderGlobe('me');
+    renderGlobe('home');
     const tooltip = screen.getByRole('tooltip');
 
     expect(tooltip).toHaveTextContent('Tooltip text');
@@ -54,13 +54,13 @@ describe('Globe', () => {
 
     rerender(
       <Globe
-        dots={[]}
         onSelect={vi.fn()}
+        selectedMarker={null}
         sharedHome
-        tip={null}
         tooltip={null}
         tooltipId='globe-tooltip'
         visitorCoords={null}
+        visitorDots={[]}
       />,
     );
 

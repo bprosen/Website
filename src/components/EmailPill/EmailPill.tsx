@@ -5,50 +5,47 @@ import {
   COPIED_EMAIL_LABEL,
   COPY_EMAIL_LABEL,
   EMAIL,
-  ICON_STROKE,
-  MAILTO,
+  EMAIL_HREF,
+  ICON_STROKE_WIDTH,
 } from '~/constants';
 import { useCopyToClipboard } from '~/hooks';
-
-const FOCUS_RING =
-  'outline-none focus-visible:ring-[3px] focus-visible:ring-inverse-foreground/60';
+import { Button } from '~/ui';
 
 export const EmailPill = () => {
   const { copied, copy } = useCopyToClipboard();
+  const CopyIcon = copied ? IconCheck : IconCopy;
 
   return (
-    <div className='inline-flex h-13 max-w-full max-sm:h-11 items-center rounded-full bg-accent pr-3 pl-[22px] max-sm:pr-1.5 max-sm:pl-4 max-sm:text-[15px] font-semibold text-accent-foreground transition-[translate] duration-200 ease-out hover:-translate-y-0.5'>
+    <div className='bg-accent text-accent-foreground inline-flex h-13 max-w-full items-center rounded-full pr-3 pl-[22px] font-semibold transition-[translate] duration-200 ease-out [--ring:var(--accent-foreground)] hover:-translate-y-0.5 max-sm:h-11 max-sm:pr-1.5 max-sm:pl-4 max-sm:text-[15px]'>
       <a
-        className={`inline-flex min-w-0 items-center gap-2.5 rounded-full max-[379px]:gap-2 text-inherit no-underline ${FOCUS_RING}`}
-        href={MAILTO}
+        className='max-compact:gap-2 inline-flex min-w-0 items-center gap-2.5 rounded-full'
+        href={EMAIL_HREF}
       >
         <IconMail
           aria-hidden
           className='size-[22px] shrink-0'
-          stroke={ICON_STROKE}
+          stroke={ICON_STROKE_WIDTH}
         />
         <span className='truncate max-sm:sr-only'>{EMAIL}</span>
       </a>
       <span
         aria-hidden
-        className='mr-1 ml-2.5 h-6 w-px shrink-0 bg-accent-foreground/20'
+        className='bg-accent-foreground/20 mr-1 ml-2.5 h-6 w-px shrink-0'
       />
-      <button
+      <Button
         aria-label={COPY_EMAIL_LABEL}
-        className={`inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-inherit transition-colors duration-200 hover:bg-accent-foreground/10 ${FOCUS_RING}`}
+        className='hover:bg-accent-foreground/10 size-10 cursor-pointer hover:translate-y-0'
         onClick={() => copy(EMAIL)}
+        size='icon'
         title={COPY_EMAIL_LABEL}
         type='button'
+        variant='ghost'
       >
-        {copied ? (
-          <IconCheck aria-hidden className='size-5' stroke={ICON_STROKE} />
-        ) : (
-          <IconCopy aria-hidden className='size-5' stroke={ICON_STROKE} />
-        )}
+        <CopyIcon aria-hidden className='size-5' stroke={ICON_STROKE_WIDTH} />
         <span aria-live='polite' className='sr-only'>
           {copied ? COPIED_EMAIL_LABEL : ''}
         </span>
-      </button>
+      </Button>
     </div>
   );
 };

@@ -1,6 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PHOTOS } from '~/constants';
+import {
+  ABOUT_PHOTOS,
+  MAIN_CONTENT_ID,
+  SECTIONS,
+  SKIP_LINK_LABEL,
+} from '~/constants';
 import { Home } from './Home';
 
 beforeEach(() => {
@@ -17,6 +22,21 @@ describe('Home', () => {
     expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
   });
 
+  it('renders a target for every section, in navigation order', () => {
+    render(<Home />);
+
+    const targets = SECTIONS.map(({ slug }) =>
+      document.getElementById(slug),
+    ).filter((target) => target !== null);
+
+    expect(targets).toHaveLength(SECTIONS.length);
+    for (const [index, target] of targets.slice(1).entries()) {
+      expect(targets[index].compareDocumentPosition(target)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+    }
+  });
+
   it('jumps to the requested section', () => {
     render(<Home section='about' />);
 
@@ -25,7 +45,8 @@ describe('Home', () => {
 
   it('loads the Japan photos eagerly only when opening on the about section', () => {
     const { unmount } = render(<Home />);
-    const fuji = () => screen.getAllByRole('img', { name: PHOTOS[0].alt })[0];
+    const fuji = () =>
+      screen.getAllByRole('img', { name: ABOUT_PHOTOS[0].alt })[0];
 
     expect(fuji()).toHaveAttribute('loading', 'lazy');
 
@@ -37,9 +58,9 @@ describe('Home', () => {
 
   it('lets keyboard users skip straight to the content', () => {
     render(<Home />);
-    const skip = screen.getByRole('link', { name: 'Skip to content' });
+    const skip = screen.getByRole('link', { name: SKIP_LINK_LABEL });
 
-    expect(skip).toHaveAttribute('href', '#main');
-    expect(screen.getByRole('main')).toHaveAttribute('id', 'main');
+    expect(skip).toHaveAttribute('href', `#${MAIN_CONTENT_ID}`);
+    expect(screen.getByRole('main')).toHaveAttribute('id', MAIN_CONTENT_ID);
   });
 });

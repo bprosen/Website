@@ -1,14 +1,26 @@
 import { type RefObject, useEffect } from 'react';
-import { AUTO_SCROLL_RESUME_MS, SCROLL_SYNC_TOLERANCE_PX } from '~/constants';
+import {
+  AUTO_SCROLL_RESUME_MS,
+  MS_PER_SECOND,
+  SCROLL_SYNC_TOLERANCE_PX,
+} from '~/constants';
+import { useMotionPaused } from './useMotionPaused';
 import { usePrefersReducedMotion } from './usePrefersReducedMotion';
 
-const loopWidthOf = (scroller: HTMLElement) => {
+const measureLoopWidth = (scroller: HTMLElement) => {
   const items = scroller.firstElementChild?.children;
+
   if (!items || items.length < 2) {
     return 0;
   }
-  const first = items[0] as HTMLElement;
-  const firstCopy = items[Math.floor(items.length / 2)] as HTMLElement;
+
+  const first = items[0];
+  const firstCopy = items[Math.floor(items.length / 2)];
+
+  if (!(first instanceof HTMLElement) || !(firstCopy instanceof HTMLElement)) {
+    return 0;
+  }
+
   return firstCopy.offsetLeft - first.offsetLeft;
 };
 
@@ -20,37 +32,38 @@ export const useAutoScroll = (
   speedPxPerSecond: number,
 ) => {
   const reducedMotion = usePrefersReducedMotion();
+  const { paused } = useMotionPaused();
 
   useEffect(() => {
     const scroller = ref.current;
-    if (!scroller || reducedMotion) {
+    if (!scroller || reducedMotion || paused) {
       return;
     }
 
     let frame = 0;
-    let lastTime: number | null = null;
+    let lastFrameMs: number | null = null;
     let position = scroller.scrollLeft;
     let held = false;
-    let resumeAt = 0;
+    let resumeAtMs = 0;
 
     const step = (time: number) => {
       if (Math.abs(scroller.scrollLeft - position) > SCROLL_SYNC_TOLERANCE_PX) {
         position = scroller.scrollLeft;
       }
-      if (lastTime !== null && !held && time >= resumeAt) {
+      if (lastFrameMs !== null && !held && time >= resumeAtMs) {
         position = wrapPosition(
-          position + (speedPxPerSecond * (time - lastTime)) / 1000,
-          loopWidthOf(scroller),
+          position + (speedPxPerSecond * (time - lastFrameMs)) / MS_PER_SECOND,
+          measureLoopWidth(scroller),
         );
         scroller.scrollLeft = position;
       }
-      lastTime = time;
+      lastFrameMs = time;
       frame = requestAnimationFrame(step);
     };
 
     const start = () => {
       if (!frame) {
-        lastTime = null;
+        lastFrameMs = null;
         frame = requestAnimationFrame(step);
       }
     };
@@ -63,7 +76,7 @@ export const useAutoScroll = (
       held = true;
     };
     const pauseBriefly = () => {
-      resumeAt = performance.now() + AUTO_SCROLL_RESUME_MS;
+      resumeAtMs = performance.now() + AUTO_SCROLL_RESUME_MS;
     };
     const release = () => {
       held = false;
@@ -88,22 +101,24 @@ export const useAutoScroll = (
       }
     };
 
-    const listeners = [
-      ['pointerenter', holdForMouse],
-      ['pointerleave', releaseForMouse],
-      ['touchstart', hold],
-      ['touchend', release],
-      ['touchcancel', release],
-      ['focusin', holdForKeyboard],
-      ['focusout', release],
-      ['wheel', pauseBriefly],
-    ] as const;
+    const listen = <Type extends keyof HTMLElementEventMap>(
+      type: Type,
+      listener: (event: HTMLElementEventMap[Type]) => void,
+    ) => {
+      scroller.addEventListener(type, listener, { passive: true });
+      return () => scroller.removeEventListener(type, listener);
+    };
 
-    for (const [type, listener] of listeners) {
-      scroller.addEventListener(type, listener as EventListener, {
-        passive: true,
-      });
-    }
+    const unlisteners = [
+      listen('pointerenter', holdForMouse),
+      listen('pointerleave', releaseForMouse),
+      listen('touchstart', hold),
+      listen('touchend', release),
+      listen('touchcancel', release),
+      listen('focusin', holdForKeyboard),
+      listen('focusout', release),
+      listen('wheel', pauseBriefly),
+    ];
 
     const visibility = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
@@ -117,9 +132,9 @@ export const useAutoScroll = (
     return () => {
       stop();
       visibility.disconnect();
-      for (const [type, listener] of listeners) {
-        scroller.removeEventListener(type, listener as EventListener);
+      for (const unlisten of unlisteners) {
+        unlisten();
       }
     };
-  }, [ref, reducedMotion, speedPxPerSecond]);
+  }, [paused, ref, reducedMotion, speedPxPerSecond]);
 };

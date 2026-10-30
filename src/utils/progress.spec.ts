@@ -25,4 +25,10 @@ describe('spansLine', () => {
     expect(spansLine(100, 500, 68)).toBe(false);
     expect(spansLine(-500, 40, 68)).toBe(false);
   });
+
+  it('treats a block touching the line at either edge as not spanning it', () => {
+    expect(spansLine(-100, 68, 68)).toBe(false);
+    expect(spansLine(68, 500, 68)).toBe(false);
+    expect(spansLine(67, 69, 68)).toBe(true);
+  });
 });

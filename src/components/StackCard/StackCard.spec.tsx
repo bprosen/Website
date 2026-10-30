@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { BRANDS, STACK_GRID } from '~/constants';
+import { BRANDS, NEW_TAB_HINT, STACK_BRANDS } from '~/constants';
 import { StackCard } from './StackCard';
 
 describe('StackCard', () => {
@@ -14,7 +14,7 @@ describe('StackCard', () => {
       within(screen.getByRole('list'))
         .getAllByRole('listitem')
         .map((item) => item.textContent),
-    ).toEqual([...STACK_GRID]);
+    ).toEqual(STACK_BRANDS.map((name) => `${name} ${NEW_TAB_HINT}`));
   });
 
   it('keeps the logos decorative so names are read once', () => {
@@ -22,7 +22,7 @@ describe('StackCard', () => {
 
     expect(screen.queryAllByRole('img')).toHaveLength(0);
     expect(container.querySelectorAll('svg[aria-hidden="true"]')).toHaveLength(
-      STACK_GRID.length,
+      STACK_BRANDS.length,
     );
   });
 
@@ -31,6 +31,6 @@ describe('StackCard', () => {
 
     expect(
       screen.getAllByRole('link').map((link) => link.getAttribute('href')),
-    ).toEqual(STACK_GRID.map((name) => BRANDS[name].url));
+    ).toEqual(STACK_BRANDS.map((name) => BRANDS[name].url));
   });
 });

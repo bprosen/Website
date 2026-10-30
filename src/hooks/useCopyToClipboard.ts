@@ -3,9 +3,11 @@ import { COPY_RESET_MS } from '~/constants';
 
 export const useCopyToClipboard = () => {
   const [copied, setCopied] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(() => {
+    return () => clearTimeout(timerRef.current);
+  }, []);
 
   const copy = useCallback(async (text: string) => {
     try {
@@ -15,8 +17,8 @@ export const useCopyToClipboard = () => {
     }
 
     setCopied(true);
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => setCopied(false), COPY_RESET_MS);
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setCopied(false), COPY_RESET_MS);
     return true;
   }, []);
 

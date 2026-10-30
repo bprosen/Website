@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { cn } from '~/lib/ui';
+import { Button } from '~/ui';
 
 type LegendButtonProps = {
   children: ReactNode;
@@ -15,14 +17,18 @@ export const LegendButton = ({
   pressed,
   swatchClassName,
 }: LegendButtonProps) => (
-  <button
+  <Button
     aria-describedby={describedBy}
     aria-pressed={pressed}
-    className='inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-1.5 text-left leading-snug rounded-lg border-0 bg-transparent px-2 font-[inherit] text-inherit underline-offset-4 outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-ink'
+    className='h-auto min-h-11 min-w-11 cursor-pointer gap-1.5 rounded-lg px-2 text-sm leading-snug whitespace-normal underline-offset-4 hover:translate-y-0 hover:bg-transparent hover:underline aria-pressed:underline'
     onClick={onClick}
     type='button'
+    variant='ghost'
   >
-    <span aria-hidden className={`size-2.5 rounded-full ${swatchClassName}`} />
+    <span
+      aria-hidden
+      className={cn('size-2.5 rounded-full', swatchClassName)}
+    />
     <span className='max-sm:sr-only'>{children}</span>
-  </button>
+  </Button>
 );

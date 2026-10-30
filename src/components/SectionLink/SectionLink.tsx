@@ -1,11 +1,13 @@
 'use client';
 
 import type { ComponentProps, MouseEvent } from 'react';
+import type { SectionSlug } from '~/types';
 import {
+  hasSectionTarget,
   isPlainLeftClick,
-  type SectionSlug,
   scrollToSection,
   sectionPath,
+  sectionTitle,
 } from '~/utils';
 
 type SectionLinkProps = Omit<ComponentProps<'a'>, 'href'> & {
@@ -22,19 +24,22 @@ export const SectionLink = ({
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(event);
 
-    if (event.defaultPrevented || !isPlainLeftClick(event)) {
-      return;
-    }
-
-    if (!scrollToSection(section)) {
+    if (
+      event.defaultPrevented ||
+      !isPlainLeftClick(event) ||
+      !hasSectionTarget(section)
+    ) {
       return;
     }
 
     event.preventDefault();
 
     if (window.location.pathname !== href) {
-      window.history.pushState(null, '', href);
+      window.history.pushState(null, '', `${href}${window.location.search}`);
     }
+
+    document.title = sectionTitle(section);
+    scrollToSection(section);
   };
 
   return <a href={href} onClick={handleClick} {...props} />;

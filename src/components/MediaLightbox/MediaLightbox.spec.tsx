@@ -1,7 +1,8 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { CLOSE_DIALOG_LABEL, ENLARGE_MEDIA_LABEL } from '~/constants';
+import { stubReducedMotion } from '~/lib/testing';
 import { MediaLightbox } from './MediaLightbox';
 
 const ALT = 'Mt. Fuji above the town';
@@ -37,44 +38,39 @@ describe('MediaLightbox', () => {
     await user.click(screen.getByRole('button', { name: TRIGGER }));
     const dialog = screen.getByRole('dialog', { name: ALT });
 
-    const image = within(dialog).getByRole('img', { name: ALT });
+    const image = within(dialog).getByRole('presentation');
 
     expect(image.getAttribute('src')).toContain('fuji.jpg');
     expect(image).toHaveStyle({ aspectRatio: '1200 / 1600' });
   });
 
-  it('plays videos muted and looping with no controls', async () => {
+  it('plays videos muted and looping, with controls to pause them', async () => {
     const user = userEvent.setup();
     renderLightbox({ video: '/clip.mp4' });
 
     await user.click(screen.getByRole('button', { name: TRIGGER }));
-    const video = within(screen.getByRole('dialog')).getByLabelText(
-      ALT,
-    ) as HTMLVideoElement;
+    const video = screen
+      .getByRole('dialog', { name: ALT })
+      .querySelector('video');
 
     expect(video).toHaveAttribute('src', '/clip.mp4');
     expect(video).toHaveAttribute('autoplay');
     expect(video).toHaveAttribute('loop');
     expect(video).toHaveAttribute('playsinline');
     expect(video).toHaveAttribute('disablepictureinpicture');
-    expect(video.muted).toBe(true);
-    expect(video).not.toHaveAttribute('controls');
+    expect(video).toHaveProperty('muted', true);
+    expect(video).toHaveAttribute('controls');
   });
 
   it('leaves videos paused with controls when reduced motion is preferred', async () => {
-    vi.stubGlobal(
-      'matchMedia',
-      vi.fn(() => ({
-        addEventListener: vi.fn(),
-        matches: true,
-        removeEventListener: vi.fn(),
-      })),
-    );
+    stubReducedMotion(true);
     const user = userEvent.setup();
     renderLightbox({ video: '/clip.mp4' });
 
     await user.click(screen.getByRole('button', { name: TRIGGER }));
-    const video = within(screen.getByRole('dialog')).getByLabelText(ALT);
+    const video = screen
+      .getByRole('dialog', { name: ALT })
+      .querySelector('video');
 
     expect(video).not.toHaveAttribute('autoplay');
     expect(video).toHaveAttribute('controls');

@@ -1,7 +1,7 @@
-const clampUnit = (value: number) => Math.min(1, Math.max(0, value));
+import { clamp } from './math';
 
 export const passedFraction = (top: number, height: number, line: number) =>
-  height > 0 ? clampUnit((line - top) / height) : 0;
+  height > 0 ? clamp((line - top) / height, 0, 1) : 0;
 
 export const spansLine = (top: number, bottom: number, line: number) =>
   top < line && bottom > line;

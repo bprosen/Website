@@ -68,7 +68,7 @@ describe('MediaTile', () => {
     );
   });
 
-  it('crops from the centre by default', () => {
+  it('crops from the center by default', () => {
     render(
       <MediaTile
         sizes='100px'

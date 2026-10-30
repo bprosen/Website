@@ -1,10 +1,11 @@
-import type { BrandName } from '~/constants/brands';
+import type { BrandName } from '~/constants';
 
 export type Brand = {
   color: string;
   label?: string;
   path: string;
   url: string;
+  viewBox?: string;
 };
 
 export type Stat = {
@@ -33,7 +34,7 @@ export type MediaSlot = {
   tint?: string;
 } & (MediaFile | NoMediaFile);
 
-export type WorkEntry = {
+export type Job = {
   collage?: readonly MediaSlot[];
   company: string;
   id: string;

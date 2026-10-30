@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  clamp,
   clampTooltipCenter,
   createView,
   preparePoints,
@@ -9,16 +8,8 @@ import {
   toGlobeUnits,
 } from './globe';
 
-describe('clamp', () => {
-  it('keeps values inside the range', () => {
-    expect(clamp(5, 0, 10)).toBe(5);
-    expect(clamp(-1, 0, 10)).toBe(0);
-    expect(clamp(11, 0, 10)).toBe(10);
-  });
-});
-
 describe('projectPoint', () => {
-  it('puts the view centre at the middle of the disc', () => {
+  it('puts the view center at the middle of the disc', () => {
     const point = projectPoint([20, 40], createView(20, 40), 90);
 
     expect(point.visible).toBe(true);
@@ -30,7 +21,7 @@ describe('projectPoint', () => {
     expect(projectPoint([-20, -140], createView(20, 40)).visible).toBe(false);
   });
 
-  it('places points east of centre to the right and north above', () => {
+  it('places points east of center to the right and north above', () => {
     const view = createView(0, 0);
 
     expect(projectPoint([0, 30], view, 90).x).toBeCloseTo(45);
@@ -84,7 +75,7 @@ describe('preparePoints / projectPoints', () => {
 describe('toGlobeUnits', () => {
   const rect = { height: 200, left: 100, top: 50, width: 200 };
 
-  it('maps the element centre to 0, 0 and corners to ±100', () => {
+  it('maps the element center to 0, 0 and corners to ±100', () => {
     expect(toGlobeUnits(200, 150, rect)).toEqual({ x: 0, y: 0 });
     expect(toGlobeUnits(100, 50, rect)).toEqual({ x: -100, y: -100 });
     expect(toGlobeUnits(300, 250, rect)).toEqual({ x: 100, y: 100 });
@@ -111,7 +102,7 @@ describe('clampTooltipCenter', () => {
     expect(clampTooltipCenter(100, 280, -200, 110)).toBe(-30);
   });
 
-  it('centres a tooltip wider than the bounds', () => {
+  it('centers a tooltip wider than the bounds', () => {
     expect(clampTooltipCenter(10, 400, 0, 300)).toBe(150);
   });
 });

@@ -6,12 +6,16 @@ import type { ReactNode } from 'react';
 import {
   COLORS,
   DARK_PAPER,
+  DARK_SCHEME_QUERY,
+  LIGHT_SCHEME_QUERY,
   OG_DESCRIPTION,
   SITE_DESCRIPTION,
   SITE_TITLE,
   SITE_URL,
 } from '~/constants';
+import { cn } from '~/lib/ui';
 import {
+  motionInitScript,
   personStructuredData,
   serializeStructuredData,
   themeInitScript,
@@ -51,8 +55,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { color: COLORS.paper, media: '(prefers-color-scheme: light)' },
-    { color: DARK_PAPER, media: '(prefers-color-scheme: dark)' },
+    { color: COLORS.paper, media: LIGHT_SCHEME_QUERY },
+    { color: DARK_PAPER, media: DARK_SCHEME_QUERY },
   ],
 };
 
@@ -62,7 +66,7 @@ type RootLayoutProps = {
 
 const RootLayout = ({ children }: RootLayoutProps) => (
   <html
-    className={`${fraunces.variable} ${dmSans.variable}`}
+    className={cn(fraunces.variable, dmSans.variable)}
     data-scroll-behavior='smooth'
     lang='en'
     suppressHydrationWarning
@@ -70,7 +74,9 @@ const RootLayout = ({ children }: RootLayoutProps) => (
     <head>
       <script
         // biome-ignore lint/security/noDangerouslySetInnerHtml: a fixed script built from constants (no user input) that must run before first paint to avoid a light-theme flash.
-        dangerouslySetInnerHTML={{ __html: themeInitScript() }}
+        dangerouslySetInnerHTML={{
+          __html: `${themeInitScript()}${motionInitScript()}`,
+        }}
       />
       <script
         // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD built from constants and escaped by serializeStructuredData, so no user input reaches the page.

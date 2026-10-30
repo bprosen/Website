@@ -1,23 +1,14 @@
 import { act, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { HERO_NAME_ID, NAME } from '~/constants';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { FULL_NAME, HERO_NAME_ID } from '~/constants';
+import { stubIntersectionObserver } from '~/lib/testing';
 import { HeaderHome } from './HeaderHome';
 
-type ObserverCallback = (entries: Partial<IntersectionObserverEntry>[]) => void;
-
-let observe: ObserverCallback = () => {};
-
-class FakeIntersectionObserver {
-  constructor(callback: ObserverCallback) {
-    observe = callback;
-  }
-  disconnect = vi.fn();
-  observe = vi.fn();
-}
+let observer: ReturnType<typeof stubIntersectionObserver>;
 
 describe('HeaderHome', () => {
   beforeEach(() => {
-    vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver);
+    observer = stubIntersectionObserver();
     const heroName = document.createElement('h1');
     heroName.id = HERO_NAME_ID;
     document.body.append(heroName);
@@ -29,29 +20,27 @@ describe('HeaderHome', () => {
 
   it('links back to the hero with the name and headshot, hidden while the hero name is on screen', () => {
     render(<HeaderHome />);
-    const link = screen.getByRole('link', { name: NAME });
+    const link = screen.getByRole('link', { name: FULL_NAME });
 
     expect(link).toHaveAttribute('href', '/');
     expect(link).toHaveAttribute('data-visible', 'false');
     expect(link.querySelector('img')?.getAttribute('src')).toContain(
       'portrait.jpg',
     );
-    expect(link).toHaveTextContent(NAME);
+    expect(link).toHaveTextContent(FULL_NAME);
   });
 
   it('shows once the hero name scrolls under the header', () => {
     render(<HeaderHome />);
 
     act(() =>
-      observe([
-        {
-          boundingClientRect: { top: -50 } as DOMRectReadOnly,
-          isIntersecting: false,
-        },
-      ]),
+      observer.intersect({
+        boundingClientRect: { top: -50 } as DOMRectReadOnly,
+        isIntersecting: false,
+      }),
     );
 
-    expect(screen.getByRole('link', { name: NAME })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: FULL_NAME })).toHaveAttribute(
       'data-visible',
       'true',
     );

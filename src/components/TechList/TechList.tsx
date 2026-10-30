@@ -1,7 +1,13 @@
-import { BRANDS, type BrandName } from '~/constants';
+import {
+  BRANDS,
+  type BrandName,
+  EXTERNAL_LINK_PROPS,
+  TECH_LIST_LABEL,
+} from '~/constants';
 import { cn } from '~/lib/ui';
 import { Badge } from '~/ui';
 import { BrandIcon } from '../BrandIcon';
+import { NewTabHint } from '../NewTabHint';
 
 type TechListProps = {
   className?: string;
@@ -10,8 +16,8 @@ type TechListProps = {
 
 export const TechList = ({ className, items }: TechListProps) => (
   <ul
-    aria-label='Tech used'
-    className={cn('m-0 flex list-none flex-wrap gap-2 p-0', className)}
+    aria-label={TECH_LIST_LABEL}
+    className={cn('flex flex-wrap gap-2', className)}
   >
     {items.map((name) => {
       const brand = BRANDS[name];
@@ -19,9 +25,10 @@ export const TechList = ({ className, items }: TechListProps) => (
       return (
         <li key={name}>
           <Badge asChild variant='tech'>
-            <a href={brand.url} rel='noopener' target='_blank'>
+            <a href={brand.url} {...EXTERNAL_LINK_PROPS}>
               <BrandIcon name={name} />
               {'label' in brand ? brand.label : name}
+              <NewTabHint />
             </a>
           </Badge>
         </li>

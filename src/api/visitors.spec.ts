@@ -1,20 +1,11 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { VISITORS_ENDPOINT } from '~/constants';
+import { stubFetchJson } from '~/lib/testing';
 import { recordVisit } from './visitors';
-
-const respondWith = (body: unknown, status = 200) =>
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async () => new Response(JSON.stringify(body), { status })),
-  );
-
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
 
 describe('recordVisit', () => {
   it('POSTs to the visitors endpoint with the abort signal', async () => {
-    respondWith({ visitors: [] });
+    stubFetchJson({ visitors: [] });
     const { signal } = new AbortController();
 
     await recordVisit(signal);
@@ -26,7 +17,7 @@ describe('recordVisit', () => {
   });
 
   it('returns only valid cells', async () => {
-    respondWith({
+    stubFetchJson({
       visitors: [
         [50, -97],
         ['x', 1],
@@ -41,13 +32,13 @@ describe('recordVisit', () => {
   });
 
   it('returns no cells for an unexpected body or a failure', async () => {
-    respondWith('nope');
+    stubFetchJson('nope');
     await expect(recordVisit()).resolves.toEqual([]);
 
-    respondWith(null);
+    stubFetchJson(null);
     await expect(recordVisit()).resolves.toEqual([]);
 
-    respondWith({ visitors: [[1, 2]] }, 503);
+    stubFetchJson({ visitors: [[1, 2]] }, 503);
     await expect(recordVisit()).resolves.toEqual([]);
   });
 });

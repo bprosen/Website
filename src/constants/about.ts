@@ -1,23 +1,24 @@
 import type { MediaSlot } from '~/types';
-import { NAME } from './site';
+import { FULL_NAME, HOME_CITY_SHORT, SCHOOL } from './profile';
 
 export const PORTRAIT = {
-  alt: NAME,
+  alt: `Portrait of ${FULL_NAME}`,
   height: 480,
-  sizes: '144px',
+  sizes:
+    '(max-width: 300px) 96px, (max-width: 450px) 32vw, (max-width: 639px) 144px, 88px',
   src: '/photos/portrait.jpg',
   width: 480,
 } as const;
 
 export const ABOUT_BIO: readonly string[] = [
-  "I'm a software developer in Winnipeg, and I graduated with distinction in Computer Science from the University of Manitoba. I like building interfaces that feel clean and quick, and I care about testing and tooling as much as the pixels.",
-  'Before I wrote software for a living, I spent seven years building Renatus Network, a Minecraft server that grew to over 2 million players. I taught myself to code on the fly to keep it running, with no formal training, and learned to lead a team of 30+ along the way.',
+  `I’m a software developer in ${HOME_CITY_SHORT}, and I graduated with distinction in Computer Science from the ${SCHOOL}. I like building interfaces that feel clean and quick, and I care about testing and tooling as much as the pixels.`,
+  'Before I wrote software for a living, I spent seven years building Renatus Network, a Minecraft server that grew to over 2\u00a0million players. I taught myself to code on the fly to keep it running, with no formal training, and learned to lead a team of 30+ along the way.',
 ];
 
-export const JAPAN_NOTE =
-  'In my downtime I love trying new things. Earlier in 2026 I travelled to Japan, where I bullet-hiked Mt. Fuji and tried a whole bunch of new experiences.';
+export const ABOUT_TRAVEL_NOTE =
+  'In my downtime I love trying new things. Earlier in 2026 I traveled to Japan, where I bullet-hiked Mt. Fuji and tried a whole bunch of new experiences.';
 
-export const PHOTOS: readonly MediaSlot[] = [
+export const ABOUT_PHOTOS: readonly MediaSlot[] = [
   {
     alt: 'Mt. Fuji rising above the rooftops of a nearby town',
     height: 1600,
@@ -35,7 +36,7 @@ export const PHOTOS: readonly MediaSlot[] = [
     width: 1232,
   },
   {
-    alt: 'The five-storey pagoda at Senso-ji lit up at night',
+    alt: 'The five-story pagoda at Senso-ji lit up at night',
     focus: 'top',
     height: 1600,
     label: 'Senso-ji',

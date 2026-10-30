@@ -1,6 +1,11 @@
-import { NAME, PAGE_END_TOLERANCE_PX, SECTIONS, SITE_TITLE } from '~/constants';
-
-export type SectionSlug = (typeof SECTIONS)[number]['slug'];
+import {
+  FULL_NAME,
+  PAGE_END_TOLERANCE_PX,
+  SECTIONS,
+  SITE_TITLE,
+  TITLE_SEPARATOR,
+} from '~/constants';
+import type { SectionSlug } from '~/types';
 
 const SLUGS: readonly string[] = SECTIONS.map(({ slug }) => slug);
 
@@ -41,6 +46,9 @@ export const isPlainLeftClick = (event: ClickLike) =>
   !event.ctrlKey &&
   !event.metaKey &&
   !event.shiftKey;
+
+export const hasSectionTarget = (section: SectionSlug | null) =>
+  section === null || document.getElementById(section) !== null;
 
 export const scrollToSection = (
   section: SectionSlug | null,
@@ -87,9 +95,12 @@ export const activeSection = (
   return active;
 };
 
+export const pageTitle = (label: string) =>
+  `${label}${TITLE_SEPARATOR}${FULL_NAME}`;
+
 export const sectionTitle = (section: SectionSlug | null) => {
   const match = SECTIONS.find(({ slug }) => slug === section);
-  return match ? `${match.label} · ${NAME}` : SITE_TITLE;
+  return match ? pageTitle(match.label) : SITE_TITLE;
 };
 
 export const isAtPageEnd = (

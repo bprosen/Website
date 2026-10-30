@@ -1,18 +1,19 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { WORK, WORK_SECTION_ID } from '~/constants';
+import { WORK_SECTION_ID } from '~/constants';
 import { cn } from '~/lib/ui';
 import { passedFraction, spansLine } from '~/utils';
-
-type WorkProgressProps = {
-  className?: string;
-};
 
 const entryElement = (id: string) =>
   document.querySelector(`[data-work-entry="${id}"]`);
 
-export const WorkProgress = ({ className }: WorkProgressProps) => {
+type WorkProgressProps = {
+  className?: string;
+  entryIds: readonly string[];
+};
+
+export const WorkProgress = ({ className, entryIds }: WorkProgressProps) => {
   const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,42 +24,45 @@ export const WorkProgress = ({ className }: WorkProgressProps) => {
       return;
     }
 
-    const entries = WORK.map(({ id }) => entryElement(id));
+    const entryElements = entryIds.map(entryElement);
     const fills = [...bar.querySelectorAll<HTMLElement>('[data-fill]')];
     let frame = 0;
 
     const update = () => {
       frame = 0;
-      const line = window.innerHeight / 2;
+      const readingLineY = window.innerHeight / 2;
       const { bottom, top } = section.getBoundingClientRect();
-      bar.dataset.active = String(spansLine(top, bottom, line));
+      const entryRects = entryElements.map((entry) =>
+        entry ? entry.getBoundingClientRect() : null,
+      );
 
-      entries.forEach((entry, index) => {
+      bar.dataset.active = String(spansLine(top, bottom, readingLineY));
+
+      for (const [index, rect] of entryRects.entries()) {
         const fill = fills[index];
-        if (!entry || !fill) {
-          return;
+
+        if (rect && fill) {
+          fill.style.transform = `scaleX(${passedFraction(rect.top, rect.height, readingLineY)})`;
         }
-        const rect = entry.getBoundingClientRect();
-        fill.style.transform = `scaleX(${passedFraction(rect.top, rect.height, line)})`;
-      });
+      }
     };
 
-    const schedule = () => {
+    const scheduleUpdate = () => {
       if (!frame) {
         frame = requestAnimationFrame(update);
       }
     };
 
     update();
-    window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule);
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate);
 
     return () => {
+      window.removeEventListener('resize', scheduleUpdate);
+      window.removeEventListener('scroll', scheduleUpdate);
       cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', schedule);
     };
-  }, []);
+  }, [entryIds]);
 
   return (
     <div
@@ -70,13 +74,13 @@ export const WorkProgress = ({ className }: WorkProgressProps) => {
       data-active='false'
       ref={barRef}
     >
-      {WORK.map(({ id }) => (
+      {entryIds.map((id) => (
         <span
-          className='h-[3px] flex-1 overflow-hidden rounded-full bg-ink/15'
+          className='bg-ink/15 h-[3px] flex-1 overflow-hidden rounded-full'
           key={id}
         >
           <span
-            className='block h-full origin-left bg-coral'
+            className='bg-coral block h-full origin-left'
             data-fill
             style={{ transform: 'scaleX(0)' }}
           />

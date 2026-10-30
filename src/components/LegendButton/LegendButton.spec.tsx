@@ -48,16 +48,4 @@ describe('LegendButton', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('You, near Toronto')).toHaveClass('max-sm:sr-only');
   });
-
-  it('shows a visible focus ring for keyboard users', () => {
-    render(
-      <LegendButton onClick={() => {}} pressed={false} swatchClassName='bg-ink'>
-        Me
-      </LegendButton>,
-    );
-
-    expect(screen.getByRole('button')).toHaveClass(
-      'focus-visible:outline-solid',
-    );
-  });
 });

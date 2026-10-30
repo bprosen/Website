@@ -1,114 +1,24 @@
 import {
-  DNT_HEADER,
-  GEO_LATITUDE_HEADER,
-  GEO_LONGITUDE_HEADER,
-  GLOBE_NEAR_DEGREES,
-  GPC_HEADER,
   HOME_CITY_SHORT,
   HOME_COORDS,
-  REDIS_TOKEN_ENV,
-  REDIS_URL_ENV,
-  VISITORS_KEY,
-  VISITORS_MAX,
-  VISITORS_TTL_MS,
+  HOME_PROXIMITY_DEG,
+  VISITOR_LABEL,
+  VISITOR_NEAR_LABEL,
 } from '~/constants';
-import type { LatLon } from '~/types';
-import { isLatLon } from './geo';
-
-export type RedisCommand = (string | number)[];
-
-export type RedisConfig = { token: string; url: string };
-
-const CELL_PATTERN = /^(-?\d{1,3}),(-?\d{1,3})$/;
-
-const headerNumber = (headers: Headers, name: string) => {
-  const value = headers.get(name)?.trim();
-  return value ? Number(value) : Number.NaN;
-};
-
-export const parseGeoHeaders = (headers: Headers): LatLon | null => {
-  const lat = headerNumber(headers, GEO_LATITUDE_HEADER);
-  const lon = headerNumber(headers, GEO_LONGITUDE_HEADER);
-  return isLatLon(lat, lon) ? [lat, lon] : null;
-};
-
-export const toCell = ([lat, lon]: LatLon): string => {
-  const roundedLat = Math.round(lat) || 0;
-  const roundedLon = Math.round(lon) || 0;
-  return `${roundedLat},${roundedLon}`;
-};
-
-export const parseCells = (values: unknown): LatLon[] => {
-  if (!Array.isArray(values)) {
-    return [];
-  }
-
-  const cells: LatLon[] = [];
-  for (const value of values) {
-    const match = typeof value === 'string' ? CELL_PATTERN.exec(value) : null;
-    if (!match) {
-      continue;
-    }
-    const lat = Number(match[1]) || 0;
-    const lon = Number(match[2]) || 0;
-    if (isLatLon(lat, lon)) {
-      cells.push([lat, lon]);
-    }
-  }
-  return cells;
-};
-
-export const shouldRecord = (headers: Headers): boolean =>
-  headers.get(GPC_HEADER)?.trim() !== '1' &&
-  headers.get(DNT_HEADER)?.trim() !== '1';
-
-export const buildPipeline = (
-  cell: string | null,
-  now: number,
-): RedisCommand[] => [
-  ...(cell ? [['ZADD', VISITORS_KEY, now, cell]] : []),
-  ['ZREMRANGEBYSCORE', VISITORS_KEY, '-inf', now - VISITORS_TTL_MS],
-  ['ZREMRANGEBYRANK', VISITORS_KEY, 0, -(VISITORS_MAX + 1)],
-  ['ZREVRANGE', VISITORS_KEY, 0, VISITORS_MAX - 1],
-];
-
-export const parsePipelineResponse = (body: unknown): LatLon[] => {
-  if (!Array.isArray(body) || body.length === 0) {
-    return [];
-  }
-  const last: unknown = body[body.length - 1];
-  if (typeof last !== 'object' || last === null || 'error' in last) {
-    return [];
-  }
-  return 'result' in last ? parseCells(last.result) : [];
-};
-
-export const readRedisConfig = (
-  env: Record<string, string | undefined>,
-): RedisConfig | null => {
-  const url = env[REDIS_URL_ENV];
-  const token = env[REDIS_TOKEN_ENV];
-  return url && token ? { token, url: url.replace(/\/+$/, '') } : null;
-};
-
-export type Visitor = {
-  coords: LatLon | null;
-  label: string;
-  sameCity: boolean;
-};
+import type { LatLon, Visitor } from '~/types';
 
 export const UNKNOWN_VISITOR: Visitor = {
   coords: null,
-  label: 'You',
+  label: VISITOR_LABEL,
   sameCity: false,
 };
 
 const isNearHome = ([lat, lon]: LatLon) =>
-  Math.abs(lat - HOME_COORDS[0]) < GLOBE_NEAR_DEGREES &&
-  Math.abs(lon - HOME_COORDS[1]) < GLOBE_NEAR_DEGREES;
+  Math.abs(lat - HOME_COORDS[0]) < HOME_PROXIMITY_DEG &&
+  Math.abs(lon - HOME_COORDS[1]) < HOME_PROXIMITY_DEG;
 
 const cityFromZone = (zone: string) =>
-  (zone.split('/').pop() ?? zone).replace(/_/g, ' ');
+  (zone.split('/').pop() ?? zone).replaceAll('_', ' ');
 
 export const resolveVisitor = (
   zone: string,
@@ -123,10 +33,14 @@ export const resolveVisitor = (
   if (isNearHome(coords)) {
     return {
       coords: null,
-      label: `You (${HOME_CITY_SHORT})`,
+      label: `${VISITOR_LABEL} (${HOME_CITY_SHORT})`,
       sameCity: true,
     };
   }
 
-  return { coords, label: `You, near ${cityFromZone(zone)}`, sameCity: false };
+  return {
+    coords,
+    label: `${VISITOR_NEAR_LABEL} ${cityFromZone(zone)}`,
+    sameCity: false,
+  };
 };

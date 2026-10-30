@@ -1,12 +1,12 @@
 import {
   EMPLOYER,
-  GITHUB,
+  FULL_NAME,
+  GITHUB_URL,
   HOME_CITY_SHORT,
   HOME_COUNTRY,
   HOME_REGION,
   JOB_TITLE,
-  LINKED_IN,
-  NAME,
+  LINKEDIN_URL,
   PORTRAIT,
   SCHOOL,
   SITE_URL,
@@ -24,11 +24,11 @@ export const personStructuredData = () => ({
   alumniOf: { '@type': 'CollegeOrUniversity', name: SCHOOL },
   image: `${SITE_URL}${PORTRAIT.src}`,
   jobTitle: JOB_TITLE,
-  name: NAME,
-  sameAs: [GITHUB, LINKED_IN],
+  name: FULL_NAME,
+  sameAs: [GITHUB_URL, LINKEDIN_URL],
   url: SITE_URL,
   worksFor: { '@type': 'Organization', name: EMPLOYER },
 });
 
 export const serializeStructuredData = (data: unknown) =>
-  JSON.stringify(data).replace(/</g, '\\u003c');
+  JSON.stringify(data).replaceAll('<', '\\u003c');

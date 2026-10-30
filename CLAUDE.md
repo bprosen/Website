@@ -11,6 +11,10 @@ Act like a senior developer: make decisions with confidence, own the result, and
 3. **Check your work.** When you finish, review your own diff the way a reviewer would, then run `pnpm biome:fix`, `pnpm lint`, `pnpm test`, and `pnpm build` if you touched routing or config. Fix any failures before calling the task done.
 4. **Report honestly.** Say what changed, what you verified, and anything you skipped or are unsure of. Don't claim something works if you haven't checked it.
 
+## Review Agents
+
+`.claude/agents/` holds three read-only reviewers: `performance-reviewer`, `code-quality-reviewer` and `ui-ux-reviewer`. They never edit code and never recommend changes that affect functionality. Each returns a report of findings ranked P0/P1/P2. Run the relevant ones after significant changes. Their findings are input for you to act on, not changes they make themselves.
+
 ## Commands
 
 - `pnpm dev`: start the dev server (Turbopack)

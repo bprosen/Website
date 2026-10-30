@@ -5,10 +5,7 @@ node_modules/
 # Next.js
 .next/
 out/
-
-# Production
-build/
-dist/
+next-env.d.ts
 
 # Environment variables
 .env
@@ -16,50 +13,28 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+!.env.example
 
 # Logs
-npm-debug.log*
 pnpm-debug.log*
 
-# Coverage directory used by tools like v8
+# Test coverage
 coverage/
 
 # TypeScript cache
 *.tsbuildinfo
 
-# Optional npm cache directory
-.npm
-
-# Output of 'npm pack'
-*.tgz
-
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
-# Gatsby files
-.cache/
-
-# Storybook build outputs
-.out
-.storybook-out
-
-# Editor directories and files
+# Editors
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS generated files
+# OS files
 .DS_Store
-.DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
 ehthumbs.db
 Thumbs.db
-!.env.example

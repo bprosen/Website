@@ -1,48 +1,50 @@
-'use client';
-
 import { type RefObject, useEffect, useRef } from 'react';
 import {
   COLORS,
   GLOBE_AUTO_SPIN_DEG_PER_SECOND,
-  GLOBE_EXTENT,
   GLOBE_HIT_RADIUS,
   GLOBE_LAND_DOT_RADIUS,
   GLOBE_MAX_DPR,
   GLOBE_TOOLTIP_VIEWPORT_MARGIN,
+  GLOBE_VIEWBOX_SIZE,
   GLOBE_VISITOR_DOT_ALPHA,
   GLOBE_VISITOR_DOT_RADIUS,
   HOME_COORDS,
   LAND,
+  MOTION_PAUSED_ATTRIBUTE,
+  MS_PER_SECOND,
   REDUCED_MOTION_QUERY,
 } from '~/constants';
-import type { LatLon } from '~/types';
+import type { LatLon, MarkerId } from '~/types';
 import {
-  applyDrag,
+  centerOn,
   clampTooltipCenter,
   createView,
-  type DragVelocity,
+  type DragState,
   exceedsDragThreshold,
   hitTestMarker,
   introMotion,
   isAtRest,
   type MarkerHit,
-  type MarkerId,
   type Motion,
+  moveDrag,
   nudge,
   type PointTable,
   preparePoints,
   projectPoint,
   projectPoints,
-  releaseVelocity,
+  releaseDrag,
+  startDrag,
   stepIdle,
   toGlobeUnits,
+  turnToward,
   type View,
 } from '~/utils';
 
 const TAU = Math.PI * 2;
 
 type DotLayer = {
-  out: Float32Array;
+  projected: Float32Array;
   table: PointTable;
 };
 
@@ -51,26 +53,15 @@ let landLayer: DotLayer | undefined;
 const getLandLayer = (): DotLayer => {
   if (!landLayer) {
     const table = preparePoints(LAND);
-    landLayer = { out: new Float32Array(table.count * 2), table };
+    landLayer = { projected: new Float32Array(table.count * 2), table };
   }
 
   return landLayer;
 };
 
-const toDotLayer = (dots: readonly LatLon[]): DotLayer => {
-  const table = preparePoints(dots.flat());
-  return { out: new Float32Array(table.count * 2), table };
-};
-
-type DragState = {
-  captured: boolean;
-  id: number;
-  startX: number;
-  startY: number;
-  t: number;
-  velocity: DragVelocity;
-  x: number;
-  y: number;
+const toDotLayer = (points: readonly LatLon[]): DotLayer => {
+  const table = preparePoints(points.flat());
+  return { projected: new Float32Array(table.count * 2), table };
 };
 
 type Controls = {
@@ -79,29 +70,29 @@ type Controls = {
   wake: () => void;
 };
 
-export type UseGlobeMotionOptions = {
+type UseGlobeMotionOptions = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   containerRef: RefObject<HTMLElement | null>;
-  dots: readonly LatLon[];
-  meRef: RefObject<HTMLElement | null>;
+  homeMarkerRef: RefObject<HTMLElement | null>;
   onSelect: (marker: MarkerId | null) => void;
-  tip: MarkerId | null;
+  selectedMarker: MarkerId | null;
   tooltipRef: RefObject<HTMLElement | null>;
   visitorCoords: LatLon | null;
-  youRef: RefObject<HTMLElement | null>;
+  visitorDots: readonly LatLon[];
+  visitorMarkerRef: RefObject<HTMLElement | null>;
 };
 
 const fillDots = (
   ctx: CanvasRenderingContext2D,
-  out: Float32Array,
+  projected: Float32Array,
   count: number,
   radius: number,
 ) => {
   ctx.beginPath();
 
   for (let i = 0; i < count; i++) {
-    const x = out[i * 2];
-    const y = out[i * 2 + 1];
+    const x = projected[i * 2];
+    const y = projected[i * 2 + 1];
     ctx.moveTo(x + radius, y);
     ctx.arc(x, y, radius, 0, TAU);
   }
@@ -110,7 +101,9 @@ const fillDots = (
 };
 
 const toPixels = (value: number, size: number) =>
-  Math.round(((value + GLOBE_EXTENT / 2) / GLOBE_EXTENT) * size * 10) / 10;
+  Math.round(
+    ((value + GLOBE_VIEWBOX_SIZE / 2) / GLOBE_VIEWBOX_SIZE) * size * 10,
+  ) / 10;
 
 const tryCapturePointer = (element: Element, pointerId: number) => {
   try {
@@ -121,9 +114,9 @@ const tryCapturePointer = (element: Element, pointerId: number) => {
   }
 };
 
-const setHidden = (el: HTMLElement, hidden: boolean) => {
-  if (el.hasAttribute('data-hidden') !== hidden) {
-    el.toggleAttribute('data-hidden', hidden);
+const setHidden = (element: HTMLElement, hidden: boolean) => {
+  if (element.hasAttribute('data-hidden') !== hidden) {
+    element.toggleAttribute('data-hidden', hidden);
   }
 };
 
@@ -134,50 +127,50 @@ type TooltipBounds = {
 };
 
 const place = (
-  el: HTMLElement | null,
+  element: HTMLElement | null,
   hit: MarkerHit<MarkerId> | undefined,
   size: number,
   tooltip?: TooltipBounds,
 ) => {
-  if (!el) {
+  if (!element) {
     return;
   }
 
   if (!hit?.visible) {
-    setHidden(el, true);
+    setHidden(element, true);
     return;
   }
 
   const x = toPixels(hit.x, size);
-  const px = tooltip
+  const left = tooltip
     ? clampTooltipCenter(x, tooltip.width, tooltip.min, tooltip.max) -
       tooltip.width / 2
     : x;
-  const transform = `translate3d(${px}px, ${toPixels(hit.y, size)}px, 0)`;
+  const transform = `translate3d(${left}px, ${toPixels(hit.y, size)}px, 0)`;
 
-  if (el.style.transform !== transform) {
-    el.style.transform = transform;
+  if (element.style.transform !== transform) {
+    element.style.transform = transform;
   }
 
-  setHidden(el, false);
+  setHidden(element, false);
 };
 
 export const useGlobeMotion = ({
   canvasRef,
   containerRef,
-  dots,
-  meRef,
+  homeMarkerRef,
   onSelect,
-  tip,
+  selectedMarker,
   tooltipRef,
   visitorCoords,
-  youRef,
+  visitorDots,
+  visitorMarkerRef,
 }: UseGlobeMotionOptions) => {
-  const controls = useRef<Controls | null>(null);
-  const tipRef = useRef(tip);
+  const controlsRef = useRef<Controls | null>(null);
+  const selectedMarkerRef = useRef(selectedMarker);
   const onSelectRef = useRef(onSelect);
-  const visitorRef = useRef(visitorCoords);
-  const dotsRef = useRef<DotLayer | null>(null);
+  const visitorCoordsRef = useRef(visitorCoords);
+  const visitorDotLayerRef = useRef<DotLayer | null>(null);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
@@ -199,31 +192,37 @@ export const useGlobeMotion = ({
         .trim() || fallback;
     let ink = readColor('--ink', COLORS.ink);
     let coral = readColor('--coral', COLORS.coral);
-    const reducedQuery = window.matchMedia(REDUCED_MOTION_QUERY);
+    const reducedMotionQuery = window.matchMedia(REDUCED_MOTION_QUERY);
 
-    let reduced = reducedQuery.matches;
-    let motion: Motion = introMotion(reduced);
+    let prefersReducedMotion = reducedMotionQuery.matches;
+    let motion: Motion = introMotion(prefersReducedMotion);
     let visible = false;
     let running = false;
     let frame = 0;
-    let last = 0;
+    let lastFrameMs = 0;
     let size = 0;
     const tooltipBounds: TooltipBounds = { max: 0, min: 0, width: 0 };
     let drag: DragState | null = null;
     const markers: MarkerHit<MarkerId>[] = [
-      { id: 'me', visible: false, x: 0, y: 0 },
-      { id: 'you', visible: false, x: 0, y: 0 },
+      { id: 'home', visible: false, x: 0, y: 0 },
+      { id: 'visitor', visible: false, x: 0, y: 0 },
     ];
 
-    const autoSpeed = () =>
-      reduced || tipRef.current !== null ? 0 : GLOBE_AUTO_SPIN_DEG_PER_SECOND;
+    const motionPaused = () =>
+      document.documentElement.hasAttribute(MOTION_PAUSED_ATTRIBUTE);
+    const autoSpinDegPerSecond = () =>
+      prefersReducedMotion ||
+      motionPaused() ||
+      selectedMarkerRef.current !== null
+        ? 0
+        : GLOBE_AUTO_SPIN_DEG_PER_SECOND;
 
     const drawDots = (view: View) => {
       if (!ctx || size === 0) {
         return;
       }
 
-      const scale = canvas.width / GLOBE_EXTENT;
+      const scale = canvas.width / GLOBE_VIEWBOX_SIZE;
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -233,42 +232,42 @@ export const useGlobeMotion = ({
       ctx.fillStyle = ink;
       fillDots(
         ctx,
-        land.out,
-        projectPoints(land.table, view, land.out),
+        land.projected,
+        projectPoints(land.table, view, land.projected),
         GLOBE_LAND_DOT_RADIUS,
       );
 
-      const visitors = dotsRef.current;
+      const visitors = visitorDotLayerRef.current;
 
       if (visitors && visitors.table.count > 0) {
         ctx.globalAlpha = GLOBE_VISITOR_DOT_ALPHA;
         ctx.fillStyle = coral;
         fillDots(
           ctx,
-          visitors.out,
-          projectPoints(visitors.table, view, visitors.out),
+          visitors.projected,
+          projectPoints(visitors.table, view, visitors.projected),
           GLOBE_VISITOR_DOT_RADIUS,
         );
       }
     };
 
     const drawMarkers = (view: View) => {
-      const [me, you] = markers;
-      const visitor = visitorRef.current;
+      const [homeHit, visitorHit] = markers;
+      const visitor = visitorCoordsRef.current;
 
-      Object.assign(me, projectPoint(HOME_COORDS, view));
+      Object.assign(homeHit, projectPoint(HOME_COORDS, view));
 
       if (visitor) {
-        Object.assign(you, projectPoint(visitor, view));
+        Object.assign(visitorHit, projectPoint(visitor, view));
       } else {
-        you.visible = false;
+        visitorHit.visible = false;
       }
 
-      place(meRef.current, me, size);
-      place(youRef.current, you, size);
+      place(homeMarkerRef.current, homeHit, size);
+      place(visitorMarkerRef.current, visitorHit, size);
       place(
         tooltipRef.current,
-        markers.find(({ id }) => id === tipRef.current),
+        markers.find(({ id }) => id === selectedMarkerRef.current),
         size,
         tooltipBounds,
       );
@@ -287,17 +286,35 @@ export const useGlobeMotion = ({
       drawMarkers(view);
     };
 
-    const tick = (time: number) => {
-      const dt = (time - last) / 1000;
-      last = time;
+    const hiddenSelectionLon = () => {
+      const selected = selectedMarkerRef.current;
+      const hit = markers.find(({ id }) => id === selected);
+      const coords =
+        selected === 'home' ? HOME_COORDS : visitorCoordsRef.current;
 
-      if (!drag?.captured) {
-        motion = stepIdle(motion, dt, autoSpeed());
+      return hit && !hit.visible && coords ? coords[1] : null;
+    };
+
+    const tick = (time: number) => {
+      const elapsedSeconds = (time - lastFrameMs) / MS_PER_SECOND;
+      lastFrameMs = time;
+      const targetLon = hiddenSelectionLon();
+
+      if (!drag?.dragging && targetLon !== null) {
+        motion = prefersReducedMotion
+          ? centerOn(motion, targetLon)
+          : turnToward(motion, targetLon, elapsedSeconds);
+      } else if (!drag?.dragging) {
+        motion = stepIdle(motion, elapsedSeconds, autoSpinDegPerSecond());
       }
 
       draw();
 
-      if (!drag && isAtRest(motion, autoSpeed())) {
+      if (
+        !drag &&
+        hiddenSelectionLon() === null &&
+        isAtRest(motion, autoSpinDegPerSecond())
+      ) {
         running = false;
         return;
       }
@@ -311,7 +328,7 @@ export const useGlobeMotion = ({
       }
 
       running = true;
-      last = performance.now();
+      lastFrameMs = performance.now();
       frame = requestAnimationFrame(tick);
     };
 
@@ -325,24 +342,25 @@ export const useGlobeMotion = ({
         return;
       }
 
-      drag = {
-        captured: false,
-        id: event.pointerId,
-        startX: event.clientX,
-        startY: event.clientY,
-        t: performance.now(),
-        velocity: { lat: 0, lon: 0 },
-        x: event.clientX,
-        y: event.clientY,
-      };
+      drag = startDrag(
+        event.pointerId,
+        event.clientX,
+        event.clientY,
+        performance.now(),
+      );
     };
 
     const onPointerMove = (event: PointerEvent) => {
-      if (!drag || event.pointerId !== drag.id) {
+      if (!drag || event.pointerId !== drag.pointerId) {
         return;
       }
 
-      if (!drag.captured) {
+      if (event.pointerType === 'mouse' && event.buttons === 0) {
+        drag = null;
+        return;
+      }
+
+      if (!drag.dragging) {
         if (
           !exceedsDragThreshold(
             drag.startX,
@@ -354,7 +372,6 @@ export const useGlobeMotion = ({
           return;
         }
 
-        drag.captured = true;
         onSelectRef.current(null);
 
         tryCapturePointer(container, event.pointerId);
@@ -362,33 +379,25 @@ export const useGlobeMotion = ({
         wake();
       }
 
-      const now = performance.now();
-      const next = applyDrag(
+      const moved = moveDrag(
+        drag,
         motion,
-        drag.velocity,
-        event.clientX - drag.x,
-        event.clientY - drag.y,
-        (now - drag.t) / 1000,
+        event.clientX,
+        event.clientY,
+        performance.now(),
       );
-
-      motion = next.motion;
-      drag.velocity = next.velocity;
-      drag.x = event.clientX;
-      drag.y = event.clientY;
-      drag.t = now;
+      drag = moved.drag;
+      motion = moved.motion;
     };
 
-    const endDrag = (event: PointerEvent, isTap: boolean) => {
-      if (!drag || event.pointerId !== drag.id) {
+    const endDrag = (event: PointerEvent, selectOnRelease: boolean) => {
+      if (!drag || event.pointerId !== drag.pointerId) {
         return;
       }
 
-      if (drag.captured) {
-        motion = {
-          ...motion,
-          ...releaseVelocity(drag.velocity, performance.now() - drag.t),
-        };
-      } else if (isTap) {
+      if (drag.dragging) {
+        motion = releaseDrag(drag, motion, performance.now());
+      } else if (selectOnRelease) {
         const point = toGlobeUnits(
           event.clientX,
           event.clientY,
@@ -402,7 +411,7 @@ export const useGlobeMotion = ({
     };
 
     const onPointerUp = (event: PointerEvent) => endDrag(event, true);
-    const onPointerCancel = (event: PointerEvent) => endDrag(event, false);
+    const onPointerInterrupted = (event: PointerEvent) => endDrag(event, false);
 
     const onKeyDown = (event: KeyboardEvent) => {
       const next = nudge(motion, event.key);
@@ -416,12 +425,12 @@ export const useGlobeMotion = ({
       draw();
     };
 
-    const onReducedChange = (event: MediaQueryListEvent) => {
-      reduced = event.matches;
+    const onReducedMotionChange = (event: MediaQueryListEvent) => {
+      prefersReducedMotion = event.matches;
       wake();
     };
 
-    const resizeObserver = new ResizeObserver(([entry]) => {
+    const sizeObserver = new ResizeObserver(([entry]) => {
       size = entry.contentRect.width;
       const dpr = Math.min(window.devicePixelRatio || 1, GLOBE_MAX_DPR);
       canvas.width = Math.round(size * dpr);
@@ -435,12 +444,12 @@ export const useGlobeMotion = ({
       drawMarkers(createView(motion.lat, motion.lon));
     };
 
-    const tooltipObserver = new ResizeObserver(([entry]) => {
+    const tooltipSizeObserver = new ResizeObserver(([entry]) => {
       tooltipBounds.width = entry.contentRect.width;
       drawMarkers(createView(motion.lat, motion.lon));
     });
 
-    const intersectionObserver = new IntersectionObserver(([entry]) => {
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       container.toggleAttribute('data-paused', !visible);
 
@@ -454,64 +463,66 @@ export const useGlobeMotion = ({
     container.addEventListener('pointerdown', onPointerDown);
     container.addEventListener('pointermove', onPointerMove);
     container.addEventListener('pointerup', onPointerUp);
-    container.addEventListener('pointercancel', onPointerCancel);
-    container.addEventListener('lostpointercapture', onPointerCancel);
+    container.addEventListener('pointercancel', onPointerInterrupted);
+    container.addEventListener('lostpointercapture', onPointerInterrupted);
     container.addEventListener('keydown', onKeyDown);
-    reducedQuery.addEventListener('change', onReducedChange);
-    resizeObserver.observe(container);
+    reducedMotionQuery.addEventListener('change', onReducedMotionChange);
+    sizeObserver.observe(container);
 
     if (tooltipRef.current) {
-      tooltipObserver.observe(tooltipRef.current);
+      tooltipSizeObserver.observe(tooltipRef.current);
     }
-    intersectionObserver.observe(container);
-    const themeObserver = new MutationObserver(() => {
+    visibilityObserver.observe(container);
+    const rootObserver = new MutationObserver(() => {
       ink = readColor('--ink', COLORS.ink);
       coral = readColor('--coral', COLORS.coral);
       draw();
+      wake();
     });
-    themeObserver.observe(document.documentElement, {
-      attributeFilter: ['class'],
+    rootObserver.observe(document.documentElement, {
+      attributeFilter: ['class', MOTION_PAUSED_ATTRIBUTE],
       attributes: true,
     });
     window.addEventListener('resize', onWindowResize);
-    controls.current = { draw, measureTooltipBounds, wake };
+    controlsRef.current = { draw, measureTooltipBounds, wake };
 
     return () => {
       sleep();
-      controls.current = null;
+      controlsRef.current = null;
       container.removeEventListener('pointerdown', onPointerDown);
       container.removeEventListener('pointermove', onPointerMove);
       container.removeEventListener('pointerup', onPointerUp);
-      container.removeEventListener('pointercancel', onPointerCancel);
-      container.removeEventListener('lostpointercapture', onPointerCancel);
+      container.removeEventListener('pointercancel', onPointerInterrupted);
+      container.removeEventListener('lostpointercapture', onPointerInterrupted);
       container.removeEventListener('keydown', onKeyDown);
-      reducedQuery.removeEventListener('change', onReducedChange);
+      reducedMotionQuery.removeEventListener('change', onReducedMotionChange);
       window.removeEventListener('resize', onWindowResize);
-      themeObserver.disconnect();
-      resizeObserver.disconnect();
-      tooltipObserver.disconnect();
-      intersectionObserver.disconnect();
+      rootObserver.disconnect();
+      sizeObserver.disconnect();
+      tooltipSizeObserver.disconnect();
+      visibilityObserver.disconnect();
     };
-  }, [canvasRef, containerRef, meRef, tooltipRef, youRef]);
+  }, [canvasRef, containerRef, homeMarkerRef, tooltipRef, visitorMarkerRef]);
 
   useEffect(() => {
-    tipRef.current = tip;
+    selectedMarkerRef.current = selectedMarker;
 
-    if (tip) {
-      controls.current?.measureTooltipBounds();
+    if (selectedMarker !== null) {
+      controlsRef.current?.measureTooltipBounds();
     }
 
-    controls.current?.draw();
-    controls.current?.wake();
-  }, [tip]);
+    controlsRef.current?.draw();
+    controlsRef.current?.wake();
+  }, [selectedMarker]);
 
   useEffect(() => {
-    visitorRef.current = visitorCoords;
-    controls.current?.draw();
+    visitorCoordsRef.current = visitorCoords;
+    controlsRef.current?.draw();
   }, [visitorCoords]);
 
   useEffect(() => {
-    dotsRef.current = dots.length > 0 ? toDotLayer(dots) : null;
-    controls.current?.draw();
-  }, [dots]);
+    visitorDotLayerRef.current =
+      visitorDots.length > 0 ? toDotLayer(visitorDots) : null;
+    controlsRef.current?.draw();
+  }, [visitorDots]);
 };

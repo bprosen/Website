@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { getDefaultNormalizer, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { WORK } from '~/constants';
+import { NEW_TAB_HINT, WORK } from '~/constants';
 import { WorkEntry } from './WorkEntry';
 
 const [taiv, renatus] = WORK;
@@ -10,11 +10,15 @@ describe('WorkEntry', () => {
     render(<WorkEntry entry={taiv} first />);
 
     expect(
-      screen.getByRole('heading', { level: 3, name: 'Taiv' }),
+      screen.getByRole('heading', { level: 3, name: taiv.company }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Software Developer')).toBeInTheDocument();
-    expect(screen.getByText('Billions')).toBeInTheDocument();
-    expect(screen.getByText(taiv.summary)).toBeInTheDocument();
+    expect(screen.getByText(taiv.role)).toBeInTheDocument();
+    expect(screen.getByText(taiv.stats?.[0]?.value ?? '')).toBeInTheDocument();
+    expect(
+      screen.getByText(taiv.summary, {
+        normalizer: getDefaultNormalizer({ collapseWhitespace: false }),
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('list', { name: 'Tech used' })).toBeInTheDocument();
   });
 
@@ -22,7 +26,7 @@ describe('WorkEntry', () => {
     const { container } = render(<WorkEntry entry={taiv} first />);
 
     expect(container.querySelector('#w1')).toBeInTheDocument();
-    expect(container.querySelector('.w1')).toHaveClass('pb-16');
+    expect(container.querySelector('.timeline-w1')).toHaveClass('pb-16');
   });
 
   it('adds a collage when the entry has one', () => {
@@ -36,13 +40,15 @@ describe('WorkEntry', () => {
 
   it('links out to the project code when the entry has a link', () => {
     render(<WorkEntry entry={renatus} last />);
-    const link = screen.getByRole('link', { name: 'View Momentum on GitHub' });
+    const link = screen.getByRole('link', {
+      name: `View Momentum on GitHub ${NEW_TAB_HINT}`,
+    });
 
     expect(link).toHaveTextContent(/^View Momentum$/);
 
     expect(link).toHaveAttribute('href', 'https://github.com/bprosen/Momentum');
     expect(link).toHaveAttribute('target', '_blank');
-    expect(link).toHaveAttribute('rel', 'noopener');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
   it('has no project link otherwise', () => {

@@ -1,4 +1,5 @@
-import { BRANDS, type BrandName } from '~/constants';
+import { BRAND_VIEW_BOX, BRANDS, type BrandName } from '~/constants';
+import type { Brand } from '~/types';
 import { isDarkBrand } from '~/utils';
 
 type BrandIconProps = {
@@ -14,7 +15,7 @@ export const BrandIcon = ({
   name,
   tinted = true,
 }: BrandIconProps) => {
-  const brand = BRANDS[name];
+  const brand: Brand = BRANDS[name];
 
   return (
     <svg
@@ -22,7 +23,7 @@ export const BrandIcon = ({
       aria-label={label}
       className={className}
       role={label ? 'img' : undefined}
-      viewBox='0 0 24 24'
+      viewBox={brand.viewBox ?? BRAND_VIEW_BOX}
     >
       <path
         className={

@@ -15,6 +15,6 @@ describe('WorkNav', () => {
     ).toEqual(['#w1', '#w2', '#w3', '#w4']);
     expect(
       within(nav).getByRole('link', { name: /Renatus Network/ }),
-    ).toHaveClass('spy-w2');
+    ).toHaveClass('timeline-link-w2');
   });
 });

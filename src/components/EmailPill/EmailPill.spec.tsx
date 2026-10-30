@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { EMAIL, MAILTO } from '~/constants';
+import { EMAIL, EMAIL_HREF } from '~/constants';
 import { EmailPill } from './EmailPill';
 
 describe('EmailPill', () => {
@@ -10,7 +10,7 @@ describe('EmailPill', () => {
 
     expect(screen.getByRole('link', { name: EMAIL })).toHaveAttribute(
       'href',
-      MAILTO,
+      EMAIL_HREF,
     );
   });
 

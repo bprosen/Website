@@ -109,6 +109,29 @@ describe('useTheme', () => {
     expect(document.documentElement).toHaveClass('dark');
   });
 
+  it('keeps following the system when the stored value is not a theme', async () => {
+    localStorage.setItem(THEME_STORAGE_KEY, 'system');
+    renderHook(() => useTheme());
+
+    prefersDark = true;
+    await act(async () => systemListener());
+
+    expect(document.documentElement).toHaveClass('dark');
+  });
+
+  it('matches the browser chrome color to the chosen theme', async () => {
+    document.head.innerHTML = '<meta name="theme-color" content="#f4f1e8">';
+    const { result } = renderHook(() => useTheme());
+
+    await act(async () => result.current.toggle());
+
+    expect(document.querySelector('meta[name="theme-color"]')).toHaveAttribute(
+      'content',
+      '#121914',
+    );
+    document.head.innerHTML = '';
+  });
+
   it('still switches when storage is unavailable', async () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('blocked');

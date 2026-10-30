@@ -11,7 +11,7 @@ export const Portrait = ({ className }: PortraitProps) => (
   <MediaLightbox
     alt={PORTRAIT.alt}
     className={cn(
-      'relative size-22 overflow-hidden rounded-full border-4 border-background shadow-[0_6px_16px_rgb(23_32_26/0.15)]',
+      'border-background relative size-22 overflow-hidden rounded-full border-4 shadow-[0_6px_16px_rgb(23_32_26/0.15)]',
       className,
     )}
     height={PORTRAIT.height}

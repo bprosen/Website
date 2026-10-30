@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { resolveVisitor, UNKNOWN_VISITOR, type Visitor } from '~/utils';
+import type { Visitor } from '~/types';
+import { resolveVisitor, UNKNOWN_VISITOR } from '~/utils';
 
 const currentZone = () => {
   try {
@@ -11,10 +12,18 @@ const currentZone = () => {
 
 const keepVisitorUnknown = () => {};
 
-export const useVisitor = (): Visitor => {
+type UseVisitorOptions = {
+  enabled: boolean;
+};
+
+export const useVisitor = ({ enabled }: UseVisitorOptions): Visitor => {
   const [visitor, setVisitor] = useState<Visitor>(UNKNOWN_VISITOR);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     let active = true;
     const zone = currentZone();
 
@@ -33,7 +42,7 @@ export const useVisitor = (): Visitor => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [enabled]);
 
   return visitor;
 };

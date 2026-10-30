@@ -1,9 +1,9 @@
-import { VISITORS_TIMEOUT_MS } from '~/constants';
-import type { LatLon } from '~/types';
+import { REDIS_TIMEOUT_MS } from '~/constants';
+import type { LatLon, RedisCommand, RedisConfig } from '~/types';
 import {
+  buildRateLimitPipeline,
   parsePipelineResponse,
-  type RedisCommand,
-  type RedisConfig,
+  parseRequestCount,
 } from '~/utils';
 import { requestJson } from './request';
 
@@ -17,5 +17,18 @@ export const runVisitorsPipeline = (
     headers: { Authorization: `Bearer ${token}` },
     method: 'POST',
     parse: parsePipelineResponse,
-    timeoutMs: VISITORS_TIMEOUT_MS,
+    timeoutMs: REDIS_TIMEOUT_MS,
+  });
+
+export const countVisitorRequest = (
+  { token, url }: RedisConfig,
+  key: string,
+): Promise<number> =>
+  requestJson(`${url}/pipeline`, {
+    body: buildRateLimitPipeline(key),
+    fallback: 0,
+    headers: { Authorization: `Bearer ${token}` },
+    method: 'POST',
+    parse: parseRequestCount,
+    timeoutMs: REDIS_TIMEOUT_MS,
   });

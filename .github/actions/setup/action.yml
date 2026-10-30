@@ -1,0 +1,17 @@
+name: Setup
+description: Install pnpm and Node, then restore the cached node_modules
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v6
+
+    - uses: actions/setup-node@v7
+      with:
+        node-version: 'lts/*'
+
+    - uses: actions/cache/restore@v6
+      with:
+        fail-on-cache-miss: true
+        key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+        path: node_modules

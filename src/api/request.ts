@@ -1,4 +1,4 @@
-export type RequestOptions<T> = {
+type RequestOptions<T> = {
   body?: unknown;
   fallback: T;
   headers?: Record<string, string>;
@@ -8,7 +8,7 @@ export type RequestOptions<T> = {
   timeoutMs?: number;
 };
 
-const toSignal = (signal?: AbortSignal, timeoutMs?: number) => {
+const withTimeout = (signal?: AbortSignal, timeoutMs?: number) => {
   const timeout =
     timeoutMs === undefined ? undefined : AbortSignal.timeout(timeoutMs);
 
@@ -41,10 +41,15 @@ export const requestJson = async <T>(
         ? { 'Content-Type': 'application/json', ...headers }
         : headers,
       method,
-      signal: toSignal(signal, timeoutMs),
+      signal: withTimeout(signal, timeoutMs),
     });
 
-    return response.ok ? parse(await response.json()) : fallback;
+    if (!response.ok) {
+      await response.body?.cancel();
+      return fallback;
+    }
+
+    return parse(await response.json());
   } catch {
     return fallback;
   }

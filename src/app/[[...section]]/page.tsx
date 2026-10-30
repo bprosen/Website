@@ -23,7 +23,7 @@ export const generateMetadata = async ({
   const title = sectionTitle(section ?? null);
 
   return {
-    alternates: { canonical: path },
+    alternates: { canonical: sectionPath(null) },
     openGraph: {
       description: OG_DESCRIPTION,
       images: [OG_IMAGE],
@@ -32,12 +32,7 @@ export const generateMetadata = async ({
       url: path,
     },
     title,
-    twitter: {
-      card: 'summary_large_image',
-      description: OG_DESCRIPTION,
-      images: [OG_IMAGE],
-      title,
-    },
+    twitter: { card: 'summary_large_image' },
   };
 };
 

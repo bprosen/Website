@@ -5,6 +5,7 @@ import { WorkProgress } from './WorkProgress';
 
 const READING_LINE = window.innerHeight / 2;
 const ENTRY_HEIGHT = 400;
+const ENTRY_IDS = WORK.map(({ id }) => id);
 
 let scrollY = 0;
 
@@ -40,7 +41,7 @@ const scrollTo = (y: number) =>
   });
 
 const renderBar = () => {
-  const { container } = render(<WorkProgress />);
+  const { container } = render(<WorkProgress entryIds={ENTRY_IDS} />);
   const bar = container.firstElementChild as HTMLElement;
   const fills = [...bar.querySelectorAll<HTMLElement>('[data-fill]')];
   return { bar, fills };
@@ -100,12 +101,18 @@ describe('WorkProgress', () => {
     expect(bar).toHaveAttribute('data-active', 'false');
   });
 
-  it('stops listening on unmount', () => {
+  it('stops listening and cancels the pending frame on unmount', () => {
+    const cancelFrame = vi.fn();
+    vi.stubGlobal('requestAnimationFrame', () => 7);
+    vi.stubGlobal('cancelAnimationFrame', cancelFrame);
     const removeListener = vi.spyOn(window, 'removeEventListener');
-    const { unmount } = render(<WorkProgress />);
+    const { unmount } = render(<WorkProgress entryIds={ENTRY_IDS} />);
+    window.dispatchEvent(new Event('scroll'));
 
     unmount();
 
     expect(removeListener).toHaveBeenCalledWith('scroll', expect.any(Function));
+    expect(removeListener).toHaveBeenCalledWith('resize', expect.any(Function));
+    expect(cancelFrame).toHaveBeenCalledWith(7);
   });
 });

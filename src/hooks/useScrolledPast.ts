@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 
-export const useScrolledPast = (targetId: string, coverId: string) => {
+type UseScrolledPastOptions = {
+  coverId: string;
+  targetId: string;
+};
+
+export const useScrolledPast = ({
+  coverId,
+  targetId,
+}: UseScrolledPastOptions) => {
   const [scrolledPast, setScrolledPast] = useState(false);
 
   useEffect(() => {

@@ -2,16 +2,15 @@ import { cn } from '~/lib/ui';
 import type { MediaSlot } from '~/types';
 import { MediaTile } from '../MediaTile';
 
-const TILE_PLACEMENT = [
-  'col-span-2 aspect-[2/1]',
-  'aspect-video',
-  'aspect-video',
-];
-const TILE_SIZES = [
-  '(min-width: 760px) 720px, calc(100vw - 64px)',
-  '(min-width: 760px) 354px, calc(50vw - 38px)',
-  '(min-width: 760px) 354px, calc(50vw - 38px)',
-];
+const WIDE_TILE = {
+  layoutClassName: 'col-span-2 aspect-[2/1]',
+  sizes: '(min-width: 760px) 720px, calc(100vw - 64px)',
+};
+const HALF_TILE = {
+  layoutClassName: 'aspect-video',
+  sizes: '(min-width: 760px) 354px, calc(50vw - 38px)',
+};
+const TILE_LAYOUTS = [WIDE_TILE, HALF_TILE, HALF_TILE];
 
 type CollageProps = {
   className?: string;
@@ -22,19 +21,20 @@ type CollageProps = {
 export const Collage = ({ className, label, slots }: CollageProps) => (
   <ul
     aria-label={label}
-    className={cn(
-      'm-0 grid max-w-[720px] list-none grid-cols-2 gap-3 p-0',
-      className,
-    )}
+    className={cn('grid max-w-[720px] grid-cols-2 gap-3', className)}
   >
-    {slots.map((slot, index) => (
-      <li className={TILE_PLACEMENT[index]} key={slot.label}>
-        <MediaTile
-          className='size-full rounded-[20px] bg-paper text-sm transition-transform duration-250 hover:scale-[1.03]'
-          sizes={TILE_SIZES[index] ?? TILE_SIZES[1]}
-          slot={slot}
-        />
-      </li>
-    ))}
+    {slots.map((slot, index) => {
+      const { layoutClassName, sizes } = TILE_LAYOUTS[index] ?? HALF_TILE;
+
+      return (
+        <li className={layoutClassName} key={slot.label}>
+          <MediaTile
+            className='bg-paper size-full rounded-[20px] text-sm transition-transform duration-250 hover:scale-[1.03]'
+            sizes={sizes}
+            slot={slot}
+          />
+        </li>
+      );
+    })}
   </ul>
 );

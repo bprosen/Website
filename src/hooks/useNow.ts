@@ -3,15 +3,15 @@ import { CLOCK_TICK_MS, CLOCK_TICK_SLACK_MS } from '~/constants';
 
 const listeners = new Set<() => void>();
 let now = 0;
-
-const currentSecond = () =>
-  Math.floor(Date.now() / CLOCK_TICK_MS) * CLOCK_TICK_MS;
 let timer: ReturnType<typeof setTimeout> | undefined;
+
+const currentTickMs = () =>
+  Math.floor(Date.now() / CLOCK_TICK_MS) * CLOCK_TICK_MS;
 
 const schedule = () => {
   timer = setTimeout(
     () => {
-      now = currentSecond();
+      now = currentTickMs();
       for (const listener of listeners) {
         listener();
       }
@@ -21,16 +21,16 @@ const schedule = () => {
   );
 };
 
-const subscribe = (listener: () => void) => {
-  listeners.add(listener);
+const subscribe = (onChange: () => void) => {
+  listeners.add(onChange);
 
   if (listeners.size === 1) {
-    now = currentSecond();
+    now = currentTickMs();
     schedule();
   }
 
   return () => {
-    listeners.delete(listener);
+    listeners.delete(onChange);
 
     if (listeners.size === 0) {
       clearTimeout(timer);
@@ -39,7 +39,7 @@ const subscribe = (listener: () => void) => {
   };
 };
 
-const getSnapshot = () => (listeners.size > 0 ? now : currentSecond());
+const getSnapshot = () => (listeners.size > 0 ? now : currentTickMs());
 const getServerSnapshot = () => null;
 
 export const useNow = (): number | null =>

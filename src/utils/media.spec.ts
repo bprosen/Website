@@ -2,14 +2,18 @@ import { describe, expect, it } from 'vitest';
 import {
   LIGHTBOX_MAX_SVH,
   LIGHTBOX_MAX_VW,
+  LIGHTBOX_RESERVE_X_PX,
   LIGHTBOX_RESERVE_X_VAR,
+  LIGHTBOX_RESERVE_Y_PX,
   LIGHTBOX_RESERVE_Y_VAR,
+  LIGHTBOX_SIDE_CONTROLS_QUERY,
   SWIPE_THRESHOLD_PX,
 } from '~/constants';
 import {
   fitToScreen,
   lightboxSizes,
   mediaPosition,
+  neighbourItems,
   swipeStep,
   toLightboxItems,
   wrapIndex,
@@ -30,7 +34,13 @@ describe('fitToScreen', () => {
 describe('lightboxSizes', () => {
   it('requests only as many pixels as the lightbox renders', () => {
     expect(lightboxSizes(1200, 1600)).toBe(
-      `min(${LIGHTBOX_MAX_VW}vw, ${LIGHTBOX_MAX_SVH * 0.75}vh, 1200px)`,
+      `min(calc(${LIGHTBOX_MAX_VW}vw - 0px), calc(${LIGHTBOX_MAX_SVH * 0.75}vh - 0px), 1200px)`,
+    );
+  });
+
+  it('subtracts the space kept clear for gallery arrows', () => {
+    expect(lightboxSizes(1200, 1600, true)).toBe(
+      `${LIGHTBOX_SIDE_CONTROLS_QUERY} min(calc(${LIGHTBOX_MAX_VW}vw - ${LIGHTBOX_RESERVE_X_PX}px), calc(${LIGHTBOX_MAX_SVH * 0.75}vh - 0px), 1200px), min(calc(${LIGHTBOX_MAX_VW}vw - 0px), calc(${LIGHTBOX_MAX_SVH * 0.75}vh - ${LIGHTBOX_RESERVE_Y_PX * 0.75}px), 1200px)`,
     );
   });
 });
@@ -46,6 +56,7 @@ describe('toLightboxItems', () => {
           height: 450,
           label: 'Clip',
           src: '/clip.jpg',
+          tint: 'red',
           video: '/clip.mp4',
           width: 800,
         },
@@ -62,6 +73,7 @@ describe('toLightboxItems', () => {
         alt: 'Run',
         height: 450,
         src: '/clip.jpg',
+        tint: 'red',
         video: '/clip.mp4',
         width: 800,
       },
@@ -92,5 +104,16 @@ describe('swipeStep', () => {
 describe('mediaPosition', () => {
   it('counts from one', () => {
     expect(mediaPosition(0, 4)).toBe('1 of 4');
+  });
+});
+
+describe('neighbourItems', () => {
+  it('returns the items on either side, wrapping at the ends', () => {
+    expect(neighbourItems(['a', 'b', 'c', 'd'], 0)).toEqual(['d', 'b']);
+  });
+
+  it('lists a shared neighbour once and never the item itself', () => {
+    expect(neighbourItems(['a', 'b'], 0)).toEqual(['b']);
+    expect(neighbourItems(['a'], 0)).toEqual([]);
   });
 });

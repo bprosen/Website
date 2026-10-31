@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import {
   type CSSProperties,
   type KeyboardEvent,
@@ -12,15 +11,13 @@ import {
   ENLARGE_MEDIA_LABEL,
   LIGHTBOX_GALLERY_RESERVE_CLASS,
 } from '~/constants';
-import { usePrefersReducedMotion, useSwipe } from '~/hooks';
+import { useSwipe } from '~/hooks';
 import { cn } from '~/lib/ui';
 import type { LightboxItem } from '~/types';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '~/ui';
-import { fitToScreen, lightboxSizes, mediaPosition, wrapIndex } from '~/utils';
+import { mediaPosition, neighbourItems, wrapIndex } from '~/utils';
+import { LightboxMedia } from '../LightboxMedia';
 import { LightboxStepButton } from '../LightboxStepButton';
-
-const ENLARGED_MEDIA_CLASS =
-  'block h-auto rounded-2xl object-cover shadow-[0_24px_64px_rgb(0_0_0/0.45)]';
 
 type MediaLightboxProps = {
   children: ReactNode;
@@ -39,7 +36,6 @@ export const MediaLightbox = ({
   item,
   style,
 }: MediaLightboxProps) => {
-  const reducedMotion = usePrefersReducedMotion();
   const items = gallery ?? [item];
   const startIndex = Math.max(
     0,
@@ -47,7 +43,6 @@ export const MediaLightbox = ({
   );
   const [index, setIndex] = useState(startIndex);
   const shown = items[index] ?? item;
-  const enlargedStyle = fitToScreen(shown.width, shown.height);
   const hasNeighbours = items.length > 1;
 
   const step = (delta: number) =>
@@ -96,34 +91,12 @@ export const MediaLightbox = ({
         {...swipeHandlers}
       >
         <DialogTitle className='sr-only'>{shown.alt}</DialogTitle>
-        {shown.video ? (
-          <video
-            autoPlay={!reducedMotion}
-            className={ENLARGED_MEDIA_CLASS}
-            controls
-            disablePictureInPicture
-            disableRemotePlayback
-            key={shown.src}
-            loop
-            muted
-            playsInline
-            poster={shown.src}
-            src={shown.video}
-            style={enlargedStyle}
-          />
-        ) : (
-          <Image
-            alt=''
-            className={ENLARGED_MEDIA_CLASS}
-            height={shown.height}
-            key={shown.src}
-            loading='eager'
-            sizes={lightboxSizes(shown.width, shown.height)}
-            src={shown.src}
-            style={enlargedStyle}
-            width={shown.width}
-          />
-        )}
+        <LightboxMedia
+          hasControls={hasNeighbours}
+          item={shown}
+          key={shown.src}
+          neighbours={neighbourItems(items, index)}
+        />
         {hasNeighbours && (
           <p aria-live='polite' className='sr-only'>
             {mediaPosition(index, items.length)}

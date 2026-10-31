@@ -29,6 +29,7 @@ type NoMediaFile = {
 
 export type LightboxItem = MediaFile & {
   alt: string;
+  tint?: string;
 };
 
 export type MediaSlot = {

@@ -3,13 +3,15 @@ import Image, { type ImageProps } from 'next/image';
 import type { CSSProperties } from 'react';
 import { PLACEHOLDER_ICON_STROKE_WIDTH } from '~/constants';
 import { cn } from '~/lib/ui';
-import type { MediaSlot } from '~/types';
+import type { LightboxItem, MediaSlot } from '~/types';
+import { toLightboxItem } from '~/utils';
 import { LazyVideo } from '../LazyVideo';
 import { MediaLightbox } from '../MediaLightbox';
 
 type MediaTileProps = {
   className?: string;
   focusable?: boolean;
+  gallery?: readonly LightboxItem[];
   iconClassName?: string;
   loading?: ImageProps['loading'];
   sizes: string;
@@ -19,6 +21,7 @@ type MediaTileProps = {
 export const MediaTile = ({
   className,
   focusable,
+  gallery,
   iconClassName = 'size-7',
   loading,
   sizes,
@@ -32,14 +35,11 @@ export const MediaTile = ({
   if (slot.src) {
     return (
       <MediaLightbox
-        alt={alt}
         className={cn('relative overflow-hidden', className)}
         focusable={focusable}
-        height={slot.height}
-        src={slot.src}
+        gallery={gallery}
+        item={toLightboxItem(slot)}
         style={tintStyle}
-        video={slot.video}
-        width={slot.width}
       >
         {slot.video ? (
           <LazyVideo

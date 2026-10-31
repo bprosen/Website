@@ -10,6 +10,7 @@ import {
 import { useAutoScroll } from '~/hooks';
 import { cn } from '~/lib/ui';
 import type { MediaSlot } from '~/types';
+import { toLightboxItems } from '~/utils';
 import { MediaTile } from '../MediaTile';
 
 const TILE_CLASS =
@@ -28,6 +29,7 @@ export const PhotoStrip = ({
 }: PhotoStripProps) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   useAutoScroll(scrollerRef, PHOTO_STRIP_SPEED_PX_PER_SECOND);
+  const gallery = toLightboxItems(photos);
 
   const renderTiles = ({ decorative }: { decorative: boolean }) =>
     photos.map((slot) => (
@@ -42,6 +44,7 @@ export const PhotoStrip = ({
         <MediaTile
           className={TILE_CLASS}
           focusable={!decorative}
+          gallery={gallery}
           iconClassName='size-6'
           loading={loading}
           sizes='176px'

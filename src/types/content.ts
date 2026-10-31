@@ -27,6 +27,10 @@ type NoMediaFile = {
   width?: never;
 };
 
+export type LightboxItem = MediaFile & {
+  alt: string;
+};
+
 export type MediaSlot = {
   alt?: string;
   focus?: 'center' | 'top';

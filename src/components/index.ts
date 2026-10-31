@@ -10,6 +10,8 @@ export * from './HeaderHome';
 export * from './Hero';
 export * from './LazyVideo';
 export * from './LegendButton';
+export * from './LightboxMedia';
+export * from './LightboxStepButton';
 export * from './LocalClock';
 export * from './MarkerTooltip';
 export * from './MediaLightbox';

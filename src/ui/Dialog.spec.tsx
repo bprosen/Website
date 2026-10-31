@@ -54,4 +54,21 @@ describe('Dialog', () => {
     expect(backdrop).toHaveAttribute('aria-hidden', 'true');
     expect(backdrop).toHaveAttribute('tabindex', '-1');
   });
+
+  it('renders controls outside the content wrapper so they pin to the screen', async () => {
+    const user = userEvent.setup();
+    render(
+      <Dialog>
+        <DialogTrigger>Open</DialogTrigger>
+        <DialogContent controls={<button type='button'>Next</button>}>
+          <DialogTitle>Preview</DialogTitle>
+        </DialogContent>
+      </Dialog>,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Open' }));
+    const next = screen.getByRole('button', { name: 'Next' });
+
+    expect(next.parentElement).toBe(screen.getByRole('dialog'));
+  });
 });

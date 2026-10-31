@@ -1,8 +1,11 @@
 import { IconX } from '@tabler/icons-react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { CLOSE_DIALOG_LABEL, ICON_STROKE_WIDTH } from '~/constants';
 import { cn } from '~/lib/ui';
+
+export const DIALOG_ICON_BUTTON_CLASS =
+  'bg-background/85 text-foreground hover:bg-background absolute inline-flex size-11 cursor-pointer items-center justify-center rounded-full border-0 shadow-[0_6px_16px_rgb(23_32_26/0.25)] transition-[background-color,scale] duration-200 [--ring:var(--inverse-foreground)] hover:scale-105';
 
 type DialogProps = ComponentProps<typeof DialogPrimitive.Root>;
 
@@ -22,11 +25,14 @@ export const DialogTitle = ({ ...props }: DialogTitleProps) => (
   <DialogPrimitive.Title data-slot='dialog-title' {...props} />
 );
 
-type DialogContentProps = ComponentProps<typeof DialogPrimitive.Content>;
+type DialogContentProps = ComponentProps<typeof DialogPrimitive.Content> & {
+  controls?: ReactNode;
+};
 
 export const DialogContent = ({
   children,
   className,
+  controls,
   ...props
 }: DialogContentProps) => (
   <DialogPrimitive.Portal>
@@ -50,9 +56,13 @@ export const DialogContent = ({
         tabIndex={-1}
       />
       <div className='relative'>{children}</div>
+      {controls}
       <DialogPrimitive.Close
         aria-label={CLOSE_DIALOG_LABEL}
-        className='bg-background/85 text-foreground hover:bg-background absolute top-[clamp(12px,3vw,24px)] right-[clamp(12px,3vw,24px)] inline-flex size-11 cursor-pointer items-center justify-center rounded-full border-0 shadow-[0_6px_16px_rgb(23_32_26/0.25)] transition-[background-color,scale] duration-200 [--ring:var(--inverse-foreground)] hover:scale-105'
+        className={cn(
+          DIALOG_ICON_BUTTON_CLASS,
+          'top-[clamp(12px,3vw,24px)] right-[clamp(12px,3vw,24px)]',
+        )}
         data-slot='dialog-close'
       >
         <IconX aria-hidden className='size-5' stroke={ICON_STROKE_WIDTH} />

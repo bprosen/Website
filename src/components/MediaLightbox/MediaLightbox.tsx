@@ -1,79 +1,106 @@
 'use client';
 
-import Image from 'next/image';
-import type { CSSProperties, ReactNode } from 'react';
-import { ENLARGE_MEDIA_LABEL } from '~/constants';
-import { usePrefersReducedMotion } from '~/hooks';
+import {
+  type CSSProperties,
+  type KeyboardEvent,
+  type ReactNode,
+  useState,
+} from 'react';
+import {
+  ARROW_KEY_STEPS,
+  ENLARGE_MEDIA_LABEL,
+  LIGHTBOX_GALLERY_RESERVE_CLASS,
+} from '~/constants';
+import { useSwipe } from '~/hooks';
 import { cn } from '~/lib/ui';
+import type { LightboxItem } from '~/types';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '~/ui';
-import { fitToScreen, lightboxSizes } from '~/utils';
-
-const ENLARGED_MEDIA_CLASS =
-  'block h-auto rounded-2xl object-cover shadow-[0_24px_64px_rgb(0_0_0/0.45)]';
+import { mediaPosition, neighbourItems, wrapIndex } from '~/utils';
+import { LightboxMedia } from '../LightboxMedia';
+import { LightboxStepButton } from '../LightboxStepButton';
 
 type MediaLightboxProps = {
-  alt: string;
   children: ReactNode;
   className?: string;
   focusable?: boolean;
-  height: number;
-  src: string;
+  gallery?: readonly LightboxItem[];
+  item: LightboxItem;
   style?: CSSProperties;
-  video?: string;
-  width: number;
 };
 
 export const MediaLightbox = ({
-  alt,
   children,
   className,
   focusable = true,
-  height,
-  src,
+  gallery,
+  item,
   style,
-  video,
-  width,
 }: MediaLightboxProps) => {
-  const reducedMotion = usePrefersReducedMotion();
-  const enlargedStyle = fitToScreen(width, height);
+  const items = gallery ?? [item];
+  const startIndex = Math.max(
+    0,
+    items.findIndex(({ src }) => src === item.src),
+  );
+  const [index, setIndex] = useState(startIndex);
+  const shown = items[index] ?? item;
+  const hasNeighbours = items.length > 1;
+
+  const step = (delta: number) =>
+    setIndex((current) => wrapIndex(current + delta, items.length));
+  const swipeHandlers = useSwipe(step);
+
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setIndex(startIndex);
+    }
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    const delta = ARROW_KEY_STEPS[event.key];
+
+    if (delta && !(event.target instanceof HTMLMediaElement)) {
+      event.preventDefault();
+      step(delta);
+    }
+  };
 
   return (
-    <Dialog>
+    <Dialog onOpenChange={handleOpenChange}>
       <DialogTrigger
-        aria-label={`${ENLARGE_MEDIA_LABEL}: ${alt}`}
+        aria-label={`${ENLARGE_MEDIA_LABEL}: ${item.alt}`}
         className={cn('block cursor-zoom-in', className)}
         style={style}
         tabIndex={focusable ? undefined : -1}
       >
         {children}
       </DialogTrigger>
-      <DialogContent>
-        <DialogTitle className='sr-only'>{alt}</DialogTitle>
-        {video ? (
-          <video
-            autoPlay={!reducedMotion}
-            className={ENLARGED_MEDIA_CLASS}
-            controls
-            disablePictureInPicture
-            disableRemotePlayback
-            loop
-            muted
-            playsInline
-            poster={src}
-            src={video}
-            style={enlargedStyle}
-          />
-        ) : (
-          <Image
-            alt=''
-            className={ENLARGED_MEDIA_CLASS}
-            height={height}
-            loading='eager'
-            sizes={lightboxSizes(width, height)}
-            src={src}
-            style={enlargedStyle}
-            width={width}
-          />
+      <DialogContent
+        className={cn(hasNeighbours && LIGHTBOX_GALLERY_RESERVE_CLASS)}
+        controls={
+          hasNeighbours && (
+            <>
+              <LightboxStepButton
+                direction='previous'
+                onClick={() => step(-1)}
+              />
+              <LightboxStepButton direction='next' onClick={() => step(1)} />
+            </>
+          )
+        }
+        onKeyDown={handleKeyDown}
+        {...swipeHandlers}
+      >
+        <DialogTitle className='sr-only'>{shown.alt}</DialogTitle>
+        <LightboxMedia
+          hasControls={hasNeighbours}
+          item={shown}
+          key={shown.src}
+          neighbours={neighbourItems(items, index)}
+        />
+        {hasNeighbours && (
+          <p aria-live='polite' className='sr-only'>
+            {mediaPosition(index, items.length)}
+          </p>
         )}
       </DialogContent>
     </Dialog>

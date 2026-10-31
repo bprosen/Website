@@ -5,6 +5,11 @@ import {
   ABOUT_PHOTOS,
   BRANDS,
   LAND,
+  LIGHTBOX_GALLERY_RESERVE_CLASS,
+  LIGHTBOX_RESERVE_X_PX,
+  LIGHTBOX_RESERVE_X_VAR,
+  LIGHTBOX_RESERVE_Y_PX,
+  LIGHTBOX_RESERVE_Y_VAR,
   PORTRAIT,
   RESUME_PATH,
   SECTIONS,
@@ -156,5 +161,16 @@ describe('constants', () => {
     ]) {
       expect(TIME_ZONES, zone).toHaveProperty([zone]);
     }
+  });
+});
+
+describe('LIGHTBOX_GALLERY_RESERVE_CLASS', () => {
+  it('reserves the same space the image sizes hint subtracts', () => {
+    expect(LIGHTBOX_GALLERY_RESERVE_CLASS).toContain(
+      `[${LIGHTBOX_RESERVE_Y_VAR}:${LIGHTBOX_RESERVE_Y_PX}px]`,
+    );
+    expect(LIGHTBOX_GALLERY_RESERVE_CLASS).toContain(
+      `sm:[${LIGHTBOX_RESERVE_X_VAR}:${LIGHTBOX_RESERVE_X_PX}px]`,
+    );
   });
 });

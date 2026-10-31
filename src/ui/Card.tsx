@@ -6,7 +6,7 @@ type CardProps = ComponentProps<'div'>;
 export const Card = ({ className, ...props }: CardProps) => (
   <div
     className={cn(
-      'flex flex-col gap-6 rounded-[28px] border bg-card p-7 text-card-foreground',
+      'bg-card text-card-foreground flex flex-col gap-6 rounded-[28px] border p-7',
       className,
     )}
     data-slot='card'
@@ -40,5 +40,5 @@ export const CardTitle = ({ className, ...props }: CardTitleProps) => (
 type CardContentProps = ComponentProps<'div'>;
 
 export const CardContent = ({ className, ...props }: CardContentProps) => (
-  <div className={cn(className)} data-slot='card-content' {...props} />
+  <div className={className} data-slot='card-content' {...props} />
 );

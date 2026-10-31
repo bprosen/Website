@@ -2,9 +2,10 @@
 
 import { IconMoon, IconSun } from '@tabler/icons-react';
 import type { MouseEvent } from 'react';
-import { ICON_STROKE } from '~/constants';
+import { DARK_THEME_LABEL, ICON_STROKE_WIDTH } from '~/constants';
 import { useTheme } from '~/hooks';
 import { cn } from '~/lib/ui';
+import { Switch, SwitchThumb } from '~/ui';
 
 type ThemeToggleProps = {
   className?: string;
@@ -22,41 +23,39 @@ export const ThemeToggle = ({ className }: ThemeToggleProps) => {
   };
 
   return (
-    <button
-      aria-checked={theme === 'dark'}
-      aria-label='Dark theme'
+    <Switch
+      aria-label={DARK_THEME_LABEL}
+      checked={theme === 'dark'}
       className={cn(
-        'group inline-flex min-h-11 cursor-pointer items-center border-0 bg-transparent p-0 outline-none',
+        'group inline-flex min-h-11 items-center outline-none',
         className,
       )}
       onClick={handleClick}
-      role='switch'
-      type='button'
     >
-      <span className='relative flex h-8 w-15 items-center rounded-full border border-border bg-accent/60 p-[3px] transition-colors duration-200 group-hover:bg-accent group-focus-visible:ring-[3px] group-focus-visible:ring-ring/50'>
+      <span className='border-border bg-accent/60 group-hover:bg-accent group-focus-visible:outline-ring relative flex h-8 w-15 items-center rounded-full border p-[3px] transition-colors duration-200 group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-solid'>
         <IconSun
           aria-hidden
           className={cn(TRACK_ICON_CLASS, 'left-2')}
-          stroke={ICON_STROKE}
+          stroke={ICON_STROKE_WIDTH}
         />
         <IconMoon
           aria-hidden
           className={cn(TRACK_ICON_CLASS, 'right-2')}
-          stroke={ICON_STROKE}
+          stroke={ICON_STROKE_WIDTH}
         />
-        <span className='relative z-1 flex size-6 items-center justify-center rounded-full bg-card text-foreground shadow-[0_2px_6px_rgb(0_0_0/0.18)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none dark:translate-x-7'>
+        <SwitchThumb className='bg-card text-foreground ring-muted-foreground ease-out-expo relative z-1 flex size-6 items-center justify-center rounded-full shadow-[0_2px_6px_rgb(0_0_0/0.18)] ring-1 transition-transform duration-300 motion-reduce:transition-none dark:translate-x-7'>
           <IconSun
             aria-hidden
             className='size-3.5 dark:hidden'
-            stroke={ICON_STROKE}
+            stroke={ICON_STROKE_WIDTH}
           />
           <IconMoon
             aria-hidden
             className='hidden size-3.5 dark:block'
-            stroke={ICON_STROKE}
+            stroke={ICON_STROKE_WIDTH}
           />
-        </span>
+        </SwitchThumb>
       </span>
-    </button>
+    </Switch>
   );
 };

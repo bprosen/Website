@@ -3,25 +3,32 @@ import {
   GLOBE_AUTO_SPIN_DEG_PER_SECOND,
   GLOBE_DRAG_LAT_PER_PX,
   GLOBE_DRAG_LON_PER_PX,
+  GLOBE_FLING_NEWEST_WEIGHT,
   GLOBE_FLING_WINDOW_MS,
+  GLOBE_INITIAL_VIEW,
   GLOBE_INTRO_SPIN_DEG_PER_SECOND,
   GLOBE_KEY_STEP_LAT,
   GLOBE_KEY_STEP_LON,
   GLOBE_LAT_LIMIT,
   GLOBE_MAX_FLING_SPEED,
   GLOBE_MAX_STEP_SECONDS,
-  GLOBE_START,
 } from '~/constants';
 import {
   applyDrag,
+  centerOn,
   exceedsDragThreshold,
   hitTestMarker,
   introMotion,
   isAtRest,
   type Motion,
+  moveDrag,
   nudge,
+  releaseDrag,
   releaseVelocity,
+  shortestLonDelta,
+  startDrag,
   stepIdle,
+  turnToward,
 } from './globeMotion';
 
 const still: Motion = { lat: 0, lon: 0, vLat: 0, vLon: 0 };
@@ -104,6 +111,15 @@ describe('applyDrag', () => {
     expect(velocity.lon).toBeCloseTo(86);
   });
 
+  it('tracks a vertical fling separately from a horizontal one', () => {
+    const { velocity } = applyDrag(still, { lat: 0, lon: 0 }, 0, 10, 0.1);
+
+    expect(velocity.lat).toBeCloseTo(
+      GLOBE_FLING_NEWEST_WEIGHT * ((10 * GLOBE_DRAG_LAT_PER_PX) / 0.1),
+    );
+    expect(velocity.lon).toBe(0);
+  });
+
   it('guards against a zero time step', () => {
     const { velocity } = applyDrag(still, { lat: 0, lon: 0 }, -1, 0, 0);
 
@@ -180,13 +196,13 @@ describe('exceedsDragThreshold', () => {
 
 describe('hitTestMarker', () => {
   const markers = [
-    { id: 'me' as const, visible: true, x: 0, y: 0 },
-    { id: 'you' as const, visible: true, x: 20, y: 0 },
+    { id: 'home' as const, visible: true, x: 0, y: 0 },
+    { id: 'visitor' as const, visible: true, x: 20, y: 0 },
   ];
 
   it('hits a marker within the radius', () => {
-    expect(hitTestMarker({ x: -12.9, y: 0 }, markers, 13)).toBe('me');
-    expect(hitTestMarker({ x: 0, y: 13 }, markers, 13)).toBe('me');
+    expect(hitTestMarker({ x: -12.9, y: 0 }, markers, 13)).toBe('home');
+    expect(hitTestMarker({ x: 0, y: 13 }, markers, 13)).toBe('home');
   });
 
   it('misses outside the radius', () => {
@@ -194,7 +210,7 @@ describe('hitTestMarker', () => {
   });
 
   it('picks the closest of overlapping markers', () => {
-    expect(hitTestMarker({ x: 11, y: 0 }, markers, 13)).toBe('you');
+    expect(hitTestMarker({ x: 11, y: 0 }, markers, 13)).toBe('visitor');
   });
 
   it("can't hit markers on the far side", () => {
@@ -206,7 +222,11 @@ describe('hitTestMarker', () => {
 
 describe('introMotion', () => {
   it('starts still at the resting view under reduced motion', () => {
-    expect(introMotion(true)).toEqual({ ...GLOBE_START, vLat: 0, vLon: 0 });
+    expect(introMotion(true)).toEqual({
+      ...GLOBE_INITIAL_VIEW,
+      vLat: 0,
+      vLon: 0,
+    });
   });
 
   it('spins up fast and settles facing the resting view', () => {
@@ -220,7 +240,88 @@ describe('introMotion', () => {
     }
 
     const drift = GLOBE_AUTO_SPIN_DEG_PER_SECOND * seconds;
-    expect(Math.abs(motion.lon - drift - GLOBE_START.lon)).toBeLessThan(5);
+    expect(Math.abs(motion.lon - drift - GLOBE_INITIAL_VIEW.lon)).toBeLessThan(
+      5,
+    );
     expect(motion.vLon).toBeCloseTo(GLOBE_AUTO_SPIN_DEG_PER_SECOND, 1);
+  });
+});
+
+describe('shortestLonDelta', () => {
+  it('turns the short way around the globe', () => {
+    expect(shortestLonDelta(0, 90)).toBe(90);
+    expect(shortestLonDelta(170, -170)).toBe(20);
+    expect(shortestLonDelta(-170, 170)).toBe(-20);
+    expect(shortestLonDelta(720 + 10, 0)).toBe(-10);
+  });
+});
+
+describe('turnToward', () => {
+  it('eases toward the target longitude and stops any spin', () => {
+    const turned = turnToward({ ...still, lon: 0, vLon: 9 }, 100, 0.1);
+
+    expect(turned.lon).toBeGreaterThan(0);
+    expect(turned.lon).toBeLessThan(100);
+    expect(turned.vLon).toBe(0);
+  });
+
+  it('ignores long frame gaps', () => {
+    expect(turnToward({ ...still, lon: 0 }, 100, 60).lon).toBeCloseTo(
+      turnToward({ ...still, lon: 0 }, 100, GLOBE_MAX_STEP_SECONDS).lon,
+    );
+  });
+});
+
+describe('centerOn', () => {
+  it('jumps straight to the target longitude', () => {
+    expect(centerOn({ ...still, lon: 350 }, -5).lon).toBe(355);
+  });
+});
+
+describe('startDrag', () => {
+  it('remembers where the press started and has not moved yet', () => {
+    expect(startDrag(7, 10, 20, 1000)).toEqual({
+      dragging: false,
+      lastMoveMs: 1000,
+      lastX: 10,
+      lastY: 20,
+      pointerId: 7,
+      startX: 10,
+      startY: 20,
+      velocity: { lat: 0, lon: 0 },
+    });
+  });
+});
+
+describe('moveDrag', () => {
+  it('rotates by the movement since the last event and starts dragging', () => {
+    const { drag, motion } = moveDrag(startDrag(1, 0, 0, 0), still, 10, 0, 100);
+
+    expect(motion.lon).toBeCloseTo(-10 * GLOBE_DRAG_LON_PER_PX);
+    expect(drag).toMatchObject({
+      dragging: true,
+      lastMoveMs: 100,
+      lastX: 10,
+      lastY: 0,
+      startX: 0,
+    });
+    expect(drag.velocity.lon).toBeLessThan(0);
+  });
+});
+
+describe('releaseDrag', () => {
+  it('flings with the drag velocity on a quick release', () => {
+    const drag = { ...startDrag(1, 0, 0, 0), velocity: { lat: 12, lon: -40 } };
+
+    expect(releaseDrag(drag, still, 10)).toMatchObject({ vLat: 12, vLon: -40 });
+  });
+
+  it('stops dead after a slow release', () => {
+    const drag = { ...startDrag(1, 0, 0, 0), velocity: { lat: 12, lon: -40 } };
+
+    expect(releaseDrag(drag, still, 10_000)).toMatchObject({
+      vLat: 0,
+      vLon: 0,
+    });
   });
 });

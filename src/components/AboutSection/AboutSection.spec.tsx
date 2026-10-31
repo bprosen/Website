@@ -19,10 +19,10 @@ describe('AboutSection', () => {
   });
 
   it('hides the Japan note until it has text', () => {
-    const { rerender } = render(<AboutSection bio={['Bio']} japanNote='' />);
+    const { rerender } = render(<AboutSection bio={['Bio']} travelNote='' />);
     expect(screen.queryByText('Japan was great.')).not.toBeInTheDocument();
 
-    rerender(<AboutSection bio={['Bio']} japanNote='Japan was great.' />);
+    rerender(<AboutSection bio={['Bio']} travelNote='Japan was great.' />);
     expect(screen.getByText('Japan was great.')).toBeInTheDocument();
   });
 });

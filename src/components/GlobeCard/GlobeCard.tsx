@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useId, useState } from 'react';
-import { HOME_CITY } from '~/constants';
-import { useVisitor, useVisitorDots } from '~/hooks';
+import { useId, useState } from 'react';
+import { GLOBE_CARD_QUERY, HOME_CITY, HOME_MARKER_LABEL } from '~/constants';
+import { useMediaQuery, useVisitor, useVisitorDots } from '~/hooks';
 import { cn } from '~/lib/ui';
-import { type MarkerId, markerFor, nextTip } from '~/utils';
+import type { MarkerId } from '~/types';
+import { isVisitorPlaced, nextSelectedMarker, visitorMarkerFor } from '~/utils';
 import { Globe } from '../Globe';
 import { LegendButton } from '../LegendButton';
 import { LocalClock } from '../LocalClock';
@@ -16,19 +17,17 @@ type GlobeCardProps = {
 
 export const GlobeCard = ({ className }: GlobeCardProps) => {
   const tooltipId = useId();
-  const visitor = useVisitor();
-  const dots = useVisitorDots();
-  const [tip, setTip] = useState<MarkerId | null>(null);
+  const shown = useMediaQuery(GLOBE_CARD_QUERY, true);
+  const visitor = useVisitor({ enabled: shown });
+  const visitorDots = useVisitorDots();
+  const [selectedMarker, setSelectedMarker] = useState<MarkerId | null>(null);
 
-  const select = useCallback(
-    (marker: MarkerId | null) => setTip((current) => nextTip(current, marker)),
-    [],
-  );
+  const toggleMarker = (marker: MarkerId | null) =>
+    setSelectedMarker((current) => nextSelectedMarker(current, marker));
 
-  const youMarker = markerFor('you', visitor);
-  const placed = visitor.coords !== null || visitor.sameCity;
-  const describes = (marker: MarkerId) =>
-    tip === marker ? tooltipId : undefined;
+  const visitorMarker = visitorMarkerFor(visitor);
+  const describedByFor = (marker: MarkerId) =>
+    selectedMarker === marker ? tooltipId : undefined;
 
   return (
     <div
@@ -39,40 +38,46 @@ export const GlobeCard = ({ className }: GlobeCardProps) => {
     >
       <Globe
         className='motion-safe:animate-intro-globe motion-safe:[animation-delay:120ms]'
-        dots={dots}
-        onSelect={select}
+        onSelect={toggleMarker}
+        selectedMarker={selectedMarker}
         sharedHome={visitor.sameCity}
-        tip={tip}
-        tooltip={tip && <MarkerTooltip marker={tip} visitor={visitor} />}
+        tooltip={
+          selectedMarker !== null && (
+            <MarkerTooltip marker={selectedMarker} visitor={visitor} />
+          )
+        }
         tooltipId={tooltipId}
         visitorCoords={visitor.coords}
+        visitorDots={visitorDots}
       />
-      <p className='m-0 text-center motion-safe:animate-intro-rise motion-safe:[animation-delay:380ms]'>
-        <span className='block text-xs text-muted-foreground sm:text-base'>
+      <p className='motion-safe:animate-intro-rise text-center motion-safe:[animation-delay:380ms]'>
+        <span className='text-muted-foreground block text-xs sm:text-base'>
           {HOME_CITY}
         </span>
-        <LocalClock className='font-serif text-base font-medium tabular-nums sm:text-[26px]' />
+        {shown && (
+          <LocalClock className='font-serif text-base font-medium tabular-nums sm:text-[26px]' />
+        )}
       </p>
-      <p className='m-0 flex flex-wrap justify-center motion-safe:animate-intro-rise motion-safe:[animation-delay:460ms] gap-x-1 text-sm text-muted-foreground sm:-mt-4 sm:gap-x-2.5'>
+      <div className='motion-safe:animate-intro-rise text-muted-foreground flex flex-wrap justify-center gap-x-1 text-sm motion-safe:[animation-delay:460ms] sm:-mt-4 sm:gap-x-2.5'>
         <LegendButton
-          describedBy={describes('me')}
-          onClick={() => select('me')}
-          pressed={tip === 'me'}
+          describedBy={describedByFor('home')}
+          onClick={() => toggleMarker('home')}
+          pressed={selectedMarker === 'home'}
           swatchClassName='bg-ink'
         >
-          Me
+          {HOME_MARKER_LABEL}
         </LegendButton>
-        {placed && (
+        {isVisitorPlaced(visitor) && (
           <LegendButton
-            describedBy={describes(youMarker)}
-            onClick={() => select(youMarker)}
-            pressed={tip === youMarker}
+            describedBy={describedByFor(visitorMarker)}
+            onClick={() => toggleMarker(visitorMarker)}
+            pressed={selectedMarker === visitorMarker}
             swatchClassName='bg-coral ring-1 ring-coral-deep'
           >
             {visitor.label}
           </LegendButton>
         )}
-      </p>
+      </div>
     </div>
   );
 };

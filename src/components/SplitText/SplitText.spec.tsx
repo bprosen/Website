@@ -1,30 +1,26 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { INTRO_LETTER_STEP_MS } from '~/constants';
 import { SplitText } from './SplitText';
 
 describe('SplitText', () => {
   it('is hidden from assistive tech so the parent can name it once', () => {
-    render(
-      <h1 aria-label='Ben'>
-        <SplitText delayMs={0} text='Ben' />
-      </h1>,
-    );
+    const { container } = render(<SplitText delayMs={0} text='Word' />);
 
-    expect(screen.getByRole('heading', { name: 'Ben' })).toBeInTheDocument();
-    expect(screen.getByRole('heading').textContent).toBe('Ben');
+    expect(container.firstElementChild).toHaveAttribute('aria-hidden', 'true');
+    expect(container.firstElementChild).toHaveTextContent('Word');
   });
 
   it('staggers each letter after the starting delay', () => {
-    const { container } = render(<SplitText delayMs={100} text='Ben' />);
+    const { container } = render(<SplitText delayMs={100} text='Sky' />);
     const letters = [
       ...container.querySelectorAll('[aria-hidden] > span'),
     ] as HTMLElement[];
 
     expect(letters.map((letter) => letter.textContent)).toEqual([
-      'B',
-      'e',
-      'n',
+      'S',
+      'k',
+      'y',
     ]);
     expect(letters.map((letter) => letter.style.animationDelay)).toEqual([
       '100ms',

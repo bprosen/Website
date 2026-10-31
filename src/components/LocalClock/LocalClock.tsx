@@ -1,6 +1,6 @@
 'use client';
 
-import { HOME_TZ } from '~/constants';
+import { HOME_TIME_ZONE } from '~/constants';
 import { useNow } from '~/hooks';
 import { formatClock } from '~/utils';
 
@@ -13,7 +13,7 @@ export const LocalClock = ({ className }: LocalClockProps) => {
 
   return (
     <span className={className}>
-      {now === null ? ' ' : formatClock(now, HOME_TZ)}
+      {now === null ? ' ' : formatClock(now, HOME_TIME_ZONE)}
     </span>
   );
 };

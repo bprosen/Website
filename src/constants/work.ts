@@ -1,19 +1,19 @@
-import type { WorkEntry } from '~/types';
-import { MOMENTUM_REPO } from './site';
+import type { Job } from '~/types';
+import { MOMENTUM_REPO_URL } from './links';
+import { EMPLOYER, JOB_TITLE } from './profile';
 
-export const WORK: readonly WorkEntry[] = [
+export const WORK: readonly Job[] = [
   {
-    company: 'Taiv',
+    company: EMPLOYER,
     id: 'w1',
     period: '2025 to now',
-    role: 'Software Developer',
+    role: JOB_TITLE,
     roleNote: 'Co-op, then part-time, then full-time',
     stats: [
       { label: 'of impressions reported', value: 'Billions' },
       { label: 'builds, down from minutes', value: '<10s' },
     ],
-    summary:
-      "Led the frontend of a new ad reporting dashboard for enterprise customers, from first idea to production launch. Built its architecture, testing standards and CI/CD pipeline, including the first Docker Compose setup for end-to-end tests. Also moved Taiv's other web apps from Create React App to Vite, cutting builds from minutes to under 10 seconds.",
+    summary: `Led the frontend of a new ad reporting dashboard for enterprise customers, from first idea to production launch. Built its architecture, testing standards and CI/CD pipeline, including the first Docker Compose setup for end-to-end tests. Also moved ${EMPLOYER}'s other web apps from Create React App to Vite, cutting builds from minutes to under 10\u00a0seconds.`,
     tech: [
       'React',
       'TypeScript',
@@ -33,7 +33,7 @@ export const WORK: readonly WorkEntry[] = [
         width: 1600,
       },
       {
-        alt: "Parkour gameplay switching into Infinite mode, with Momentum's live stats scoreboard",
+        alt: 'Parkour gameplay switching into Infinite mode, with Momentum’s live stats scoreboard',
         height: 450,
         label: 'Infinite mode',
         src: '/media/renatus/parkour-infinite.jpg',
@@ -51,17 +51,17 @@ export const WORK: readonly WorkEntry[] = [
     ],
     company: 'Renatus Network',
     id: 'w2',
-    link: { href: MOMENTUM_REPO, label: 'View Momentum' },
+    link: { href: MOMENTUM_REPO_URL, label: 'View Momentum' },
     period: '2019 to 2026',
     role: 'Owner and Lead Developer',
     roleNote: 'Minecraft game server',
     stats: [
       { label: 'unique players', value: '2M+' },
       { label: 'staff led', value: '30+' },
-      { label: 'of stable uptime', value: '500+ days' },
+      { label: 'of stable uptime', value: '500+\u00a0days' },
     ],
     summary:
-      "Grew the community 1,300% while leading development and a staff team across every role. Built Momentum, the server's core management plugin: it tracked advanced player stats, ran the parkour level system, automated events and much more for 250,000+ players.",
+      'Grew the community 1,300% while leading development and a staff team across every role. Built Momentum, the server’s core management plugin: it tracked advanced player stats, ran the parkour level system, automated events and much more for 250,000+ players.',
     tech: ['Java', 'MySQL', 'Ubuntu'],
   },
   {

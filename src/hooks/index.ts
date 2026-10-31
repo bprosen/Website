@@ -1,5 +1,7 @@
 export * from './useAutoScroll';
 export * from './useCopyToClipboard';
+export * from './useMediaQuery';
+export * from './useMotionPaused';
 export * from './useNow';
 export * from './usePrefersReducedMotion';
 export * from './useScrolledPast';

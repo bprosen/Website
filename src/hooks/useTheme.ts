@@ -2,20 +2,23 @@ import { useCallback, useSyncExternalStore } from 'react';
 import {
   DARK_SCHEME_QUERY,
   REDUCED_MOTION_QUERY,
+  THEME_COLOR_SELECTOR,
   THEME_DARK_CLASS,
   THEME_REVEAL_EASING,
   THEME_REVEAL_MS,
   THEME_STORAGE_KEY,
 } from '~/constants';
+import type { Theme } from '~/types';
 import {
+  isTheme,
   oppositeTheme,
   resolveTheme,
   revealClipPath,
   revealRadius,
-  type Theme,
+  themeColorFor,
 } from '~/utils';
 
-const readStored = () => {
+const readStoredTheme = () => {
   try {
     return localStorage.getItem(THEME_STORAGE_KEY);
   } catch {
@@ -23,7 +26,7 @@ const readStored = () => {
   }
 };
 
-const writeStored = (theme: Theme) => {
+const writeStoredTheme = (theme: Theme) => {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   } catch {
@@ -33,6 +36,10 @@ const writeStored = (theme: Theme) => {
 
 const applyTheme = (theme: Theme) => {
   document.documentElement.classList.toggle(THEME_DARK_CLASS, theme === 'dark');
+
+  for (const meta of document.querySelectorAll(THEME_COLOR_SELECTOR)) {
+    meta.setAttribute('content', themeColorFor(theme));
+  }
 };
 
 const subscribe = (onChange: () => void) => {
@@ -42,17 +49,17 @@ const subscribe = (onChange: () => void) => {
     attributes: true,
   });
 
-  const system = window.matchMedia(DARK_SCHEME_QUERY);
+  const darkSchemeQuery = window.matchMedia(DARK_SCHEME_QUERY);
   const onSystemChange = () => {
-    if (readStored() === null) {
-      applyTheme(resolveTheme(null, system.matches));
+    if (!isTheme(readStoredTheme())) {
+      applyTheme(resolveTheme(null, darkSchemeQuery.matches));
     }
   };
-  system.addEventListener('change', onSystemChange);
+  darkSchemeQuery.addEventListener('change', onSystemChange);
 
   return () => {
     observer.disconnect();
-    system.removeEventListener('change', onSystemChange);
+    darkSchemeQuery.removeEventListener('change', onSystemChange);
   };
 };
 
@@ -92,7 +99,7 @@ export const useTheme = () => {
     const next = oppositeTheme(getSnapshot());
     const commit = () => {
       applyTheme(next);
-      writeStored(next);
+      writeStoredTheme(next);
     };
 
     const reducedMotion = window.matchMedia(REDUCED_MOTION_QUERY).matches;

@@ -1,36 +1,14 @@
 import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MOTION_PAUSED_ATTRIBUTE } from '~/constants';
+import { stubIntersectionObserver, stubReducedMotion } from '~/lib/testing';
 import { LazyVideo } from './LazyVideo';
 
-let intersect: (visible: boolean) => void = () => {};
-const disconnect = vi.fn();
-
-const setReducedMotion = (matches: boolean) =>
-  vi.stubGlobal(
-    'matchMedia',
-    vi.fn(() => ({
-      addEventListener: vi.fn(),
-      matches,
-      removeEventListener: vi.fn(),
-    })),
-  );
+let observer: ReturnType<typeof stubIntersectionObserver>;
+const intersect = (visible: boolean) => observer.intersect(visible);
 
 beforeEach(() => {
-  intersect = () => {};
-  vi.stubGlobal(
-    'IntersectionObserver',
-    class {
-      constructor(callback: IntersectionObserverCallback) {
-        intersect = (visible) =>
-          callback(
-            [{ isIntersecting: visible } as IntersectionObserverEntry],
-            this as unknown as IntersectionObserver,
-          );
-      }
-      observe = vi.fn();
-      disconnect = disconnect;
-    },
-  );
+  observer = stubIntersectionObserver();
 });
 
 const renderVideo = () =>
@@ -77,15 +55,21 @@ describe('LazyVideo', () => {
     expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
   });
 
-  it('does not autoplay or show controls under reduced motion', () => {
-    setReducedMotion(true);
+  it('does not play while motion is paused', () => {
+    document.documentElement.setAttribute(MOTION_PAUSED_ATTRIBUTE, '');
     renderVideo();
 
     act(() => intersect(true));
 
-    expect(screen.getByLabelText('Parkour clip')).not.toHaveAttribute(
-      'controls',
-    );
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+  });
+
+  it('does not autoplay under reduced motion', () => {
+    stubReducedMotion(true);
+    renderVideo();
+
+    act(() => intersect(true));
+
     expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
   });
 
@@ -94,7 +78,7 @@ describe('LazyVideo', () => {
 
     unmount();
 
-    expect(disconnect).toHaveBeenCalled();
+    expect(observer.observers[0].disconnect).toHaveBeenCalled();
     expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
   });
 
@@ -114,14 +98,12 @@ describe('LazyVideo', () => {
     expect(video).toHaveClass('opacity-100');
   });
 
-  it('shows the poster frame under reduced motion', () => {
-    setReducedMotion(true);
+  it('keeps showing the optimized poster under reduced motion', () => {
+    stubReducedMotion(true);
     renderVideo();
+    const video = screen.getByLabelText('Parkour clip');
 
-    expect(screen.getByLabelText('Parkour clip')).toHaveClass('opacity-100');
-    expect(screen.getByLabelText('Parkour clip')).toHaveAttribute(
-      'poster',
-      '/poster.jpg',
-    );
+    expect(video).toHaveClass('opacity-0');
+    expect(video).not.toHaveAttribute('poster');
   });
 });

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { SECTION_ACTIVE_LINE, SECTIONS } from '~/constants';
+import { SECTION_ACTIVE_LINE_VIEWPORT_RATIO, SECTIONS } from '~/constants';
 import { activeSection, isAtPageEnd, sectionPath, sectionTitle } from '~/utils';
 
 const readSectionTops = () =>
@@ -14,25 +14,28 @@ export const useSectionUrlSync = () => {
 
     const sync = () => {
       frame = 0;
-      const section = activeSection(
-        readSectionTops(),
-        window.innerHeight * SECTION_ACTIVE_LINE,
-        isAtPageEnd(
-          window.scrollY,
-          window.innerHeight,
-          document.documentElement.scrollHeight,
-        ),
+      const activeLineY =
+        window.innerHeight * SECTION_ACTIVE_LINE_VIEWPORT_RATIO;
+      const atPageEnd = isAtPageEnd(
+        window.scrollY,
+        window.innerHeight,
+        document.documentElement.scrollHeight,
       );
+      const section = activeSection(readSectionTops(), activeLineY, atPageEnd);
       const path = sectionPath(section);
 
       if (path !== window.location.pathname) {
-        window.history.replaceState(window.history.state, '', path);
+        window.history.replaceState(
+          null,
+          '',
+          `${path}${window.location.search}`,
+        );
         document.title = sectionTitle(section);
       }
     };
 
     const onScroll = () => {
-      if (frame === 0) {
+      if (!frame) {
         frame = requestAnimationFrame(sync);
       }
     };
@@ -40,8 +43,8 @@ export const useSectionUrlSync = () => {
     window.addEventListener('scroll', onScroll, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', onScroll);
       cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
     };
   }, []);
 };

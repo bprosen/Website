@@ -1,0 +1,3 @@
+export const REDIS_URL_ENV = 'UPSTASH_KV_REST_API_URL';
+export const REDIS_TOKEN_ENV = 'UPSTASH_KV_REST_API_TOKEN';
+export const REDIS_TIMEOUT_MS = 2000;

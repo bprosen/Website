@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { BRANDS } from '~/constants';
+import { BRAND_VIEW_BOX, BRANDS, DEVICON_VIEW_BOX } from '~/constants';
 import { BrandIcon } from './BrandIcon';
 
 describe('BrandIcon', () => {
-  it('is decorative and brand-coloured by default', () => {
+  it('is decorative and brand-colored by default', () => {
     const { container } = render(<BrandIcon name='React' />);
     const svg = container.querySelector('svg');
 
@@ -16,7 +16,7 @@ describe('BrandIcon', () => {
     );
   });
 
-  it('is a labelled image when given a label', () => {
+  it('is a labeled image when given a label', () => {
     render(<BrandIcon label='Docker' name='Docker' tinted={false} />);
     const icon = screen.getByRole('img', { name: 'Docker' });
 
@@ -24,17 +24,30 @@ describe('BrandIcon', () => {
     expect(icon.querySelector('path')).not.toHaveAttribute('fill');
   });
 
-  it('lets dark logos use the text colour in dark mode', () => {
+  it('lets dark logos use the text color in dark mode', () => {
     const { container } = render(<BrandIcon name='GitHub' />);
 
     expect(container.querySelector('path')).toHaveClass('dark:fill-current');
   });
 
-  it('keeps light logos in their brand colour', () => {
+  it('keeps light logos in their brand color', () => {
     const { container } = render(<BrandIcon name='React' />);
 
     expect(container.querySelector('path')).not.toHaveClass(
       'dark:fill-current',
     );
+  });
+
+  it('draws on the default canvas unless the brand sets its own', () => {
+    const { container } = render(
+      <>
+        <BrandIcon name='React' />
+        <BrandIcon name='MySQL' />
+      </>,
+    );
+    const [react, mysql] = container.querySelectorAll('svg');
+
+    expect(react).toHaveAttribute('viewBox', BRAND_VIEW_BOX);
+    expect(mysql).toHaveAttribute('viewBox', DEVICON_VIEW_BOX);
   });
 });

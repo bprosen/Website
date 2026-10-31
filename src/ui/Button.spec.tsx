@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { Button, buttonVariants } from './Button';
+import { Button } from './Button';
 
 describe('Button', () => {
   it('renders a button with the default variant', () => {
@@ -25,20 +25,16 @@ describe('Button', () => {
   });
 
   it('lets callers override classes', () => {
-    expect(buttonVariants({ className: 'h-20', size: 'default' })).toContain(
-      'h-20',
-    );
-    render(<Button className='px-1'>X</Button>);
+    render(<Button className='px-1'>Save</Button>);
 
     expect(screen.getByRole('button')).not.toHaveClass('px-[22px]');
   });
 
   it.each([
-    ['accent', 'bg-accent'],
     ['ghost', 'hover:bg-accent'],
-    ['outlineDark', 'border-inverse-foreground/50'],
+    ['outlineInverse', 'border-inverse-foreground/50'],
   ] as const)('applies the %s variant', (variant, className) => {
-    render(<Button variant={variant}>X</Button>);
+    render(<Button variant={variant}>Save</Button>);
 
     expect(screen.getByRole('button')).toHaveClass(className);
   });
@@ -49,7 +45,7 @@ describe('Button', () => {
     ['lg', 'h-13'],
     ['nav', 'min-h-11'],
   ] as const)('applies the %s size', (size, className) => {
-    render(<Button size={size}>X</Button>);
+    render(<Button size={size}>Save</Button>);
 
     expect(screen.getByRole('button')).toHaveClass(className);
   });

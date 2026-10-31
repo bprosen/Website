@@ -1,6 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { UNKNOWN_VISITOR, type Visitor } from '~/utils';
+import {
+  FIRST_NAME,
+  HOME_CITY,
+  LOCAL_TIME_PREFIX,
+  LOCAL_TIME_SUFFIX,
+} from '~/constants';
+import type { Visitor } from '~/types';
+import { UNKNOWN_VISITOR } from '~/utils';
 import { MarkerTooltip } from './MarkerTooltip';
 
 const toronto: Visitor = {
@@ -20,16 +27,18 @@ afterEach(() => {
 
 describe('MarkerTooltip', () => {
   it('shows the local time on the home marker', () => {
-    render(<MarkerTooltip marker='me' visitor={UNKNOWN_VISITOR} />);
+    render(<MarkerTooltip marker='home' visitor={UNKNOWN_VISITOR} />);
 
-    expect(screen.getByText('Ben · Winnipeg, Canada')).toBeInTheDocument();
+    expect(
+      screen.getByText(`${FIRST_NAME} · ${HOME_CITY}`),
+    ).toBeInTheDocument();
     expect(screen.getByText('3:04:05 PM').parentElement).toHaveTextContent(
-      "It's 3:04:05 PM here",
+      `${LOCAL_TIME_PREFIX} 3:04:05 PM ${LOCAL_TIME_SUFFIX}`,
     );
   });
 
   it('shows the distance on the visitor marker', () => {
-    render(<MarkerTooltip marker='you' visitor={toronto} />);
+    render(<MarkerTooltip marker='visitor' visitor={toronto} />);
 
     expect(screen.getByText('You, near Toronto')).toBeInTheDocument();
     expect(screen.getByText(/km from Winnipeg$/)).toBeInTheDocument();

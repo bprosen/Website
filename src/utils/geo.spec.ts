@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { HOME_COORDS } from '~/constants';
-import { haversineKm, isLatLon, readLatLonList } from './geo';
+import { haversineKm, isLatLon, parseLatLonList } from './geo';
 
 describe('isLatLon', () => {
   it('accepts finite in-range coordinates', () => {
@@ -16,10 +16,10 @@ describe('isLatLon', () => {
   });
 });
 
-describe('readLatLonList', () => {
+describe('parseLatLonList', () => {
   it('keeps valid pairs only', () => {
     expect(
-      readLatLonList([
+      parseLatLonList([
         [50, -97],
         [91, 0],
         [0, 181],
@@ -36,8 +36,8 @@ describe('readLatLonList', () => {
   });
 
   it('returns an empty list for non-arrays', () => {
-    expect(readLatLonList(undefined)).toEqual([]);
-    expect(readLatLonList({ 0: [1, 2] })).toEqual([]);
+    expect(parseLatLonList(undefined)).toEqual([]);
+    expect(parseLatLonList({ 0: [1, 2] })).toEqual([]);
   });
 });
 

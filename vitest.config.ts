@@ -1,7 +1,7 @@
-import { defineConfig } from 'vitest/config';
+import path from 'node:path';
 import react from '@vitejs/plugin-react';
-import path from 'path';
- 
+import { defineConfig } from 'vitest/config';
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -10,26 +10,17 @@ export default defineConfig({
     },
   },
   test: {
-    globals: true,
-    environment: "jsdom",
-    css: true,
-    pool: 'threads',
-    setupFiles: "./src/lib/setupTests.ts",
-    include: ["src/**/*.spec.ts", "src/**/*.spec.tsx"],
     coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "html"],
-      reportsDirectory: "./coverage",
-      include: ["src/**/*.ts", "src/**/*.tsx"],
-      exclude: [
-        "**/node_modules/**",
-        "**/build/**",
-        "**/ui/**",
-        "**/coverage/**",
-        "**/lib/**",
-        "**/app/**",
-        "**/types/**"
-      ],
+      exclude: ['**/ui/**', '**/lib/**', '**/app/**', '**/types/**'],
+      include: ['src/**/*.ts', 'src/**/*.tsx'],
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      reportsDirectory: './coverage',
     },
-  }
-})
+    css: true,
+    environment: 'jsdom',
+    include: ['src/**/*.spec.ts', 'src/**/*.spec.tsx'],
+    pool: 'threads',
+    setupFiles: './src/lib/setupTests.ts',
+  },
+});

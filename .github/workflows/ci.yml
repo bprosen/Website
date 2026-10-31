@@ -4,44 +4,38 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
-  setup:
+  install:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v6
-        with:
-          version: 10
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 'lts/*'
           cache: 'pnpm'
+          node-version: 'lts/*'
 
-      - run: pnpm install
+      - run: pnpm install --frozen-lockfile
 
       - uses: actions/cache/save@v6
         with:
-          path: node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          path: node_modules
 
   test:
-    needs: setup
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 10
+      - uses: ./.github/actions/setup
 
-      - uses: actions/cache/restore@v6
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - run: pnpm run test:coverage
+      - run: pnpm test:coverage
 
       - uses: actions/upload-artifact@v7
         if: always()
@@ -51,56 +45,31 @@ jobs:
           retention-days: 30
 
   lint:
-    needs: setup
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 10
+      - uses: ./.github/actions/setup
 
-      - uses: actions/cache/restore@v6
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - run: pnpm run lint
+      - run: pnpm lint
 
   format:
-    needs: setup
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 10
+      - uses: ./.github/actions/setup
 
-      - uses: actions/cache/restore@v6
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - run: pnpm run format
+      - run: pnpm format
 
   build:
-    needs: setup
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 10
+      - uses: ./.github/actions/setup
 
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 'lts/*'
-
-      - uses: actions/cache/restore@v6
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - run: pnpm run build
+      - run: pnpm build

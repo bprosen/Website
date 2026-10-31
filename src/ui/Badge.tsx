@@ -3,7 +3,7 @@ import { Slot } from 'radix-ui';
 import type { ComponentProps } from 'react';
 import { cn } from '~/lib/ui';
 
-export const badgeVariants = cva(
+const badgeVariants = cva(
   'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap [&>svg]:pointer-events-none [&>svg]:size-3',
   {
     defaultVariants: {
@@ -12,7 +12,7 @@ export const badgeVariants = cva(
     variants: {
       variant: {
         default: 'bg-primary text-primary-foreground',
-        tech: 'gap-2 bg-background py-1.5 pr-3.5 pl-2.5 text-sm font-normal text-foreground no-underline outline-none transition-[translate,box-shadow] duration-200 hover:-translate-y-0.5 focus-visible:ring-[3px] focus-visible:ring-ring/50 [&>svg]:size-[18px]',
+        tech: 'bg-background text-foreground gap-2 py-1.5 pr-3.5 pl-2.5 text-sm font-normal no-underline transition-[translate,box-shadow] duration-200 hover:-translate-y-0.5 [&>svg]:size-[18px]',
       },
     },
   },

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { NAME } from '~/constants';
+import { FULL_NAME } from '~/constants';
 import { SiteHeader } from './SiteHeader';
 
 describe('SiteHeader', () => {
@@ -8,7 +8,7 @@ describe('SiteHeader', () => {
     render(<SiteHeader />);
     const nav = screen.getByRole('navigation', { name: 'Primary' });
 
-    expect(screen.getByRole('link', { name: NAME })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: FULL_NAME })).toHaveAttribute(
       'href',
       '/',
     );

@@ -1,8 +1,12 @@
-import { runVisitorsPipeline } from '~/api';
-import type { LatLon } from '~/types';
+import { countVisitorRequest, runVisitorsPipeline } from '~/api';
+import { VISITORS_RATE_LIMIT } from '~/constants';
+import type { LatLon, RedisConfig } from '~/types';
 import {
   buildPipeline,
+  clientAddress,
+  isSameOriginRequest,
   parseGeoHeaders,
+  rateLimitKey,
   readRedisConfig,
   shouldRecord,
   toCell,
@@ -16,10 +20,28 @@ const visitorCell = (headers: Headers) => {
   return coords ? toCell(coords) : null;
 };
 
+const isRateLimited = async (config: RedisConfig, headers: Headers) => {
+  const address = clientAddress(headers);
+
+  if (address === null) {
+    return false;
+  }
+
+  const requests = await countVisitorRequest(
+    config,
+    await rateLimitKey(address),
+  );
+  return requests > VISITORS_RATE_LIMIT;
+};
+
 export const POST = async (request: Request) => {
   const config = readRedisConfig(process.env);
 
-  if (!config) {
+  if (!config || !isSameOriginRequest(request.headers)) {
+    return respond([]);
+  }
+
+  if (await isRateLimited(config, request.headers)) {
     return respond([]);
   }
 

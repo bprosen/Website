@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { THEME_STORAGE_KEY } from '~/constants';
+import { stubMediaQueries } from '~/lib/testing';
 import {
   isDarkBrand,
   isTheme,
@@ -8,6 +9,7 @@ import {
   resolveTheme,
   revealClipPath,
   revealRadius,
+  themeColorFor,
   themeInitScript,
 } from './theme';
 
@@ -18,16 +20,13 @@ afterEach(() => {
 });
 
 const runInitScript = (prefersDark: boolean) => {
-  vi.stubGlobal(
-    'matchMedia',
-    vi.fn(() => ({ matches: prefersDark })),
-  );
+  stubMediaQueries(() => prefersDark);
   new Function(themeInitScript())();
   return document.documentElement.classList.contains('dark');
 };
 
 describe('isTheme / oppositeTheme', () => {
-  it('recognises the two themes', () => {
+  it('recognizes the two themes', () => {
     expect(isTheme('dark')).toBe(true);
     expect(isTheme('light')).toBe(true);
     expect(isTheme('blue')).toBe(false);
@@ -52,7 +51,32 @@ describe('resolveTheme', () => {
   });
 });
 
+describe('themeColorFor', () => {
+  it('matches the browser chrome to the page background', () => {
+    expect(themeColorFor('light')).toBe('#f4f1e8');
+    expect(themeColorFor('dark')).toBe('#121914');
+  });
+});
+
 describe('themeInitScript', () => {
+  it('follows the system when the stored value is not a theme', () => {
+    localStorage.setItem(THEME_STORAGE_KEY, 'system');
+
+    expect(runInitScript(true)).toBe(true);
+  });
+
+  it('sets the browser chrome color once the page has parsed', () => {
+    document.head.innerHTML = '<meta name="theme-color" content="#f4f1e8">';
+    runInitScript(true);
+
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+
+    expect(document.querySelector('meta')).toHaveAttribute(
+      'content',
+      '#121914',
+    );
+  });
+
   it('follows the system preference on a first visit', () => {
     expect(runInitScript(true)).toBe(true);
     document.documentElement.classList.remove('dark');
@@ -95,6 +119,12 @@ describe('relativeLuminance / isDarkBrand', () => {
   it('measures black and white', () => {
     expect(relativeLuminance('#000000')).toBe(0);
     expect(relativeLuminance('#ffffff')).toBeCloseTo(1);
+  });
+
+  it('weights each color channel by how bright it looks', () => {
+    expect(relativeLuminance('#ff0000')).toBeCloseTo(0.2126);
+    expect(relativeLuminance('#00ff00')).toBeCloseTo(0.7152);
+    expect(relativeLuminance('#0000ff')).toBeCloseTo(0.0722);
   });
 
   it('flags logos that would vanish on a dark background', () => {

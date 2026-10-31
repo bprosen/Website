@@ -1,14 +1,13 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { REVEAL_READY_CLASS, REVEALED_ATTRIBUTE } from '~/constants';
+import { stubIntersectionObserver } from '~/lib/testing';
 import { useScrollReveal } from './useScrollReveal';
 
-type ObserverCallback = (entries: Partial<IntersectionObserverEntry>[]) => void;
-
-let intersect: ObserverCallback = () => {};
-const observe = vi.fn();
-const unobserve = vi.fn();
-const disconnect = vi.fn();
+let observer: ReturnType<typeof stubIntersectionObserver>;
+const intersect = (entries: Partial<IntersectionObserverEntry>[]) =>
+  observer.intersect(entries);
+const observed = () => observer.observers[0];
 
 const placeAt = (element: Element, top: number) =>
   vi.spyOn(element, 'getBoundingClientRect').mockReturnValue({
@@ -30,21 +29,10 @@ const setUpPage = () => {
 
 describe('useScrollReveal', () => {
   beforeEach(() => {
-    vi.stubGlobal(
-      'IntersectionObserver',
-      class {
-        constructor(callback: ObserverCallback) {
-          intersect = callback;
-        }
-        disconnect = disconnect;
-        observe = observe;
-        unobserve = unobserve;
-      },
-    );
+    observer = stubIntersectionObserver();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
     document.body.innerHTML = '';
   });
 
@@ -53,7 +41,7 @@ describe('useScrollReveal', () => {
     renderHook(() => useScrollReveal());
 
     expect(byId('seen')).toHaveAttribute(REVEALED_ATTRIBUTE);
-    expect(observe).not.toHaveBeenCalledWith(byId('seen'));
+    expect(observed().observe).not.toHaveBeenCalledWith(byId('seen'));
     expect(document.documentElement).toHaveClass(REVEAL_READY_CLASS);
   });
 
@@ -61,15 +49,15 @@ describe('useScrollReveal', () => {
     const byId = setUpPage();
     renderHook(() => useScrollReveal());
 
-    expect(observe).toHaveBeenCalledWith(byId('first'));
-    expect(observe).toHaveBeenCalledWith(byId('second'));
-    expect(observe).not.toHaveBeenCalledWith(byId('plain'));
+    expect(observed().observe).toHaveBeenCalledWith(byId('first'));
+    expect(observed().observe).toHaveBeenCalledWith(byId('second'));
+    expect(observed().observe).not.toHaveBeenCalledWith(byId('plain'));
 
     act(() => intersect([{ isIntersecting: true, target: byId('first') }]));
 
     expect(byId('first')).toHaveAttribute(REVEALED_ATTRIBUTE);
     expect(byId('second')).not.toHaveAttribute(REVEALED_ATTRIBUTE);
-    expect(unobserve).toHaveBeenCalledWith(byId('first'));
+    expect(observed().unobserve).toHaveBeenCalledWith(byId('first'));
   });
 
   it('stops watching and drops the ready flag on unmount', () => {
@@ -78,7 +66,7 @@ describe('useScrollReveal', () => {
 
     unmount();
 
-    expect(disconnect).toHaveBeenCalled();
+    expect(observed().disconnect).toHaveBeenCalled();
     expect(document.documentElement).not.toHaveClass(REVEAL_READY_CLASS);
   });
 });

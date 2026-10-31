@@ -1,8 +1,10 @@
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { FULL_NAME, TITLE_SEPARATOR } from '~/constants';
+import { stubAnimationFrames } from '~/lib/testing';
 import { useSectionUrlSync } from './useSectionUrlSync';
 
-let frames: FrameRequestCallback[] = [];
+let frames: ReturnType<typeof stubAnimationFrames>;
 
 const setTops = (tops: Record<string, number>) => {
   for (const [id, top] of Object.entries(tops)) {
@@ -13,15 +15,10 @@ const setTops = (tops: Record<string, number>) => {
 
 const scroll = () => {
   window.dispatchEvent(new Event('scroll'));
-  const queued = frames;
-  frames = [];
-  for (const callback of queued) {
-    callback(0);
-  }
+  frames.run(0);
 };
 
 beforeEach(() => {
-  frames = [];
   document.body.innerHTML =
     '<section id="work"></section><section id="about"></section><footer id="contact"></footer>';
   window.history.replaceState({ next: 'state' }, '', '/');
@@ -29,19 +26,10 @@ beforeEach(() => {
   vi.spyOn(document.documentElement, 'scrollHeight', 'get').mockReturnValue(
     10000,
   );
-  vi.stubGlobal(
-    'requestAnimationFrame',
-    vi.fn((callback: FrameRequestCallback) => {
-      frames.push(callback);
-      return frames.length;
-    }),
-  );
-  vi.stubGlobal('cancelAnimationFrame', vi.fn());
+  frames = stubAnimationFrames();
 });
 
 afterEach(() => {
-  vi.restoreAllMocks();
-  vi.unstubAllGlobals();
   document.body.innerHTML = '';
   window.history.replaceState(null, '', '/');
 });
@@ -63,15 +51,27 @@ describe('useSectionUrlSync', () => {
     expect(window.location.pathname).toBe('/');
   });
 
-  it('replaces the history entry and keeps its state', () => {
+  it('replaces the history entry instead of adding one', () => {
     const push = vi.spyOn(window.history, 'pushState');
+    const replace = vi.spyOn(window.history, 'replaceState');
     renderHook(() => useSectionUrlSync());
 
     setTops({ about: 1500, contact: 3000, work: 0 });
     scroll();
 
     expect(push).not.toHaveBeenCalled();
-    expect(window.history.state).toEqual({ next: 'state' });
+    expect(replace).toHaveBeenCalledWith(null, '', '/work');
+  });
+
+  it('keeps the query string when the section changes', () => {
+    window.history.replaceState(null, '', '/?utm_source=newsletter');
+    renderHook(() => useSectionUrlSync());
+
+    setTops({ about: 1500, contact: 3000, work: 0 });
+    scroll();
+
+    expect(window.location.pathname).toBe('/work');
+    expect(window.location.search).toBe('?utm_source=newsletter');
   });
 
   it('leaves the URL alone while staying in the same section', () => {
@@ -102,13 +102,22 @@ describe('useSectionUrlSync', () => {
     expect(requestAnimationFrame).not.toHaveBeenCalled();
   });
 
+  it('cancels a pending check when unmounted', () => {
+    const { unmount } = renderHook(() => useSectionUrlSync());
+    window.dispatchEvent(new Event('scroll'));
+
+    unmount();
+
+    expect(cancelAnimationFrame).toHaveBeenCalledWith(1);
+  });
+
   it('updates the tab title along with the URL', () => {
     renderHook(() => useSectionUrlSync());
 
     setTops({ about: 100, contact: 1600, work: -1200 });
     scroll();
 
-    expect(document.title).toBe('About · Ben Edgar-Prosen');
+    expect(document.title).toBe(`About${TITLE_SEPARATOR}${FULL_NAME}`);
   });
 
   it('switches to the last section at the bottom of the page', () => {
@@ -122,6 +131,6 @@ describe('useSectionUrlSync', () => {
     scroll();
 
     expect(window.location.pathname).toBe('/contact');
-    expect(document.title).toBe('Contact · Ben Edgar-Prosen');
+    expect(document.title).toBe(`Contact${TITLE_SEPARATOR}${FULL_NAME}`);
   });
 });

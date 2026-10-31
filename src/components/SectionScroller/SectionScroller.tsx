@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 import { useSectionUrlSync } from '~/hooks';
-import { type SectionSlug, scrollToSection, sectionFromPath } from '~/utils';
+import type { SectionSlug } from '~/types';
+import { scrollToSection, sectionFromPath, sectionTitle } from '~/utils';
 
 type SectionScrollerProps = {
   section: SectionSlug | null;
@@ -22,9 +23,13 @@ export const SectionScroller = ({ section }: SectionScrollerProps) => {
 
   useEffect(() => {
     const onPopState = () => {
-      if (window.location.hash === '') {
-        scrollToSection(sectionFromPath(window.location.pathname));
+      if (window.location.hash !== '') {
+        return;
       }
+
+      const section = sectionFromPath(window.location.pathname);
+      document.title = sectionTitle(section);
+      scrollToSection(section);
     };
 
     window.addEventListener('popstate', onPopState);

@@ -4,11 +4,11 @@ import {
   COLORS,
   DISPLAY_FONT,
   FIRST_NAME,
+  FULL_NAME,
   LAST_NAME,
-  NAME,
   OG_DESCRIPTION,
+  OG_IMAGE,
   SITE_DOMAIN,
-  SITE_TITLE,
 } from '~/constants';
 import {
   loadBodyFont,
@@ -16,13 +16,13 @@ import {
   loadPortraitDataUrl,
 } from '~/lib/ogAssets';
 
-export const alt = SITE_TITLE;
+export const alt = OG_IMAGE.alt;
 export const contentType = 'image/png';
-export const size = { height: 630, width: 1200 };
+export const size = { height: OG_IMAGE.height, width: OG_IMAGE.width };
 
 const PORTRAIT_PX = 340;
 
-const Image = async () => {
+const OpengraphImage = async () => {
   const [portrait, bodyFont, displayFont] = await Promise.all([
     loadPortraitDataUrl(),
     loadBodyFont(),
@@ -67,7 +67,7 @@ const Image = async () => {
       </div>
       {/* biome-ignore lint/performance/noImgElement: ImageResponse renders with Satori, which only understands plain img elements. */}
       <img
-        alt={NAME}
+        alt={FULL_NAME}
         height={PORTRAIT_PX}
         src={portrait}
         style={{
@@ -82,4 +82,4 @@ const Image = async () => {
   );
 };
 
-export default Image;
+export default OpengraphImage;

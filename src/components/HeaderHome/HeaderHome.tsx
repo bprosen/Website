@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { HERO_NAME_ID, NAME, PORTRAIT, SITE_HEADER_ID } from '~/constants';
+import { FULL_NAME, HERO_NAME_ID, PORTRAIT, SITE_HEADER_ID } from '~/constants';
 import { useScrolledPast } from '~/hooks';
 import { cn } from '~/lib/ui';
 import { SectionLink } from '../SectionLink';
@@ -11,19 +11,22 @@ type HeaderHomeProps = {
 };
 
 export const HeaderHome = ({ className }: HeaderHomeProps) => {
-  const visible = useScrolledPast(HERO_NAME_ID, SITE_HEADER_ID);
+  const visible = useScrolledPast({
+    coverId: SITE_HEADER_ID,
+    targetId: HERO_NAME_ID,
+  });
 
   return (
     <SectionLink
-      aria-label={NAME}
+      aria-label={FULL_NAME}
       className={cn(
-        'inline-flex min-h-11 shrink-0 items-center rounded-full no-underline outline-none transition-[opacity,scale,translate,visibility] duration-300 ease-out focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[visible=false]:invisible data-[visible=false]:opacity-0 max-sm:data-[visible=false]:scale-50 sm:data-[visible=false]:-translate-y-[18px] motion-reduce:transition-opacity',
+        'inline-flex min-h-11 shrink-0 items-center rounded-full transition-[opacity,scale,translate,visibility] duration-300 ease-out data-[visible=false]:invisible data-[visible=false]:opacity-0 motion-reduce:transition-opacity max-sm:data-[visible=false]:scale-50 sm:data-[visible=false]:-translate-y-[18px]',
         className,
       )}
       data-visible={visible}
       section={null}
     >
-      <span className='relative size-9 overflow-hidden rounded-full ring-2 ring-background sm:hidden'>
+      <span className='ring-background relative size-9 overflow-hidden rounded-full ring-2 sm:hidden'>
         <Image
           alt=''
           className='object-cover'
@@ -34,7 +37,7 @@ export const HeaderHome = ({ className }: HeaderHomeProps) => {
         />
       </span>
       <span className='font-serif text-[22px] font-semibold max-sm:hidden'>
-        {NAME}
+        {FULL_NAME}
       </span>
     </SectionLink>
   );

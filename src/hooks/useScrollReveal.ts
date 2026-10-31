@@ -9,7 +9,7 @@ import {
 const reveal = (element: Element) =>
   element.setAttribute(REVEALED_ATTRIBUTE, '');
 
-const isAlreadySeen = (element: Element) =>
+const startsInViewport = (element: Element) =>
   element.getBoundingClientRect().top < window.innerHeight;
 
 export const useScrollReveal = () => {
@@ -28,7 +28,7 @@ export const useScrollReveal = () => {
     );
 
     for (const element of document.querySelectorAll(REVEAL_SELECTOR)) {
-      if (isAlreadySeen(element)) {
+      if (startsInViewport(element)) {
         reveal(element);
       } else {
         observer.observe(element);

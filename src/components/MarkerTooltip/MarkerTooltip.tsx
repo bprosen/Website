@@ -1,11 +1,6 @@
-'use client';
-
-import {
-  distanceFromHome,
-  homeMarkerTitle,
-  type MarkerId,
-  type Visitor,
-} from '~/utils';
+import { LOCAL_TIME_PREFIX, LOCAL_TIME_SUFFIX } from '~/constants';
+import type { MarkerId, Visitor } from '~/types';
+import { distanceFromHome, homeMarkerTitle } from '~/utils';
 import { LocalClock } from '../LocalClock';
 
 type MarkerTooltipProps = {
@@ -14,21 +9,23 @@ type MarkerTooltipProps = {
 };
 
 export const MarkerTooltip = ({ marker, visitor }: MarkerTooltipProps) => {
-  const visitorCoords = marker === 'you' ? visitor.coords : null;
+  if (marker === 'visitor' && visitor.coords) {
+    return (
+      <>
+        <strong className='block font-semibold'>{visitor.label}</strong>
+        <span className='text-mist'>{distanceFromHome(visitor.coords)}</span>
+      </>
+    );
+  }
 
   return (
     <>
       <strong className='block font-semibold'>
-        {visitorCoords ? visitor.label : homeMarkerTitle(visitor)}
+        {homeMarkerTitle(visitor)}
       </strong>
       <span className='text-mist'>
-        {visitorCoords ? (
-          distanceFromHome(visitorCoords)
-        ) : (
-          <>
-            It's <LocalClock className='tabular-nums' /> here
-          </>
-        )}
+        {LOCAL_TIME_PREFIX} <LocalClock className='tabular-nums' />{' '}
+        {LOCAL_TIME_SUFFIX}
       </span>
     </>
   );

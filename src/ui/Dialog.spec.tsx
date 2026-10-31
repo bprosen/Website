@@ -16,7 +16,7 @@ const renderDialog = () =>
   );
 
 describe('Dialog', () => {
-  it('opens a titled dialog with a labelled close button', async () => {
+  it('opens a titled dialog with a labeled close button', async () => {
     const user = userEvent.setup();
     renderDialog();
 

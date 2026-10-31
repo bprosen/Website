@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
-import { usePrefersReducedMotion } from '~/hooks';
+import { useMotionPaused, usePrefersReducedMotion } from '~/hooks';
 import { cn } from '~/lib/ui';
 
 type LazyVideoProps = {
@@ -24,12 +24,13 @@ export const LazyVideo = ({
 }: LazyVideoProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const [playing, setPlaying] = useState(false);
+  const { paused } = useMotionPaused();
+  const [hasStarted, setHasStarted] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
 
-    if (!video || reducedMotion) {
+    if (!video || reducedMotion || paused) {
       return;
     }
 
@@ -47,26 +48,25 @@ export const LazyVideo = ({
       observer.disconnect();
       video.pause();
     };
-  }, [reducedMotion]);
+  }, [paused, reducedMotion]);
 
   return (
-    <div className={cn('relative', className)}>
+    <span className={cn('relative block', className)}>
       <Image alt='' className='object-cover' fill sizes={sizes} src={poster} />
       <video
         aria-label={label}
         className={cn(
           'absolute inset-0 size-full object-cover transition-opacity duration-300',
-          playing || reducedMotion ? 'opacity-100' : 'opacity-0',
+          hasStarted ? 'opacity-100' : 'opacity-0',
         )}
         loop
         muted
-        onPlaying={() => setPlaying(true)}
+        onPlaying={() => setHasStarted(true)}
         playsInline
-        poster={reducedMotion ? poster : undefined}
         preload='none'
         ref={videoRef}
         src={src}
       />
-    </div>
+    </span>
   );
 };

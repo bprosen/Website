@@ -1,28 +1,32 @@
 import {
+  DISTANCE_UNIT,
   FIRST_NAME,
   HOME_CITY,
   HOME_CITY_SHORT,
   HOME_COORDS,
+  LOCALE,
+  SAME_CITY_NOTE,
+  TITLE_SEPARATOR,
 } from '~/constants';
-import type { LatLon } from '~/types';
+import type { LatLon, MarkerId, Visitor } from '~/types';
 import { haversineKm } from './geo';
-import type { Visitor } from './visitors';
 
-export type MarkerId = 'me' | 'you';
-
-export const nextTip = (
+export const nextSelectedMarker = (
   current: MarkerId | null,
   requested: MarkerId | null,
 ): MarkerId | null =>
   requested === null || requested === current ? null : requested;
 
-export const markerFor = (requested: MarkerId, visitor: Visitor): MarkerId =>
-  requested === 'you' && !visitor.coords ? 'me' : requested;
+export const visitorMarkerFor = (visitor: Visitor): MarkerId =>
+  visitor.coords ? 'visitor' : 'home';
+
+export const isVisitorPlaced = (visitor: Visitor) =>
+  visitor.coords !== null || visitor.sameCity;
 
 export const homeMarkerTitle = (visitor: Visitor) =>
-  visitor.sameCity
-    ? `${FIRST_NAME} · ${HOME_CITY} · you're here too`
-    : `${FIRST_NAME} · ${HOME_CITY}`;
+  [FIRST_NAME, HOME_CITY, ...(visitor.sameCity ? [SAME_CITY_NOTE] : [])].join(
+    TITLE_SEPARATOR,
+  );
 
 export const distanceFromHome = (coords: LatLon) =>
-  `${haversineKm(HOME_COORDS, coords).toLocaleString('en-CA')} km from ${HOME_CITY_SHORT}`;
+  `${haversineKm(HOME_COORDS, coords).toLocaleString(LOCALE)} ${DISTANCE_UNIT} ${HOME_CITY_SHORT}`;

@@ -17,6 +17,7 @@ import {
   applyDrag,
   centerOn,
   exceedsDragThreshold,
+  fadeInOpacity,
   hitTestMarker,
   introMotion,
   isAtRest,
@@ -323,5 +324,21 @@ describe('releaseDrag', () => {
       vLat: 0,
       vLon: 0,
     });
+  });
+});
+
+describe('fadeInOpacity', () => {
+  it('runs from hidden to fully shown over the duration', () => {
+    expect(fadeInOpacity(0, 700)).toBe(0);
+    expect(fadeInOpacity(700, 700)).toBe(1);
+  });
+
+  it('eases out, so most of the fade happens early', () => {
+    expect(fadeInOpacity(350, 700)).toBeCloseTo(0.875);
+  });
+
+  it('clamps times outside the fade', () => {
+    expect(fadeInOpacity(-50, 700)).toBe(0);
+    expect(fadeInOpacity(5000, 700)).toBe(1);
   });
 });

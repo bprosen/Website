@@ -81,6 +81,9 @@ export const isAtRest = (motion: Motion, autoSpeed: number) =>
   Math.abs(motion.vLon) < GLOBE_REST_SPEED &&
   Math.abs(motion.vLat) < GLOBE_REST_SPEED;
 
+export const fadeInOpacity = (elapsedMs: number, durationMs: number) =>
+  1 - (1 - clamp(elapsedMs / durationMs, 0, 1)) ** 3;
+
 export const applyDrag = (
   motion: Motion,
   velocity: DragVelocity,

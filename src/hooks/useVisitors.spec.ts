@@ -119,6 +119,16 @@ describe('useVisitors', () => {
     expect(result.current).toBe(initial);
   });
 
+  it('shows the dots when the visitor cannot be placed', async () => {
+    recordVisit.mockResolvedValue({ dots: [[50, -97]], location: null });
+    const { result } = renderHook(() => useVisitors());
+
+    await flushTimers();
+
+    expect(result.current.dots).toEqual([[50, -97]]);
+    expect(result.current.visitor).toBe(UNKNOWN_VISITOR);
+  });
+
   it('keeps the same empty dot list when only the visitor is known', async () => {
     recordVisit.mockResolvedValue({
       dots: [],

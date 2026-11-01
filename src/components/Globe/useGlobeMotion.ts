@@ -8,6 +8,7 @@ import {
   GLOBE_TOOLTIP_VIEWPORT_MARGIN,
   GLOBE_VIEWBOX_SIZE,
   GLOBE_VISITOR_DOT_ALPHA,
+  GLOBE_VISITOR_DOT_FADE_MS,
   GLOBE_VISITOR_DOT_RADIUS,
   HOME_COORDS,
   LAND,
@@ -22,6 +23,7 @@ import {
   createView,
   type DragState,
   exceedsDragThreshold,
+  fadeInOpacity,
   hitTestMarker,
   introMotion,
   isAtRest,
@@ -66,6 +68,7 @@ const toDotLayer = (points: readonly LatLon[]): DotLayer => {
 
 type Controls = {
   draw: () => void;
+  fadeInVisitorDots: () => void;
   measureTooltipBounds: () => void;
   wake: () => void;
 };
@@ -203,6 +206,7 @@ export const useGlobeMotion = ({
     let size = 0;
     const tooltipBounds: TooltipBounds = { max: 0, min: 0, width: 0 };
     let drag: DragState | null = null;
+    let visitorDotsShownAtMs: number | null = null;
     const markers: MarkerHit<MarkerId>[] = [
       { id: 'home', visible: false, x: 0, y: 0 },
       { id: 'visitor', visible: false, x: 0, y: 0 },
@@ -216,6 +220,14 @@ export const useGlobeMotion = ({
       selectedMarkerRef.current !== null
         ? 0
         : GLOBE_AUTO_SPIN_DEG_PER_SECOND;
+
+    const visitorDotOpacity = () =>
+      visitorDotsShownAtMs === null || prefersReducedMotion || motionPaused()
+        ? 1
+        : fadeInOpacity(
+            performance.now() - visitorDotsShownAtMs,
+            GLOBE_VISITOR_DOT_FADE_MS,
+          );
 
     const drawDots = (view: View) => {
       if (!ctx || size === 0) {
@@ -240,7 +252,7 @@ export const useGlobeMotion = ({
       const visitors = visitorDotLayerRef.current;
 
       if (visitors && visitors.table.count > 0) {
-        ctx.globalAlpha = GLOBE_VISITOR_DOT_ALPHA;
+        ctx.globalAlpha = GLOBE_VISITOR_DOT_ALPHA * visitorDotOpacity();
         ctx.fillStyle = coral;
         fillDots(
           ctx,
@@ -313,6 +325,7 @@ export const useGlobeMotion = ({
       if (
         !drag &&
         hiddenSelectionLon() === null &&
+        visitorDotOpacity() === 1 &&
         isAtRest(motion, autoSpinDegPerSecond())
       ) {
         running = false;
@@ -330,6 +343,12 @@ export const useGlobeMotion = ({
       running = true;
       lastFrameMs = performance.now();
       frame = requestAnimationFrame(tick);
+    };
+
+    const fadeInVisitorDots = () => {
+      visitorDotsShownAtMs = performance.now();
+      draw();
+      wake();
     };
 
     const sleep = () => {
@@ -484,7 +503,12 @@ export const useGlobeMotion = ({
       attributes: true,
     });
     window.addEventListener('resize', onWindowResize);
-    controlsRef.current = { draw, measureTooltipBounds, wake };
+    controlsRef.current = {
+      draw,
+      fadeInVisitorDots,
+      measureTooltipBounds,
+      wake,
+    };
 
     return () => {
       sleep();
@@ -521,8 +545,13 @@ export const useGlobeMotion = ({
   }, [visitorCoords]);
 
   useEffect(() => {
-    visitorDotLayerRef.current =
-      visitorDots.length > 0 ? toDotLayer(visitorDots) : null;
-    controlsRef.current?.draw();
+    if (visitorDots.length === 0) {
+      visitorDotLayerRef.current = null;
+      controlsRef.current?.draw();
+      return;
+    }
+
+    visitorDotLayerRef.current = toDotLayer(visitorDots);
+    controlsRef.current?.fadeInVisitorDots();
   }, [visitorDots]);
 };

@@ -1,24 +1,26 @@
+import { userAgent } from 'next/server';
 import { countVisitorRequest, runVisitorsPipeline } from '~/api';
 import { VISITORS_RATE_LIMIT } from '~/constants';
-import type { LatLon, RedisConfig } from '~/types';
+import type { LatLon, RedisConfig, VisitorLocation } from '~/types';
 import {
   buildPipeline,
   clientAddress,
   isSameOriginRequest,
-  parseGeoHeaders,
+  locationFromHeaders,
   rateLimitKey,
   readRedisConfig,
   shouldRecord,
   toCell,
 } from '~/utils';
 
-const respond = (visitors: LatLon[]) =>
-  Response.json({ visitors }, { headers: { 'Cache-Control': 'no-store' } });
+const respond = (visitors: LatLon[], location: VisitorLocation | null) =>
+  Response.json(
+    { location, visitors },
+    { headers: { 'Cache-Control': 'no-store' } },
+  );
 
-const visitorCell = (headers: Headers) => {
-  const coords = shouldRecord(headers) ? parseGeoHeaders(headers) : null;
-  return coords ? toCell(coords) : null;
-};
+const visitorCell = (headers: Headers, location: VisitorLocation | null) =>
+  shouldRecord(headers) && location ? toCell(location.coords) : null;
 
 const isRateLimited = async (config: RedisConfig, headers: Headers) => {
   const address = clientAddress(headers);
@@ -35,17 +37,21 @@ const isRateLimited = async (config: RedisConfig, headers: Headers) => {
 };
 
 export const POST = async (request: Request) => {
+  if (!isSameOriginRequest(request.headers) || userAgent(request).isBot) {
+    return respond([], null);
+  }
+
+  const location = locationFromHeaders(request.headers);
   const config = readRedisConfig(process.env);
 
-  if (!config || !isSameOriginRequest(request.headers)) {
-    return respond([]);
+  if (!config || (await isRateLimited(config, request.headers))) {
+    return respond([], location);
   }
 
-  if (await isRateLimited(config, request.headers)) {
-    return respond([]);
-  }
+  const commands = buildPipeline(
+    visitorCell(request.headers, location),
+    Date.now(),
+  );
 
-  const commands = buildPipeline(visitorCell(request.headers), Date.now());
-
-  return respond(await runVisitorsPipeline(config, commands));
+  return respond(await runVisitorsPipeline(config, commands), location);
 };

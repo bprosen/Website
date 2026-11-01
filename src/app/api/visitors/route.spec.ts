@@ -23,6 +23,8 @@ const geoHeaders = {
   'x-vercel-ip-longitude': '-97.1384',
 };
 
+const geoLocation = { city: null, coords: [49.8951, -97.1384] };
+
 const fetchMock = vi.fn<typeof fetch>();
 
 const sentBody = () => {
@@ -81,7 +83,7 @@ describe('POST /api/visitors', () => {
     expect(response.status).toBe(200);
   });
 
-  it('never sends unrounded coordinates', async () => {
+  it('never stores unrounded coordinates', async () => {
     await POST(request(geoHeaders));
 
     const body = sentBody();
@@ -96,6 +98,7 @@ describe('POST /api/visitors', () => {
 
     expect(response.headers.get('Cache-Control')).toBe('no-store');
     expect(await response.json()).toEqual({
+      location: geoLocation,
       visitors: [
         [50, -97],
         [-34, 151],
@@ -108,7 +111,10 @@ describe('POST /api/visitors', () => {
 
     const response = await POST(request(geoHeaders));
 
-    expect(await response.json()).toEqual({ visitors: [[50, -97]] });
+    expect(await response.json()).toEqual({
+      location: geoLocation,
+      visitors: [[50, -97]],
+    });
   });
 
   it.each([
@@ -123,6 +129,7 @@ describe('POST /api/visitors', () => {
       expect(sentCommands().map(([name]) => name)).not.toContain('ZADD');
       expect(sentBody()).not.toContain('50,-97');
       expect(await response.json()).toEqual({
+        location: geoLocation,
         visitors: [
           [50, -97],
           [-34, 151],
@@ -151,7 +158,10 @@ describe('POST /api/visitors', () => {
     expect(fetchMock).not.toHaveBeenCalled();
     expect(response.status).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe('no-store');
-    expect(await response.json()).toEqual({ visitors: [] });
+    expect(await response.json()).toEqual({
+      location: geoLocation,
+      visitors: [],
+    });
   });
 
   it.each([
@@ -165,7 +175,10 @@ describe('POST /api/visitors', () => {
     const response = await POST(request(geoHeaders));
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ visitors: [] });
+    expect(await response.json()).toEqual({
+      location: geoLocation,
+      visitors: [],
+    });
   });
 
   it('returns [] when fetch throws', async () => {
@@ -175,14 +188,20 @@ describe('POST /api/visitors', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe('no-store');
-    expect(await response.json()).toEqual({ visitors: [] });
+    expect(await response.json()).toEqual({
+      location: geoLocation,
+      visitors: [],
+    });
   });
 
   it('refuses requests from other sites without touching Redis', async () => {
     const response = await POST(request({ 'sec-fetch-site': 'cross-site' }));
 
     expect(fetchMock).not.toHaveBeenCalled();
-    await expect(response.json()).resolves.toEqual({ visitors: [] });
+    await expect(response.json()).resolves.toEqual({
+      location: null,
+      visitors: [],
+    });
   });
 
   it('accepts a same-origin request from a browser that sends no fetch metadata', async () => {
@@ -208,7 +227,10 @@ describe('POST /api/visitors', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(sentCommands().map(([name]) => name)).toEqual(['INCR', 'EXPIRE']);
     expect(String(sentCommands()[0][1])).not.toContain('203.0.113.7');
-    await expect(response.json()).resolves.toEqual({ visitors: [] });
+    await expect(response.json()).resolves.toEqual({
+      location: null,
+      visitors: [],
+    });
   });
 
   it('records visits from a client within the limit', async () => {
@@ -219,5 +241,40 @@ describe('POST /api/visitors', () => {
     await POST(request({ ...geoHeaders, 'x-real-ip': '203.0.113.7' }));
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns the decoded city with the location', async () => {
+    const response = await POST(
+      request({ ...geoHeaders, 'x-vercel-ip-city': 'Winnipeg' }),
+    );
+
+    expect((await response.json()).location).toEqual({
+      ...geoLocation,
+      city: 'Winnipeg',
+    });
+  });
+
+  it('returns the location even when Redis is not configured', async () => {
+    vi.stubEnv('UPSTASH_KV_REST_API_URL', '');
+
+    const response = await POST(request(geoHeaders));
+
+    expect((await response.json()).location).toEqual(geoLocation);
+  });
+
+  it('answers crawlers without touching Redis', async () => {
+    const response = await POST(
+      request({
+        ...geoHeaders,
+        'user-agent':
+          'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+      }),
+    );
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    await expect(response.json()).resolves.toEqual({
+      location: null,
+      visitors: [],
+    });
   });
 });

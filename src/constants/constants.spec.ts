@@ -17,7 +17,6 @@ import {
   WORK,
 } from '~/constants';
 import type { MediaSlot } from '~/types';
-import { TIME_ZONES } from './timezones';
 
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 const JPEG_START_OF_FRAME_MARKERS = new Set([0xc0, 0xc1, 0xc2]);
@@ -138,28 +137,6 @@ describe('constants', () => {
     for (let i = 0; i < LAND.length; i += 2) {
       expect(Math.abs(LAND[i])).toBeLessThanOrEqual(90);
       expect(Math.abs(LAND[i + 1])).toBeLessThanOrEqual(180);
-    }
-  });
-
-  it('places every time zone on the globe', () => {
-    for (const [lat, lon] of Object.values(TIME_ZONES)) {
-      expect(Math.abs(lat)).toBeLessThanOrEqual(90);
-      expect(Math.abs(lon)).toBeLessThanOrEqual(180);
-    }
-
-    expect(TIME_ZONES['America/Winnipeg']).toBeDefined();
-  });
-
-  it('places zones that browsers report under their own name', () => {
-    for (const zone of [
-      'America/Cordoba',
-      'Asia/Kuala_Lumpur',
-      'Europe/Amsterdam',
-      'Europe/Oslo',
-      'Europe/Stockholm',
-      'Pacific/Truk',
-    ]) {
-      expect(TIME_ZONES, zone).toHaveProperty([zone]);
     }
   });
 });

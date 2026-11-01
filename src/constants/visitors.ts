@@ -11,6 +11,7 @@ export const VISITORS_TTL_MS = 30 * MS_PER_DAY;
 
 export const GEO_LATITUDE_HEADER = 'x-vercel-ip-latitude';
 export const GEO_LONGITUDE_HEADER = 'x-vercel-ip-longitude';
+export const GEO_CITY_HEADER = 'x-vercel-ip-city';
 export const GPC_HEADER = 'sec-gpc';
 export const DNT_HEADER = 'dnt';
 export const FETCH_SITE_HEADER = 'sec-fetch-site';

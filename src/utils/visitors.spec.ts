@@ -1,51 +1,80 @@
 import { describe, expect, it } from 'vitest';
-import type { LatLon } from '~/types';
-import { resolveVisitor, UNKNOWN_VISITOR } from './visitors';
-
-const _geo = (lat?: string, lon?: string) => {
-  const headers = new Headers();
-  if (lat !== undefined) headers.set('x-vercel-ip-latitude', lat);
-  if (lon !== undefined) headers.set('x-vercel-ip-longitude', lon);
-  return headers;
-};
+import {
+  parseVisitorLocation,
+  resolveVisitor,
+  UNKNOWN_VISITOR,
+} from './visitors';
 
 describe('resolveVisitor', () => {
-  const zones: Record<string, LatLon> = {
-    'America/Argentina/Buenos_Aires': [-34.6, -58.5],
-    'America/Winnipeg': [49.9, -97.2],
-    'Europe/Paris': [48.9, 2.3],
-  };
-
-  it('is unknown for zones not in the table', () => {
-    expect(resolveVisitor('Mars/Olympus', zones)).toBe(UNKNOWN_VISITOR);
-    expect(resolveVisitor('', zones)).toBe(UNKNOWN_VISITOR);
-  });
-
-  it("doesn't read inherited object keys", () => {
-    expect(resolveVisitor('toString', zones)).toBe(UNKNOWN_VISITOR);
+  it('is unknown without a location', () => {
+    expect(resolveVisitor(null)).toBe(UNKNOWN_VISITOR);
   });
 
   it('recognizes visitors in Winnipeg and draws no second marker', () => {
-    expect(resolveVisitor('America/Winnipeg', zones)).toEqual({
+    expect(
+      resolveVisitor({ city: 'Winnipeg', coords: [49.8951, -97.1384] }),
+    ).toEqual({
       coords: null,
       label: 'You (Winnipeg)',
       sameCity: true,
     });
   });
 
+  it('treats visitors far north of Winnipeg as distinct visitors', () => {
+    expect(
+      resolveVisitor({ city: 'Rankin Inlet', coords: [62.8, -92.1] }),
+    ).toEqual({
+      coords: [62.8, -92.1],
+      label: 'You, near Rankin Inlet',
+      sameCity: false,
+    });
+  });
+
   it('places visitors at the same latitude but far away as distinct visitors', () => {
-    expect(resolveVisitor('Europe/Paris', zones)).toEqual({
+    expect(resolveVisitor({ city: 'Paris', coords: [48.9, 2.3] })).toEqual({
       coords: [48.9, 2.3],
       label: 'You, near Paris',
       sameCity: false,
     });
   });
 
-  it('names the nearest city with spaces for underscores', () => {
-    expect(resolveVisitor('America/Argentina/Buenos_Aires', zones)).toEqual({
-      coords: [-34.6, -58.5],
-      label: 'You, near Buenos Aires',
+  it('places visitors without a known city under a plain label', () => {
+    expect(resolveVisitor({ city: null, coords: [48.9, 2.3] })).toEqual({
+      coords: [48.9, 2.3],
+      label: 'You',
       sameCity: false,
     });
+  });
+});
+
+describe('parseVisitorLocation', () => {
+  it('reads the city and coordinates', () => {
+    expect(
+      parseVisitorLocation({ city: 'Toronto', coords: [43.6, -79.4] }),
+    ).toEqual({ city: 'Toronto', coords: [43.6, -79.4] });
+  });
+
+  it('keeps the coordinates when the city is missing or empty', () => {
+    expect(parseVisitorLocation({ coords: [43.6, -79.4] })).toEqual({
+      city: null,
+      coords: [43.6, -79.4],
+    });
+    expect(parseVisitorLocation({ city: '', coords: [43.6, -79.4] })).toEqual({
+      city: null,
+      coords: [43.6, -79.4],
+    });
+    expect(parseVisitorLocation({ city: 7, coords: [43.6, -79.4] })).toEqual({
+      city: null,
+      coords: [43.6, -79.4],
+    });
+  });
+
+  it('rejects anything without valid coordinates', () => {
+    expect(parseVisitorLocation(null)).toBeNull();
+    expect(parseVisitorLocation('Toronto')).toBeNull();
+    expect(parseVisitorLocation({ city: 'Toronto' })).toBeNull();
+    expect(
+      parseVisitorLocation({ city: 'Toronto', coords: [91, 0] }),
+    ).toBeNull();
   });
 });

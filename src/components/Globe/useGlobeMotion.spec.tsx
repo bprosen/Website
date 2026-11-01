@@ -1,7 +1,20 @@
 import { act, render, screen } from '@testing-library/react';
 import { useRef } from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { HOME_COORDS, MOTION_PAUSED_ATTRIBUTE } from '~/constants';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type MockInstance,
+  vi,
+} from 'vitest';
+import {
+  GLOBE_VISITOR_DOT_ALPHA,
+  GLOBE_VISITOR_DOT_FADE_MS,
+  HOME_COORDS,
+  MOTION_PAUSED_ATTRIBUTE,
+} from '~/constants';
 import {
   stubAnimationFrames,
   stubIntersectionObserver,
@@ -472,6 +485,76 @@ describe('useGlobeMotion', () => {
     mount();
 
     expect(ctx.fill).toHaveBeenCalledTimes(1);
+  });
+
+  describe('visitor dot fade', () => {
+    let now: MockInstance<() => number>;
+
+    beforeEach(() => {
+      now = vi.spyOn(performance, 'now');
+    });
+
+    afterEach(() => {
+      now.mockRestore();
+    });
+
+    it('fades the visitor dots in once they arrive', () => {
+      now.mockReturnValue(1000);
+      const ctx = mockContext();
+      const { rerender } = mount();
+      act(() => intersect(true));
+
+      rerender(<Harness visitorDots={[[49.9, -97.1]]} />);
+      expect(ctx.globalAlpha).toBe(0);
+
+      now.mockReturnValue(1000 + GLOBE_VISITOR_DOT_FADE_MS / 2);
+      act(() => runFrame());
+      expect(ctx.globalAlpha).toBeGreaterThan(0);
+      expect(ctx.globalAlpha).toBeLessThan(GLOBE_VISITOR_DOT_ALPHA);
+
+      now.mockReturnValue(1000 + GLOBE_VISITOR_DOT_FADE_MS);
+      act(() => runFrame());
+      expect(ctx.globalAlpha).toBe(GLOBE_VISITOR_DOT_ALPHA);
+    });
+
+    it('keeps drawing until the fade finishes, then rests', () => {
+      let time = 1000;
+      const tick = () => {
+        time += 16;
+        now.mockReturnValue(time);
+        act(() => runFrame(time));
+      };
+      now.mockReturnValue(time);
+      mockContext();
+      const { rerender } = mount({ selectedMarker: 'home' });
+      act(() => intersect(true));
+      for (let i = 0; i < 2000 && frames.pending() > 0; i++) {
+        tick();
+      }
+      expect(frames.pending()).toBe(0);
+
+      const fadeStart = time;
+      rerender(<Harness selectedMarker='home' visitorDots={[[49.9, -97.1]]} />);
+      tick();
+      expect(frames.pending()).toBe(1);
+
+      for (let i = 0; i < 2000 && frames.pending() > 0; i++) {
+        tick();
+      }
+      expect(time).toBeGreaterThanOrEqual(
+        fadeStart + GLOBE_VISITOR_DOT_FADE_MS,
+      );
+      expect(frames.pending()).toBe(0);
+    });
+
+    it('shows the visitor dots at once under reduced motion', () => {
+      stubReducedMotion(true);
+      now.mockReturnValue(1000);
+      const ctx = mockContext();
+      mount({ visitorDots: [[49.9, -97.1]] });
+
+      expect(ctx.globalAlpha).toBe(GLOBE_VISITOR_DOT_ALPHA);
+    });
   });
 
   it('resumes spinning when reduced motion is turned off', () => {

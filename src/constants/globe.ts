@@ -30,6 +30,7 @@ export const GLOBE_KEY_STEP_LAT = 8;
 export const GLOBE_LAND_DOT_RADIUS = 1.3;
 export const GLOBE_VISITOR_DOT_RADIUS = 2;
 export const GLOBE_VISITOR_DOT_ALPHA = 0.7;
+export const GLOBE_VISITOR_DOT_FADE_MS = 700;
 export const GLOBE_HIT_RADIUS = 13;
 export const GLOBE_TOOLTIP_VIEWPORT_MARGIN = 12;
 

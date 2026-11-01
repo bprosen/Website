@@ -17,13 +17,12 @@ import type { Visitor } from '~/types';
 import { UNKNOWN_VISITOR } from '~/utils';
 import { GlobeCard } from './GlobeCard';
 
-const { useVisitor } = vi.hoisted(() => ({ useVisitor: vi.fn() }));
+const { useVisitors } = vi.hoisted(() => ({ useVisitors: vi.fn() }));
 
 vi.mock('~/hooks', async (importOriginal) => ({
   ...(await importOriginal<typeof import('~/hooks')>()),
   useMediaQuery: () => true,
-  useVisitor,
-  useVisitorDots: () => [],
+  useVisitors,
 }));
 
 const toronto: Visitor = {
@@ -39,7 +38,7 @@ const winnipeg: Visitor = {
 };
 
 beforeEach(() => {
-  useVisitor.mockReturnValue(toronto);
+  useVisitors.mockReturnValue({ dots: [], visitor: toronto });
 });
 
 describe('GlobeCard', () => {
@@ -89,7 +88,7 @@ describe('GlobeCard', () => {
   });
 
   it('leaves the visitor out of the legend when they cannot be placed', () => {
-    useVisitor.mockReturnValue(UNKNOWN_VISITOR);
+    useVisitors.mockReturnValue({ dots: [], visitor: UNKNOWN_VISITOR });
     render(<GlobeCard />);
 
     expect(
@@ -101,7 +100,7 @@ describe('GlobeCard', () => {
   });
 
   it('shares the home marker with visitors from the same city', async () => {
-    useVisitor.mockReturnValue(winnipeg);
+    useVisitors.mockReturnValue({ dots: [], visitor: winnipeg });
     const { container } = render(<GlobeCard />);
     const you = screen.getByRole('button', {
       name: `${VISITOR_LABEL} (${HOME_CITY_SHORT})`,

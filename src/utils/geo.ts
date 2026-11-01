@@ -8,7 +8,7 @@ export const isLatLon = (lat: number, lon: number) =>
   Math.abs(lat) <= 90 &&
   Math.abs(lon) <= 180;
 
-const isLatLonPair = (value: unknown): value is LatLon =>
+export const isLatLonPair = (value: unknown): value is LatLon =>
   Array.isArray(value) &&
   value.length === 2 &&
   typeof value[0] === 'number' &&

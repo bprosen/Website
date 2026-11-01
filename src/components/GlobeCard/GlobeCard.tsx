@@ -2,7 +2,7 @@
 
 import { useId, useState } from 'react';
 import { GLOBE_CARD_QUERY, HOME_CITY, HOME_MARKER_LABEL } from '~/constants';
-import { useMediaQuery, useVisitor, useVisitorDots } from '~/hooks';
+import { useMediaQuery, useVisitors } from '~/hooks';
 import { cn } from '~/lib/ui';
 import type { MarkerId } from '~/types';
 import { isVisitorPlaced, nextSelectedMarker, visitorMarkerFor } from '~/utils';
@@ -18,8 +18,7 @@ type GlobeCardProps = {
 export const GlobeCard = ({ className }: GlobeCardProps) => {
   const tooltipId = useId();
   const shown = useMediaQuery(GLOBE_CARD_QUERY, true);
-  const visitor = useVisitor({ enabled: shown });
-  const visitorDots = useVisitorDots();
+  const { dots: visitorDots, visitor } = useVisitors();
   const [selectedMarker, setSelectedMarker] = useState<MarkerId | null>(null);
 
   const toggleMarker = (marker: MarkerId | null) =>

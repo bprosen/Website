@@ -5,3 +5,13 @@ export type Visitor = {
   label: string;
   sameCity: boolean;
 };
+
+export type VisitorLocation = {
+  city: string | null;
+  coords: LatLon;
+};
+
+export type VisitorsSnapshot = {
+  dots: LatLon[];
+  location: VisitorLocation | null;
+};

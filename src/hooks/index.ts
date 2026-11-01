@@ -9,5 +9,4 @@ export * from './useScrollReveal';
 export * from './useSectionUrlSync';
 export * from './useSwipe';
 export * from './useTheme';
-export * from './useVisitor';
-export * from './useVisitorDots';
+export * from './useVisitors';

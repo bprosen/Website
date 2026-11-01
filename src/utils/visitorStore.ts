@@ -3,6 +3,7 @@ import {
   DNT_HEADER,
   FETCH_SITE_HEADER,
   FORWARDED_FOR_HEADER,
+  GEO_CITY_HEADER,
   GEO_LATITUDE_HEADER,
   GEO_LONGITUDE_HEADER,
   GPC_HEADER,
@@ -17,7 +18,12 @@ import {
   VISITORS_REDIS_KEY,
   VISITORS_TTL_MS,
 } from '~/constants';
-import type { LatLon, RedisCommand, RedisConfig } from '~/types';
+import type {
+  LatLon,
+  RedisCommand,
+  RedisConfig,
+  VisitorLocation,
+} from '~/types';
 import { isLatLon } from './geo';
 
 const CELL_PATTERN = /^(-?\d{1,3}),(-?\d{1,3})$/;
@@ -31,6 +37,26 @@ export const parseGeoHeaders = (headers: Headers): LatLon | null => {
   const lat = headerNumber(headers, GEO_LATITUDE_HEADER);
   const lon = headerNumber(headers, GEO_LONGITUDE_HEADER);
   return isLatLon(lat, lon) ? [lat, lon] : null;
+};
+
+const decodeCity = (value: string) => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
+
+const parseGeoCity = (headers: Headers) => {
+  const value = headers.get(GEO_CITY_HEADER)?.trim();
+  return value ? decodeCity(value) : null;
+};
+
+export const locationFromHeaders = (
+  headers: Headers,
+): VisitorLocation | null => {
+  const coords = parseGeoHeaders(headers);
+  return coords ? { city: parseGeoCity(headers), coords } : null;
 };
 
 export const toCell = ([lat, lon]: LatLon): string => {

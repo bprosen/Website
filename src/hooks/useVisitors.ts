@@ -4,20 +4,36 @@ import {
   VISITORS_IDLE_FALLBACK_MS,
   VISITORS_IDLE_TIMEOUT_MS,
 } from '~/constants';
-import type { LatLon } from '~/types';
+import type { LatLon, Visitor } from '~/types';
+import { resolveVisitor, UNKNOWN_VISITOR } from '~/utils';
+
+type Visitors = {
+  dots: readonly LatLon[];
+  visitor: Visitor;
+};
 
 const NO_DOTS: readonly LatLon[] = [];
+const NO_VISITORS: Visitors = { dots: NO_DOTS, visitor: UNKNOWN_VISITOR };
 
-export const useVisitorDots = (): readonly LatLon[] => {
-  const [dots, setDots] = useState<readonly LatLon[]>(NO_DOTS);
+export const useVisitors = (): Visitors => {
+  const [visitors, setVisitors] = useState<Visitors>(NO_VISITORS);
 
   useEffect(() => {
+    if (navigator.webdriver) {
+      return;
+    }
+
     const controller = new AbortController();
     const load = () => {
-      recordVisit(controller.signal).then((visitors) => {
-        if (!controller.signal.aborted && visitors.length > 0) {
-          setDots(visitors);
+      recordVisit(controller.signal).then(({ dots, location }) => {
+        if (controller.signal.aborted || (dots.length === 0 && !location)) {
+          return;
         }
+
+        setVisitors({
+          dots: dots.length > 0 ? dots : NO_DOTS,
+          visitor: resolveVisitor(location),
+        });
       });
     };
 
@@ -40,5 +56,5 @@ export const useVisitorDots = (): readonly LatLon[] => {
     };
   }, []);
 
-  return dots;
+  return visitors;
 };

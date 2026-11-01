@@ -5,6 +5,7 @@ import {
   buildRateLimitPipeline,
   clientAddress,
   isSameOriginRequest,
+  locationFromHeaders,
   parseCells,
   parseGeoHeaders,
   parsePipelineResponse,
@@ -54,6 +55,40 @@ describe('parseGeoHeaders', () => {
     ['longitude below -180', '10', '-181'],
   ])('returns null for %s', (_label, lat, lon) => {
     expect(parseGeoHeaders(geo(lat, lon))).toBeNull();
+  });
+});
+
+describe('locationFromHeaders', () => {
+  const withCity = (city: string) => {
+    const headers = geo('49.8951', '-97.1384');
+    headers.set('x-vercel-ip-city', city);
+    return headers;
+  };
+
+  it('pairs the coordinates with the decoded city', () => {
+    expect(locationFromHeaders(withCity('S%C3%A3o%20Paulo'))).toEqual({
+      city: 'São Paulo',
+      coords: [49.8951, -97.1384],
+    });
+  });
+
+  it('keeps a city that is not valid percent encoding as sent', () => {
+    expect(locationFromHeaders(withCity('100%'))?.city).toBe('100%');
+  });
+
+  it('has no city when the header is missing or blank', () => {
+    expect(locationFromHeaders(geo('10', '20'))).toEqual({
+      city: null,
+      coords: [10, 20],
+    });
+    expect(locationFromHeaders(withCity('  '))?.city).toBeNull();
+  });
+
+  it('is null without coordinates', () => {
+    const headers = geo();
+    headers.set('x-vercel-ip-city', 'Winnipeg');
+
+    expect(locationFromHeaders(headers)).toBeNull();
   });
 });
 

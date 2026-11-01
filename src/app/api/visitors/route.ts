@@ -19,10 +19,8 @@ const respond = (visitors: LatLon[], location: VisitorLocation | null) =>
     { headers: { 'Cache-Control': 'no-store' } },
   );
 
-const visitorCell = (headers: Headers, location: VisitorLocation | null) => {
-  const recordable = shouldRecord(headers) && !userAgent({ headers }).isBot;
-  return recordable && location ? toCell(location.coords) : null;
-};
+const visitorCell = (headers: Headers, location: VisitorLocation | null) =>
+  shouldRecord(headers) && location ? toCell(location.coords) : null;
 
 const isRateLimited = async (config: RedisConfig, headers: Headers) => {
   const address = clientAddress(headers);
@@ -39,7 +37,7 @@ const isRateLimited = async (config: RedisConfig, headers: Headers) => {
 };
 
 export const POST = async (request: Request) => {
-  if (!isSameOriginRequest(request.headers)) {
+  if (!isSameOriginRequest(request.headers) || userAgent(request).isBot) {
     return respond([], null);
   }
 

@@ -83,7 +83,7 @@ describe('POST /api/visitors', () => {
     expect(response.status).toBe(200);
   });
 
-  it('never sends unrounded coordinates', async () => {
+  it('never stores unrounded coordinates', async () => {
     await POST(request(geoHeaders));
 
     const body = sentBody();
@@ -262,7 +262,7 @@ describe('POST /api/visitors', () => {
     expect((await response.json()).location).toEqual(geoLocation);
   });
 
-  it('skips recording crawlers but still returns the list', async () => {
+  it('answers crawlers without touching Redis', async () => {
     const response = await POST(
       request({
         ...geoHeaders,
@@ -271,7 +271,10 @@ describe('POST /api/visitors', () => {
       }),
     );
 
-    expect(sentCommands().map(([name]) => name)).not.toContain('ZADD');
-    expect((await response.json()).visitors).toHaveLength(2);
+    expect(fetchMock).not.toHaveBeenCalled();
+    await expect(response.json()).resolves.toEqual({
+      location: null,
+      visitors: [],
+    });
   });
 });

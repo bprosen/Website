@@ -31,13 +31,18 @@ describe('useVisitors', () => {
     const { result } = renderHook(() => useVisitors());
 
     expect(recordVisit).not.toHaveBeenCalled();
-    expect(result.current).toEqual({ dots: [], visitor: UNKNOWN_VISITOR });
+    expect(result.current).toEqual({
+      dots: [],
+      loading: true,
+      visitor: UNKNOWN_VISITOR,
+    });
 
     await flushTimers();
 
     expect(recordVisit).toHaveBeenCalledTimes(1);
     expect(result.current).toEqual({
       dots: [[50, -97]],
+      loading: false,
       visitor: {
         coords: [43.6, -79.4],
         label: 'You, near Toronto',
@@ -82,11 +87,12 @@ describe('useVisitors', () => {
       configurable: true,
       value: true,
     });
-    renderHook(() => useVisitors());
+    const { result } = renderHook(() => useVisitors());
 
     await flushTimers();
 
     expect(recordVisit).not.toHaveBeenCalled();
+    expect(result.current.loading).toBe(false);
   });
 
   it('aborts and skips the request when unmounted first', async () => {
@@ -109,14 +115,16 @@ describe('useVisitors', () => {
     expect(signal.aborted).toBe(true);
   });
 
-  it('keeps the same result when the server knows nothing', async () => {
+  it('stops loading with nothing to show when the server knows nothing or fails', async () => {
     recordVisit.mockResolvedValue({ dots: [], location: null });
     const { result } = renderHook(() => useVisitors());
-    const initial = result.current;
+    const initialDots = result.current.dots;
 
     await flushTimers();
 
-    expect(result.current).toBe(initial);
+    expect(result.current.loading).toBe(false);
+    expect(result.current.dots).toBe(initialDots);
+    expect(result.current.visitor).toBe(UNKNOWN_VISITOR);
   });
 
   it('shows the dots when the visitor cannot be placed', async () => {

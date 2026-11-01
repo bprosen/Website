@@ -1,7 +1,12 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { GLOBE_CARD_QUERY, HOME_CITY, HOME_MARKER_LABEL } from '~/constants';
+import {
+  GLOBE_CARD_QUERY,
+  HOME_CITY,
+  HOME_MARKER_LABEL,
+  VISITOR_LOCATING_LABEL,
+} from '~/constants';
 import { useMediaQuery, useVisitors } from '~/hooks';
 import { cn } from '~/lib/ui';
 import type { MarkerId } from '~/types';
@@ -18,13 +23,14 @@ type GlobeCardProps = {
 export const GlobeCard = ({ className }: GlobeCardProps) => {
   const tooltipId = useId();
   const shown = useMediaQuery(GLOBE_CARD_QUERY, true);
-  const { dots: visitorDots, visitor } = useVisitors();
+  const { dots: visitorDots, loading, visitor } = useVisitors();
   const [selectedMarker, setSelectedMarker] = useState<MarkerId | null>(null);
 
   const toggleMarker = (marker: MarkerId | null) =>
     setSelectedMarker((current) => nextSelectedMarker(current, marker));
 
   const visitorMarker = visitorMarkerFor(visitor);
+  const visitorSelected = !loading && selectedMarker === visitorMarker;
   const describedByFor = (marker: MarkerId) =>
     selectedMarker === marker ? tooltipId : undefined;
 
@@ -66,14 +72,18 @@ export const GlobeCard = ({ className }: GlobeCardProps) => {
         >
           {HOME_MARKER_LABEL}
         </LegendButton>
-        {isVisitorPlaced(visitor) && (
+        {(loading || isVisitorPlaced(visitor)) && (
           <LegendButton
-            describedBy={describedByFor(visitorMarker)}
+            describedBy={visitorSelected ? tooltipId : undefined}
+            disabled={loading}
             onClick={() => toggleMarker(visitorMarker)}
-            pressed={selectedMarker === visitorMarker}
-            swatchClassName='bg-coral ring-1 ring-coral-deep'
+            pressed={visitorSelected}
+            swatchClassName={cn(
+              'bg-coral ring-coral-deep ring-1',
+              loading && 'motion-safe:animate-pulse',
+            )}
           >
-            {visitor.label}
+            {loading ? VISITOR_LOCATING_LABEL : visitor.label}
           </LegendButton>
         )}
       </div>

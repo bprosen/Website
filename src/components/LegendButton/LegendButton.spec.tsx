@@ -26,6 +26,26 @@ describe('LegendButton', () => {
     );
   });
 
+  it('ignores clicks while disabled', async () => {
+    const onClick = vi.fn();
+    render(
+      <LegendButton
+        disabled
+        onClick={onClick}
+        pressed={false}
+        swatchClassName='bg-coral'
+      >
+        You
+      </LegendButton>,
+    );
+    const button = screen.getByRole('button', { name: 'You' });
+
+    await userEvent.click(button);
+
+    expect(button).toBeDisabled();
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
   it('reflects the pressed state', () => {
     render(
       <LegendButton onClick={() => {}} pressed swatchClassName='bg-ink'>

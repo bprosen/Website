@@ -11,6 +11,7 @@ import {
   SAME_CITY_NOTE,
   TITLE_SEPARATOR,
   VISITOR_LABEL,
+  VISITOR_LOCATING_LABEL,
   VISITOR_NEAR_LABEL,
 } from '~/constants';
 import type { Visitor } from '~/types';
@@ -38,7 +39,7 @@ const winnipeg: Visitor = {
 };
 
 beforeEach(() => {
-  useVisitors.mockReturnValue({ dots: [], visitor: toronto });
+  useVisitors.mockReturnValue({ dots: [], loading: false, visitor: toronto });
 });
 
 describe('GlobeCard', () => {
@@ -88,7 +89,11 @@ describe('GlobeCard', () => {
   });
 
   it('leaves the visitor out of the legend when they cannot be placed', () => {
-    useVisitors.mockReturnValue({ dots: [], visitor: UNKNOWN_VISITOR });
+    useVisitors.mockReturnValue({
+      dots: [],
+      loading: false,
+      visitor: UNKNOWN_VISITOR,
+    });
     render(<GlobeCard />);
 
     expect(
@@ -99,8 +104,33 @@ describe('GlobeCard', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('shows a disabled, unpressed placeholder while locating the visitor', async () => {
+    useVisitors.mockReturnValue({
+      dots: [],
+      loading: true,
+      visitor: UNKNOWN_VISITOR,
+    });
+    render(<GlobeCard />);
+    const locating = screen.getByRole('button', {
+      name: VISITOR_LOCATING_LABEL,
+    });
+
+    expect(locating).toBeDisabled();
+
+    await userEvent.click(
+      screen.getByRole('button', { name: HOME_MARKER_LABEL }),
+    );
+
+    expect(locating).toHaveAttribute('aria-pressed', 'false');
+    expect(locating).not.toHaveAttribute('aria-describedby');
+  });
+
   it('shares the home marker with visitors from the same city', async () => {
-    useVisitors.mockReturnValue({ dots: [], visitor: winnipeg });
+    useVisitors.mockReturnValue({
+      dots: [],
+      loading: false,
+      visitor: winnipeg,
+    });
     const { container } = render(<GlobeCard />);
     const you = screen.getByRole('button', {
       name: `${VISITOR_LABEL} (${HOME_CITY_SHORT})`,

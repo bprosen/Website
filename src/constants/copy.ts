@@ -17,6 +17,7 @@ export const DARK_THEME_LABEL = 'Dark theme';
 export const HOME_MARKER_LABEL = 'Me';
 export const VISITOR_LABEL = 'You';
 export const VISITOR_NEAR_LABEL = 'You, near';
+export const VISITOR_LOCATING_LABEL = 'You (locating…)';
 export const SAME_CITY_NOTE = 'you’re here too';
 export const DISTANCE_UNIT = 'km from';
 export const LOCAL_TIME_PREFIX = 'It’s';

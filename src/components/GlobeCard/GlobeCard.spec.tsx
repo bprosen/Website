@@ -115,7 +115,7 @@ describe('GlobeCard', () => {
       name: VISITOR_LOCATING_LABEL,
     });
 
-    expect(locating).toBeDisabled();
+    expect(locating).toHaveAttribute('aria-disabled', 'true');
 
     await userEvent.click(
       screen.getByRole('button', { name: HOME_MARKER_LABEL }),

@@ -26,7 +26,7 @@ describe('LegendButton', () => {
     );
   });
 
-  it('ignores clicks while disabled', async () => {
+  it('stays focusable but ignores clicks while disabled', async () => {
     const onClick = vi.fn();
     render(
       <LegendButton
@@ -40,9 +40,11 @@ describe('LegendButton', () => {
     );
     const button = screen.getByRole('button', { name: 'You' });
 
+    await userEvent.tab();
     await userEvent.click(button);
 
-    expect(button).toBeDisabled();
+    expect(button).toHaveFocus();
+    expect(button).toHaveAttribute('aria-disabled', 'true');
     expect(onClick).not.toHaveBeenCalled();
   });
 

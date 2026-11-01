@@ -30,6 +30,7 @@ export const GlobeCard = ({ className }: GlobeCardProps) => {
     setSelectedMarker((current) => nextSelectedMarker(current, marker));
 
   const visitorMarker = visitorMarkerFor(visitor);
+  const visitorSelected = !loading && selectedMarker === visitorMarker;
   const describedByFor = (marker: MarkerId) =>
     selectedMarker === marker ? tooltipId : undefined;
 
@@ -73,10 +74,10 @@ export const GlobeCard = ({ className }: GlobeCardProps) => {
         </LegendButton>
         {(loading || isVisitorPlaced(visitor)) && (
           <LegendButton
-            describedBy={loading ? undefined : describedByFor(visitorMarker)}
+            describedBy={visitorSelected ? tooltipId : undefined}
             disabled={loading}
             onClick={() => toggleMarker(visitorMarker)}
-            pressed={!loading && selectedMarker === visitorMarker}
+            pressed={visitorSelected}
             swatchClassName={cn(
               'bg-coral ring-coral-deep ring-1',
               loading && 'motion-safe:animate-pulse',
